@@ -1,0 +1,4 @@
+interface:
+  display_name: "List LearnUs Courses"
+  short_description: "List the courses visible on your LearnUs dashboard"
+  default_prompt: "Use $list-learnus-courses to show my current LearnUs course index."

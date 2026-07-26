@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render plugin manifests and the Claude marketplace from one specification."""
+"""Render plugin manifests and both marketplaces from one specification."""
 
 from __future__ import annotations
 
@@ -10,26 +10,32 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 REPOSITORY = "https://github.com/mrcha033/yonsei-skills"
 AUTHOR = {"name": "mrcha033", "url": "https://github.com/mrcha033"}
+OUTCOMES = json.loads(
+    (ROOT / "contracts" / "skill-outcomes.json").read_text(encoding="utf-8")
+)
+INSTALLATIONS = {
+    plugin["plugin"]: plugin["installation"]
+    for plugin in OUTCOMES["plugins"]
+}
 
 SPECS = {
     "learnus-course-copilot": {
-        "version": "0.2.0",
-        "display": "LearnUs Course Copilot",
-        "description": "Use password-prompted headless or browser LearnUs sessions to turn authorized course pages into materials, deadlines, and study actions.",
-        "short": "Headless LearnUs login and study actions",
-        "long": "Use a hidden terminal password prompt and memory-only local session service, or an existing browser login, to inspect authorized LearnUs pages and recover automatically from session expiry.",
+        "version": "0.3.0",
+        "display": "LearnUs Course Tools",
+        "description": "Manage a memory-only LearnUs session and separately list authorized courses, deadlines, or materials with fail-closed parsing.",
+        "short": "Fine-grained LearnUs session and course tools",
+        "long": "Install four result-specific skills for hidden-terminal session management, course discovery, assignment deadlines, and material links without persisting credentials.",
         "keywords": ["learnus", "yonsei", "lms", "course"],
         "capabilities": [
-            "Headless SSO authentication",
-            "Automatic session recovery",
-            "Course snapshot analysis",
-            "Material discovery",
-            "Deadline extraction",
+            "Memory-only LearnUs session management",
+            "Authorized course listing",
+            "Associated deadline reporting",
+            "Material and video inventory",
         ],
         "prompts": [
-            "Collect the materials and deadlines from this LearnUs course.",
-            "Start a headless LearnUs session on this GUI-less host.",
-            "Structure this authorized LearnUs page into study actions.",
+            "List my authorized LearnUs courses.",
+            "Show the deadlines in this LearnUs course.",
+            "List the materials in this LearnUs course.",
         ],
     },
     "yonsei-certificate-assistant": {
@@ -43,14 +49,22 @@ SPECS = {
         "prompts": ["Help me issue a valid Yonsei certificate from my Mac."],
     },
     "yonsei-notice-monitor": {
-        "version": "0.1.0",
-        "display": "Yonsei Notice Monitor",
-        "description": "Find and summarize current public Yonsei University and Sinchon IT service notices with source links and dates.",
-        "short": "Monitor university and IT service notices",
-        "long": "Search the official university and Sinchon IT notice boards, preserve publication dates and categories, and return directly linked summaries.",
+        "version": "0.2.0",
+        "display": "Yonsei Notice Tools",
+        "description": "Search official Yonsei notices, extract contextual deadline candidates, or detect changes against an explicit local snapshot.",
+        "short": "Search notices, deadlines, and changes",
+        "long": "Install three public read-only skills for globally sorted official notice search, contextual deadline extraction, and explicit-state change detection.",
         "keywords": ["yonsei", "notices", "it", "monitor"],
-        "capabilities": ["Official notice discovery", "Date-aware summaries", "Source-linked results"],
-        "prompts": ["Find current Yonsei notices relevant to me."],
+        "capabilities": [
+            "Globally sorted official notice search",
+            "Contextual deadline candidates",
+            "Explicit-state change detection",
+        ],
+        "prompts": [
+            "Search current official Yonsei notices.",
+            "List upcoming deadlines from recent Yonsei notices.",
+            "Show notices changed since my last snapshot.",
+        ],
     },
     "yonsei-academic-copilot": {
         "version": "0.1.0",
@@ -63,14 +77,25 @@ SPECS = {
         "prompts": ["Inspect my authorized Yonsei academic information."],
     },
     "yonsei-course-registration": {
-        "version": "0.1.0",
-        "display": "Yonsei Course Registration",
-        "description": "Review Yonsei course offerings, detect schedule conflicts, and prepare an enrollment plan without submitting registrations in version 0.1.",
-        "short": "Plan courses without automated submission",
-        "long": "Use the official undergraduate, graduate, and course-catalogue entry points to build a conflict-checked plan while keeping registration submission disabled.",
+        "version": "0.2.0",
+        "display": "Yonsei Course Planner",
+        "description": "Normalize supplied Yonsei course rows, audit a selected plan, check schedule conflicts, build ranked timetables, or diagnose official entry access without registration writes.",
+        "short": "Fine-grained read-only Yonsei course planning",
+        "long": "Install five result-specific skills for course-data normalization, conflict checks, course-plan audits, deterministic timetable construction, and bounded entry-point diagnostics.",
         "keywords": ["yonsei", "courses", "registration", "schedule"],
-        "capabilities": ["Course catalogue lookup", "Schedule conflict checks", "Enrollment planning"],
-        "prompts": ["Build a conflict-free Yonsei course plan for me."],
+        "capabilities": [
+            "Course-row normalization",
+            "Schedule and campus conflict checks",
+            "Explicit course-plan constraint audits",
+            "Ranked timetable construction",
+            "Official entry diagnostics",
+        ],
+        "prompts": [
+            "Normalize these Yonsei course rows.",
+            "Audit this Yonsei course plan against my constraints.",
+            "Check this proposed Yonsei timetable for conflicts.",
+            "Build ranked conflict-free timetables from these choices.",
+        ],
     },
     "yonsei-attendance-copilot": {
         "version": "0.1.0",
@@ -200,10 +225,10 @@ def main() -> int:
         write_json(codex_path, codex_manifest(name, spec, codex_version))
         write_json(plugin_root / ".claude-plugin" / "plugin.json", claude_manifest(name, spec))
 
-    marketplace = {
+    claude_marketplace = {
         "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
         "name": "yonsei-skills",
-        "description": "Independently installable Yonsei University workflow skills.",
+        "description": "Independently installable, outcome-tested Yonsei University skills.",
         "owner": {"name": "mrcha033"},
         "plugins": [
             {
@@ -219,9 +244,30 @@ def main() -> int:
                 "tags": spec["keywords"],
             }
             for name, spec in SPECS.items()
+            if INSTALLATIONS[name] == "AVAILABLE"
         ],
     }
-    write_json(ROOT / ".claude-plugin" / "marketplace.json", marketplace)
+    codex_marketplace = {
+        "name": "yonsei-skills",
+        "interface": {"displayName": "Yonsei Skills"},
+        "plugins": [
+            {
+                "name": name,
+                "source": {
+                    "source": "local",
+                    "path": f"./plugins/{name}",
+                },
+                "policy": {
+                    "installation": INSTALLATIONS[name],
+                    "authentication": "ON_INSTALL",
+                },
+                "category": "Education",
+            }
+            for name in SPECS
+        ],
+    }
+    write_json(ROOT / ".claude-plugin" / "marketplace.json", claude_marketplace)
+    write_json(ROOT / ".agents" / "plugins" / "marketplace.json", codex_marketplace)
     print(f"Rendered {len(SPECS)} plugin manifests and the Claude marketplace.")
     return 0
 

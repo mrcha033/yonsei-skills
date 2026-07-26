@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Vendor the shared service runtime into independently installable plugins."""
+"""Vendor the legacy service probe into certificate and held plugin scaffolds."""
 
 from __future__ import annotations
 
@@ -14,13 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PACKAGE = ROOT / "packages" / "yonsei-service-runtime"
 PLUGIN_SERVICES = {
     "yonsei-certificate-assistant": ["certificate"],
-    "yonsei-notice-monitor": ["university-notices", "it-notices"],
     "yonsei-academic-copilot": ["academic"],
-    "yonsei-course-registration": [
-        "course-undergraduate",
-        "course-graduate",
-        "course-catalog",
-    ],
     "yonsei-attendance-copilot": ["attendance"],
     "yonsei-shuttle-booking": ["shuttle"],
     "yonsei-space-reservation": ["space"],
@@ -80,7 +74,7 @@ def main() -> int:
     print(
         "Runtime distributions are current."
         if args.check
-        else f"Synced runtime into {len(PLUGIN_SERVICES)} independent plugins."
+        else f"Synced runtime into {len(PLUGIN_SERVICES)} plugin distributions."
     )
     return 0
 

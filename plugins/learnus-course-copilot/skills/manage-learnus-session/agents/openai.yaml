@@ -1,0 +1,4 @@
+interface:
+  display_name: "Manage LearnUs Session"
+  short_description: "Run a secure memory-only LearnUs login session"
+  default_prompt: "Use $manage-learnus-session to start or inspect my GUI-less LearnUs session securely."

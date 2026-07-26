@@ -1,0 +1,6 @@
+interface:
+  display_name: "Normalize Yonsei Courses"
+  short_description: "Normalize Korean course rows into planning JSON"
+  default_prompt: "Use $normalize-yonsei-courses to validate and normalize my Yonsei course data."
+policy:
+  allow_implicit_invocation: true

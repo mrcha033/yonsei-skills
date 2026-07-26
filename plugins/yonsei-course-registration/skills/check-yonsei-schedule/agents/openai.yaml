@@ -1,0 +1,6 @@
+interface:
+  display_name: "Check Yonsei Schedule"
+  short_description: "Find timetable and campus-transfer conflicts"
+  default_prompt: "Use $check-yonsei-schedule to check my proposed Yonsei timetable for conflicts."
+policy:
+  allow_implicit_invocation: true

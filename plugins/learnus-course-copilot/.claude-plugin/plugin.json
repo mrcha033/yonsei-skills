@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "learnus-course-copilot",
-  "displayName": "LearnUs Course Copilot",
-  "version": "0.2.0",
-  "description": "Use password-prompted headless or browser LearnUs sessions to turn authorized course pages into materials, deadlines, and study actions.",
+  "displayName": "LearnUs Course Tools",
+  "version": "0.3.0",
+  "description": "Manage a memory-only LearnUs session and separately list authorized courses, deadlines, or materials with fail-closed parsing.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

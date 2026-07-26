@@ -57,24 +57,31 @@ class RuntimeTests(unittest.TestCase):
             self.runtime.is_allowed_redirect("https://yonsei.example/steal")
         )
 
-    def test_notice_parser_self_test(self) -> None:
-        script = (
+    def test_notice_outcome_suite(self) -> None:
+        test_root = (
             ROOT
             / "plugins"
             / "yonsei-notice-monitor"
-            / "skills"
-            / "yonsei-notice-monitor"
-            / "scripts"
-            / "fetch_notices.py"
+            / "tests"
         )
         completed = subprocess.run(
-            [sys.executable, str(script), "--self-test"],
+            [
+                sys.executable,
+                "-B",
+                "-m",
+                "unittest",
+                "discover",
+                "-s",
+                str(test_root),
+                "-v",
+            ],
             text=True,
             capture_output=True,
             check=False,
         )
         self.assertEqual(0, completed.returncode, completed.stderr)
-        self.assertIn("PASS", completed.stdout)
+        self.assertIn("Ran ", completed.stderr)
+        self.assertIn("\nOK\n", completed.stderr)
 
 
 if __name__ == "__main__":

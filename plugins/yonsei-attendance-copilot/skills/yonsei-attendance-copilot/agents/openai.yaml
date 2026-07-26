@@ -1,4 +1,0 @@
-interface:
-  display_name: "Yonsei Attendance Copilot"
-  short_description: "Review authorized electronic attendance records"
-  default_prompt: "Use $yonsei-attendance-copilot to review my authorized electronic attendance records."

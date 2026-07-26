@@ -1,0 +1,4 @@
+interface:
+  display_name: "List LearnUs Deadlines"
+  short_description: "Report visibly associated LearnUs assignment deadlines"
+  default_prompt: "Use $list-learnus-deadlines to report the assignments due in this LearnUs course."

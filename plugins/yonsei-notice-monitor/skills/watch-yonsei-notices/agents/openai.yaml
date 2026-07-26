@@ -1,0 +1,4 @@
+interface:
+  display_name: "Detect Yonsei Notice Changes"
+  short_description: "Compare official notices with explicit state"
+  default_prompt: "Use $watch-yonsei-notices to compare current official Yonsei notices with my approved state file."

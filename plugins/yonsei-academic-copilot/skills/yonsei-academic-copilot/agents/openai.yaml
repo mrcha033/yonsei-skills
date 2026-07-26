@@ -1,4 +1,0 @@
-interface:
-  display_name: "Yonsei Academic Copilot"
-  short_description: "Inspect authorized academic information safely"
-  default_prompt: "Use $yonsei-academic-copilot to inspect my authorized Yonsei academic information."

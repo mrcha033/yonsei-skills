@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-notice-monitor",
-  "displayName": "Yonsei Notice Monitor",
-  "version": "0.1.0",
-  "description": "Find and summarize current public Yonsei University and Sinchon IT service notices with source links and dates.",
+  "displayName": "Yonsei Notice Tools",
+  "version": "0.2.0",
+  "description": "Search official Yonsei notices, extract contextual deadline candidates, or detect changes against an explicit local snapshot.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

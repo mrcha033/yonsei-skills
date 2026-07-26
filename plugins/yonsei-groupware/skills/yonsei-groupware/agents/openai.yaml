@@ -1,6 +1,0 @@
-interface:
-  display_name: "Yonsei Groupware"
-  short_description: "Use authorized groupware workflows safely"
-  default_prompt: "Use $yonsei-groupware to open and inspect my authorized Yonsei groupware."
-policy:
-  allow_implicit_invocation: false

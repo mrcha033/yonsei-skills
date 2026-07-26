@@ -1,0 +1,6 @@
+interface:
+  display_name: "Audit Yonsei Course Plan"
+  short_description: "Audit one plan against explicit constraints"
+  default_prompt: "Use $audit-yonsei-course-plan to audit my selected courses against my stated planning constraints."
+policy:
+  allow_implicit_invocation: true

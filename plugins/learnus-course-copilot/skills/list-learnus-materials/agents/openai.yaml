@@ -1,0 +1,4 @@
+interface:
+  display_name: "List LearnUs Materials"
+  short_description: "Inventory visible LearnUs files and media resources"
+  default_prompt: "Use $list-learnus-materials to list the learning materials in this LearnUs course."

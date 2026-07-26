@@ -1,0 +1,4 @@
+interface:
+  display_name: "Search Yonsei Notices"
+  short_description: "Search official notices by topic and date"
+  default_prompt: "Use $search-yonsei-notices to find official Yonsei notices about my topic and date range."

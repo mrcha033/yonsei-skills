@@ -11,7 +11,7 @@
         "path": "./plugins/learnus-course-copilot"
       },
       "policy": {
-        "installation": "AVAILABLE",
+        "installation": "NOT_AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -47,7 +47,7 @@
         "path": "./plugins/yonsei-academic-copilot"
       },
       "policy": {
-        "installation": "AVAILABLE",
+        "installation": "NOT_AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -71,7 +71,7 @@
         "path": "./plugins/yonsei-attendance-copilot"
       },
       "policy": {
-        "installation": "AVAILABLE",
+        "installation": "NOT_AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -83,7 +83,7 @@
         "path": "./plugins/yonsei-shuttle-booking"
       },
       "policy": {
-        "installation": "AVAILABLE",
+        "installation": "NOT_AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -95,7 +95,7 @@
         "path": "./plugins/yonsei-space-reservation"
       },
       "policy": {
-        "installation": "AVAILABLE",
+        "installation": "NOT_AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -107,7 +107,7 @@
         "path": "./plugins/yonsei-yri"
       },
       "policy": {
-        "installation": "AVAILABLE",
+        "installation": "NOT_AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -119,7 +119,7 @@
         "path": "./plugins/yonsei-rms"
       },
       "policy": {
-        "installation": "AVAILABLE",
+        "installation": "NOT_AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -131,7 +131,7 @@
         "path": "./plugins/yonsei-erp"
       },
       "policy": {
-        "installation": "AVAILABLE",
+        "installation": "NOT_AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -143,7 +143,7 @@
         "path": "./plugins/yonsei-groupware"
       },
       "policy": {
-        "installation": "AVAILABLE",
+        "installation": "NOT_AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"

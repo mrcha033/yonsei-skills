@@ -1,0 +1,4 @@
+interface:
+  display_name: "Extract Yonsei Deadlines"
+  short_description: "Extract dated actions from official notices"
+  default_prompt: "Use $list-yonsei-notice-deadlines to find upcoming official Yonsei deadline mentions relevant to me."

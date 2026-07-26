@@ -1,4 +1,0 @@
-interface:
-  display_name: "LearnUs Course Copilot"
-  short_description: "Use headless LearnUs sessions for study actions"
-  default_prompt: "Use $learnus-course-copilot to authenticate headlessly when needed and collect the materials and deadlines from this LearnUs page."

@@ -1,7 +1,7 @@
 {
   "name": "yonsei-course-registration",
-  "version": "0.1.0",
-  "description": "Review Yonsei course offerings, detect schedule conflicts, and prepare an enrollment plan without submitting registrations in version 0.1.",
+  "version": "0.2.0",
+  "description": "Normalize supplied Yonsei course rows, audit a selected plan, check schedule conflicts, build ranked timetables, or diagnose official entry access without registration writes.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -16,19 +16,24 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Course Registration",
-    "shortDescription": "Plan courses without automated submission",
-    "longDescription": "Use the official undergraduate, graduate, and course-catalogue entry points to build a conflict-checked plan while keeping registration submission disabled.",
+    "displayName": "Yonsei Course Planner",
+    "shortDescription": "Fine-grained read-only Yonsei course planning",
+    "longDescription": "Install five result-specific skills for course-data normalization, conflict checks, course-plan audits, deterministic timetable construction, and bounded entry-point diagnostics.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
-      "Course catalogue lookup",
-      "Schedule conflict checks",
-      "Enrollment planning"
+      "Course-row normalization",
+      "Schedule and campus conflict checks",
+      "Explicit course-plan constraint audits",
+      "Ranked timetable construction",
+      "Official entry diagnostics"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Build a conflict-free Yonsei course plan for me."
+      "Normalize these Yonsei course rows.",
+      "Audit this Yonsei course plan against my constraints.",
+      "Check this proposed Yonsei timetable for conflicts.",
+      "Build ranked conflict-free timetables from these choices."
     ]
   }
 }

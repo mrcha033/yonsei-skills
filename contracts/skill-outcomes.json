@@ -1,0 +1,289 @@
+{
+  "schema": "yonsei-skill-outcomes/v1",
+  "release_gate": {
+    "one_primary_result": true,
+    "structured_output": true,
+    "task_specific_runtime": true,
+    "isolated_install_test": true,
+    "credential_disk_persistence": "none",
+    "credential_runtime_retention": "memory-only-when-explicitly-required",
+    "session_expiry_test": "required-when-authenticated",
+    "mutation_confirmation": "required-immediately-before-write",
+    "official_result_verification": "required-after-write"
+  },
+  "plugins": [
+    {
+      "plugin": "learnus-course-copilot",
+      "release": "alpha-live-auth-pending",
+      "installation": "NOT_AVAILABLE",
+      "outcomes": [
+        {
+          "skill": "manage-learnus-session",
+          "primary_result": "authenticated memory-only LearnUs session status",
+          "state": "implemented"
+        },
+        {
+          "skill": "list-learnus-courses",
+          "primary_result": "structured list of accessible LearnUs courses",
+          "state": "implemented"
+        },
+        {
+          "skill": "list-learnus-deadlines",
+          "primary_result": "dated assignment and activity deadline list",
+          "state": "implemented"
+        },
+        {
+          "skill": "list-learnus-materials",
+          "primary_result": "course material and video link inventory",
+          "state": "implemented"
+        }
+      ]
+    },
+    {
+      "plugin": "yonsei-certificate-assistant",
+      "release": "external-user-work",
+      "installation": "AVAILABLE",
+      "outcomes": []
+    },
+    {
+      "plugin": "yonsei-notice-monitor",
+      "release": "beta-public-read-only",
+      "installation": "AVAILABLE",
+      "outcomes": [
+        {
+          "skill": "search-yonsei-notices",
+          "primary_result": "globally sorted filtered official notice list",
+          "state": "implemented"
+        },
+        {
+          "skill": "list-yonsei-notice-deadlines",
+          "primary_result": "deadline candidates with notice source context",
+          "state": "implemented"
+        },
+        {
+          "skill": "watch-yonsei-notices",
+          "primary_result": "new and changed notices since an explicit state snapshot",
+          "state": "implemented"
+        }
+      ]
+    },
+    {
+      "plugin": "yonsei-academic-copilot",
+      "release": "not-available",
+      "installation": "NOT_AVAILABLE",
+      "outcomes": [
+        {
+          "skill": "list-yonsei-classes",
+          "primary_result": "current-term class schedule",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "summarize-yonsei-grades",
+          "primary_result": "term and cumulative grade summary",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "check-yonsei-enrollment",
+          "primary_result": "current enrollment and academic status",
+          "state": "blocked-authenticated-fixture"
+        }
+      ]
+    },
+    {
+      "plugin": "yonsei-course-registration",
+      "release": "beta-read-only",
+      "installation": "AVAILABLE",
+      "outcomes": [
+        {
+          "skill": "normalize-yonsei-courses",
+          "primary_result": "validated canonical course dataset",
+          "state": "implemented"
+        },
+        {
+          "skill": "check-yonsei-schedule",
+          "primary_result": "time and campus conflict report",
+          "state": "implemented"
+        },
+        {
+          "skill": "audit-yonsei-course-plan",
+          "primary_result": "explicit course-plan constraint audit",
+          "state": "implemented"
+        },
+        {
+          "skill": "build-yonsei-timetable",
+          "primary_result": "ranked conflict-free timetable candidates",
+          "state": "implemented"
+        },
+        {
+          "skill": "diagnose-yonsei-course-access",
+          "primary_result": "bounded official entry-point access diagnosis",
+          "state": "implemented"
+        },
+        {
+          "skill": "search-yonsei-courses",
+          "primary_result": "current official catalogue search results",
+          "state": "blocked-stable-public-source"
+        }
+      ]
+    },
+    {
+      "plugin": "yonsei-attendance-copilot",
+      "release": "not-available",
+      "installation": "NOT_AVAILABLE",
+      "outcomes": [
+        {
+          "skill": "summarize-yonsei-attendance",
+          "primary_result": "absence and lateness totals by course and date range",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "find-yonsei-attendance-discrepancies",
+          "primary_result": "attendance records needing user review",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "draft-yonsei-attendance-correction",
+          "primary_result": "unsent correction request with evidence checklist",
+          "state": "blocked-authenticated-fixture"
+        }
+      ]
+    },
+    {
+      "plugin": "yonsei-shuttle-booking",
+      "release": "not-available",
+      "installation": "NOT_AVAILABLE",
+      "outcomes": [
+        {
+          "skill": "list-yonsei-shuttle-options",
+          "primary_result": "dated route and departure options",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "check-yonsei-shuttle-seats",
+          "primary_result": "current seat availability for one trip",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "reserve-yonsei-shuttle",
+          "primary_result": "verified reservation receipt after explicit confirmation",
+          "state": "blocked-authorized-live-test"
+        },
+        {
+          "skill": "cancel-yonsei-shuttle",
+          "primary_result": "verified cancellation receipt after explicit confirmation",
+          "state": "blocked-authorized-live-test"
+        }
+      ]
+    },
+    {
+      "plugin": "yonsei-space-reservation",
+      "release": "not-available",
+      "installation": "NOT_AVAILABLE",
+      "outcomes": [
+        {
+          "skill": "search-yonsei-spaces",
+          "primary_result": "available spaces matching time, capacity, and equipment",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "check-yonsei-space-rules",
+          "primary_result": "eligibility and rule report for one proposed booking",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "request-yonsei-space",
+          "primary_result": "verified reservation request after explicit confirmation",
+          "state": "blocked-authorized-live-test"
+        }
+      ]
+    },
+    {
+      "plugin": "yonsei-yri",
+      "release": "not-available",
+      "installation": "NOT_AVAILABLE",
+      "outcomes": [
+        {
+          "skill": "list-yri-achievements",
+          "primary_result": "structured authorized research achievement list",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "find-missing-yri-achievements",
+          "primary_result": "candidate missing or duplicate achievement report",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "draft-yri-change",
+          "primary_result": "field-level unsaved before and after diff",
+          "state": "blocked-authenticated-fixture"
+        }
+      ]
+    },
+    {
+      "plugin": "yonsei-rms",
+      "release": "not-available",
+      "installation": "NOT_AVAILABLE",
+      "outcomes": [
+        {
+          "skill": "summarize-rms-project",
+          "primary_result": "authorized project, participant, and period summary",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "check-rms-budget",
+          "primary_result": "budget totals and inconsistency report",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "check-rms-participants",
+          "primary_result": "participant role and period validation report",
+          "state": "blocked-authenticated-fixture"
+        }
+      ]
+    },
+    {
+      "plugin": "yonsei-erp",
+      "release": "not-available",
+      "installation": "NOT_AVAILABLE",
+      "outcomes": [
+        {
+          "skill": "list-erp-requests",
+          "primary_result": "authorized administrative request status list",
+          "state": "blocked-https-auth-path"
+        },
+        {
+          "skill": "list-erp-approvals",
+          "primary_result": "authorized approval inbox",
+          "state": "blocked-https-auth-path"
+        },
+        {
+          "skill": "check-erp-payment-status",
+          "primary_result": "authorized payment status report",
+          "state": "blocked-https-auth-path"
+        }
+      ]
+    },
+    {
+      "plugin": "yonsei-groupware",
+      "release": "not-available",
+      "installation": "NOT_AVAILABLE",
+      "outcomes": [
+        {
+          "skill": "list-groupware-approvals",
+          "primary_result": "authorized approval inbox",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "search-groupware-documents",
+          "primary_result": "authorized document search results",
+          "state": "blocked-authenticated-fixture"
+        },
+        {
+          "skill": "draft-groupware-message",
+          "primary_result": "unsent message with recipient and attachment checklist",
+          "state": "blocked-authenticated-fixture"
+        }
+      ]
+    }
+  ]
+}

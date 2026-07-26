@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-course-registration",
-  "displayName": "Yonsei Course Registration",
-  "version": "0.1.0",
-  "description": "Review Yonsei course offerings, detect schedule conflicts, and prepare an enrollment plan without submitting registrations in version 0.1.",
+  "displayName": "Yonsei Course Planner",
+  "version": "0.2.0",
+  "description": "Normalize supplied Yonsei course rows, audit a selected plan, check schedule conflicts, build ranked timetables, or diagnose official entry access without registration writes.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

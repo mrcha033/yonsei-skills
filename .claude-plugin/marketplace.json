@@ -1,30 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "yonsei-skills",
-  "description": "Independently installable Yonsei University workflow skills.",
+  "description": "Independently installable, outcome-tested Yonsei University skills.",
   "owner": {
     "name": "mrcha033"
   },
   "plugins": [
-    {
-      "name": "learnus-course-copilot",
-      "displayName": "LearnUs Course Copilot",
-      "source": "./plugins/learnus-course-copilot",
-      "description": "Use password-prompted headless or browser LearnUs sessions to turn authorized course pages into materials, deadlines, and study actions.",
-      "version": "0.2.0",
-      "author": {
-        "name": "mrcha033"
-      },
-      "homepage": "https://github.com/mrcha033/yonsei-skills",
-      "repository": "https://github.com/mrcha033/yonsei-skills",
-      "category": "education",
-      "tags": [
-        "learnus",
-        "yonsei",
-        "lms",
-        "course"
-      ]
-    },
     {
       "name": "yonsei-certificate-assistant",
       "displayName": "Yonsei Certificate Assistant",
@@ -46,10 +27,10 @@
     },
     {
       "name": "yonsei-notice-monitor",
-      "displayName": "Yonsei Notice Monitor",
+      "displayName": "Yonsei Notice Tools",
       "source": "./plugins/yonsei-notice-monitor",
-      "description": "Find and summarize current public Yonsei University and Sinchon IT service notices with source links and dates.",
-      "version": "0.1.0",
+      "description": "Search official Yonsei notices, extract contextual deadline candidates, or detect changes against an explicit local snapshot.",
+      "version": "0.2.0",
       "author": {
         "name": "mrcha033"
       },
@@ -64,30 +45,11 @@
       ]
     },
     {
-      "name": "yonsei-academic-copilot",
-      "displayName": "Yonsei Academic Copilot",
-      "source": "./plugins/yonsei-academic-copilot",
-      "description": "Inspect authorized Yonsei academic information through the official academic system with a read-only first release.",
-      "version": "0.1.0",
-      "author": {
-        "name": "mrcha033"
-      },
-      "homepage": "https://github.com/mrcha033/yonsei-skills",
-      "repository": "https://github.com/mrcha033/yonsei-skills",
-      "category": "education",
-      "tags": [
-        "yonsei",
-        "academic",
-        "records",
-        "student"
-      ]
-    },
-    {
       "name": "yonsei-course-registration",
-      "displayName": "Yonsei Course Registration",
+      "displayName": "Yonsei Course Planner",
       "source": "./plugins/yonsei-course-registration",
-      "description": "Review Yonsei course offerings, detect schedule conflicts, and prepare an enrollment plan without submitting registrations in version 0.1.",
-      "version": "0.1.0",
+      "description": "Normalize supplied Yonsei course rows, audit a selected plan, check schedule conflicts, build ranked timetables, or diagnose official entry access without registration writes.",
+      "version": "0.2.0",
       "author": {
         "name": "mrcha033"
       },
@@ -99,139 +61,6 @@
         "courses",
         "registration",
         "schedule"
-      ]
-    },
-    {
-      "name": "yonsei-attendance-copilot",
-      "displayName": "Yonsei Attendance Copilot",
-      "source": "./plugins/yonsei-attendance-copilot",
-      "description": "Review the user's authorized Yonsei electronic attendance records without performing check-ins or location spoofing.",
-      "version": "0.1.0",
-      "author": {
-        "name": "mrcha033"
-      },
-      "homepage": "https://github.com/mrcha033/yonsei-skills",
-      "repository": "https://github.com/mrcha033/yonsei-skills",
-      "category": "education",
-      "tags": [
-        "yonsei",
-        "attendance",
-        "rollbook",
-        "student"
-      ]
-    },
-    {
-      "name": "yonsei-shuttle-booking",
-      "displayName": "Yonsei Shuttle Booking",
-      "source": "./plugins/yonsei-shuttle-booking",
-      "description": "Check Yonsei International Campus shuttle options and require explicit confirmation before a reservation is submitted.",
-      "version": "0.1.0",
-      "author": {
-        "name": "mrcha033"
-      },
-      "homepage": "https://github.com/mrcha033/yonsei-skills",
-      "repository": "https://github.com/mrcha033/yonsei-skills",
-      "category": "education",
-      "tags": [
-        "yonsei",
-        "shuttle",
-        "booking",
-        "campus"
-      ]
-    },
-    {
-      "name": "yonsei-space-reservation",
-      "displayName": "Yonsei Space Reservation",
-      "source": "./plugins/yonsei-space-reservation",
-      "description": "Check Yonsei space availability and require explicit confirmation before sending a reservation request.",
-      "version": "0.1.0",
-      "author": {
-        "name": "mrcha033"
-      },
-      "homepage": "https://github.com/mrcha033/yonsei-skills",
-      "repository": "https://github.com/mrcha033/yonsei-skills",
-      "category": "education",
-      "tags": [
-        "yonsei",
-        "space",
-        "room",
-        "reservation"
-      ]
-    },
-    {
-      "name": "yonsei-yri",
-      "displayName": "Yonsei YRI",
-      "source": "./plugins/yonsei-yri",
-      "description": "Open and inspect authorized Yonsei Researcher Information records with confirmation required for every write.",
-      "version": "0.1.0",
-      "author": {
-        "name": "mrcha033"
-      },
-      "homepage": "https://github.com/mrcha033/yonsei-skills",
-      "repository": "https://github.com/mrcha033/yonsei-skills",
-      "category": "education",
-      "tags": [
-        "yonsei",
-        "yri",
-        "research",
-        "achievements"
-      ]
-    },
-    {
-      "name": "yonsei-rms",
-      "displayName": "Yonsei RMS",
-      "source": "./plugins/yonsei-rms",
-      "description": "Open and inspect authorized Yonsei Research Management System records with confirmation required for every write.",
-      "version": "0.1.0",
-      "author": {
-        "name": "mrcha033"
-      },
-      "homepage": "https://github.com/mrcha033/yonsei-skills",
-      "repository": "https://github.com/mrcha033/yonsei-skills",
-      "category": "education",
-      "tags": [
-        "yonsei",
-        "rms",
-        "research",
-        "management"
-      ]
-    },
-    {
-      "name": "yonsei-erp",
-      "displayName": "Yonsei ERP",
-      "source": "./plugins/yonsei-erp",
-      "description": "Open and inspect authorized Yonsei ERP workflows with a read-only default and confirmation before any administrative write.",
-      "version": "0.1.0",
-      "author": {
-        "name": "mrcha033"
-      },
-      "homepage": "https://github.com/mrcha033/yonsei-skills",
-      "repository": "https://github.com/mrcha033/yonsei-skills",
-      "category": "education",
-      "tags": [
-        "yonsei",
-        "erp",
-        "administration",
-        "workflow"
-      ]
-    },
-    {
-      "name": "yonsei-groupware",
-      "displayName": "Yonsei Groupware",
-      "source": "./plugins/yonsei-groupware",
-      "description": "Open and inspect authorized Yonsei groupware while requiring explicit confirmation before sending, approving, or sharing.",
-      "version": "0.1.0",
-      "author": {
-        "name": "mrcha033"
-      },
-      "homepage": "https://github.com/mrcha033/yonsei-skills",
-      "repository": "https://github.com/mrcha033/yonsei-skills",
-      "category": "education",
-      "tags": [
-        "yonsei",
-        "groupware",
-        "collaboration",
-        "workflow"
       ]
     }
   ]

@@ -1,6 +1,0 @@
-interface:
-  display_name: "Yonsei ERP"
-  short_description: "Use authorized Yonsei ERP workflows safely"
-  default_prompt: "Use $yonsei-erp to open and inspect an authorized Yonsei ERP workflow."
-policy:
-  allow_implicit_invocation: false

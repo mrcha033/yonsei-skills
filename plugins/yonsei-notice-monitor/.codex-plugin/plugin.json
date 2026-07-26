@@ -1,7 +1,7 @@
 {
   "name": "yonsei-notice-monitor",
-  "version": "0.1.0+codex.20260726161933",
-  "description": "Find and summarize current public Yonsei University and Sinchon IT service notices with source links and dates.",
+  "version": "0.2.0",
+  "description": "Search official Yonsei notices, extract contextual deadline candidates, or detect changes against an explicit local snapshot.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -16,19 +16,21 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Notice Monitor",
-    "shortDescription": "Monitor university and IT service notices",
-    "longDescription": "Search the official university and Sinchon IT notice boards, preserve publication dates and categories, and return directly linked summaries.",
+    "displayName": "Yonsei Notice Tools",
+    "shortDescription": "Search notices, deadlines, and changes",
+    "longDescription": "Install three public read-only skills for globally sorted official notice search, contextual deadline extraction, and explicit-state change detection.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
-      "Official notice discovery",
-      "Date-aware summaries",
-      "Source-linked results"
+      "Globally sorted official notice search",
+      "Contextual deadline candidates",
+      "Explicit-state change detection"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Find current Yonsei notices relevant to me."
+      "Search current official Yonsei notices.",
+      "List upcoming deadlines from recent Yonsei notices.",
+      "Show notices changed since my last snapshot."
     ]
   }
 }
