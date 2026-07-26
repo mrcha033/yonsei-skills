@@ -1,0 +1,34 @@
+{
+  "name": "yonsei-notice-monitor",
+  "version": "0.1.0+codex.20260726161933",
+  "description": "Find and summarize current public Yonsei University and Sinchon IT service notices with source links and dates.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "keywords": [
+    "yonsei",
+    "notices",
+    "it",
+    "monitor"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Yonsei Notice Monitor",
+    "shortDescription": "Monitor university and IT service notices",
+    "longDescription": "Search the official university and Sinchon IT notice boards, preserve publication dates and categories, and return directly linked summaries.",
+    "developerName": "mrcha033",
+    "category": "Education",
+    "capabilities": [
+      "Official notice discovery",
+      "Date-aware summaries",
+      "Source-linked results"
+    ],
+    "websiteURL": "https://github.com/mrcha033/yonsei-skills",
+    "defaultPrompt": [
+      "Find current Yonsei notices relevant to me."
+    ]
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "schema": "yonsei-service-catalog/v1",
+  "updated_at": "2026-07-27",
+  "sources": {
+    "portal": "https://portal.yonsei.ac.kr/ui/index.html",
+    "portal_link_map": "https://portal.yonsei.ac.kr/ui/thirdparty/portal/lib/js/linkAddress.js",
+    "vpn_guide": "https://yis.yonsei.ac.kr/ics/service/PolicyApplyInfo.do"
+  },
+  "services": {
+    "portal": {
+      "label": "Yonsei Portal",
+      "entry_url": "https://portal.yonsei.ac.kr/ui/index.html",
+      "portal_key": null,
+      "access": "public-login-boundary",
+      "mutation_policy": "none",
+      "vpn_policy": "probe-direct-first"
+    },
+    "certificate": {
+      "label": "Internet Certificate Issuance",
+      "entry_url": "https://portal.yonsei.ac.kr/ui/index.html",
+      "direct_url": "https://icert.yonsei.ac.kr/servlet/YSID?COMMAND=VERIFY&LANG=0",
+      "portal_url": "https://icert.yonsei.ac.kr/servlet/YSID?COMMAND=VERIFY&LANG=0",
+      "portal_key": "LK011_A",
+      "access": "portal-authenticated-issuance",
+      "mutation_policy": "official-issuance-only",
+      "vpn_policy": "probe-direct-first",
+      "notes": [
+        "The direct pre-login URL is for original-document verification.",
+        "Start issuance from the authenticated portal Internet Certificate menu."
+      ]
+    },
+    "university-notices": {
+      "label": "University Notices",
+      "entry_url": "https://www.yonsei.ac.kr/sc/254/subview.do",
+      "portal_key": null,
+      "access": "public",
+      "mutation_policy": "read-only",
+      "vpn_policy": "never"
+    },
+    "it-notices": {
+      "label": "Sinchon IT Service Notices",
+      "entry_url": "https://yis.yonsei.ac.kr/ics/help/notice.do",
+      "portal_url": "https://yis.yonsei.ac.kr/ics/index.do",
+      "portal_key": "LK013_S",
+      "access": "public",
+      "mutation_policy": "read-only",
+      "vpn_policy": "never"
+    },
+    "academic": {
+      "label": "Academic Information System",
+      "entry_url": "https://underwood1.yonsei.ac.kr/passni/spLogin.jsp?locale=ko",
+      "portal_key": "LK001_A",
+      "access": "yonsei-sso",
+      "mutation_policy": "read-only-v0.1",
+      "vpn_policy": "probe-direct-first"
+    },
+    "course-undergraduate": {
+      "label": "Undergraduate Course Registration",
+      "entry_url": "https://ysweb.yonsei.ac.kr/com/lgin/SsoCtr/initPageWork.do?univDivCd=facly",
+      "portal_key": "LK002_A",
+      "access": "yonsei-sso",
+      "mutation_policy": "submission-disabled-v0.1",
+      "vpn_policy": "probe-direct-first"
+    },
+    "course-graduate": {
+      "label": "Graduate Course Registration",
+      "entry_url": "https://ysweb.yonsei.ac.kr/com/lgin/SsoCtr/initPageWork.do?univDivCd=gsch",
+      "portal_key": "LK003_A",
+      "access": "yonsei-sso",
+      "mutation_policy": "submission-disabled-v0.1",
+      "vpn_policy": "probe-direct-first"
+    },
+    "course-catalog": {
+      "label": "Course Catalogue and Syllabus",
+      "entry_url": "https://underwood1.yonsei.ac.kr/com/lgin/SsoCtr/initExtPageWork.do?link=handbList&locale=ko",
+      "portal_key": "LK004_A",
+      "access": "public-or-yonsei-sso",
+      "mutation_policy": "read-only",
+      "vpn_policy": "probe-direct-first"
+    },
+    "attendance": {
+      "label": "Electronic Attendance",
+      "entry_url": "https://ysrollbook.yonsei.ac.kr/",
+      "portal_key": "LK010_A",
+      "access": "yonsei-sso",
+      "mutation_policy": "read-only-no-check-in",
+      "vpn_policy": "probe-direct-first"
+    },
+    "shuttle": {
+      "label": "International Campus Shuttle",
+      "entry_url": "https://underwood1.yonsei.ac.kr/passni/spLogin.jsp?returnUrl=L2NvbS9sZ2luL1Nzb0N0ci9pbml0RXh0UGFnZVdvcmsuZG8%2FbGluaz1zaHV0dGxl&locale=ko",
+      "portal_key": "LK014_S",
+      "access": "yonsei-sso",
+      "mutation_policy": "confirm-before-reservation",
+      "vpn_policy": "probe-direct-first"
+    },
+    "space": {
+      "label": "Space Reservation",
+      "entry_url": "https://space.yonsei.ac.kr/",
+      "portal_key": "LK016_A",
+      "access": "service-login",
+      "mutation_policy": "confirm-before-request",
+      "vpn_policy": "probe-direct-first"
+    },
+    "yri": {
+      "label": "Yonsei Researcher Information",
+      "entry_url": "https://yri.yonsei.ac.kr/",
+      "portal_key": "LK039_A",
+      "access": "yonsei-sso",
+      "mutation_policy": "confirm-each-write",
+      "vpn_policy": "probe-direct-first"
+    },
+    "rms": {
+      "label": "Research Management System",
+      "entry_url": "https://rms2.yonsei.ac.kr/",
+      "portal_key": "LK053_A",
+      "access": "yonsei-sso",
+      "mutation_policy": "confirm-each-write",
+      "vpn_policy": "probe-direct-first"
+    },
+    "erp": {
+      "label": "ERP Administration Information System",
+      "entry_url": "https://infra.yonsei.ac.kr/sso/sapep_gw_prd.jsp",
+      "portal_key": "LK008_A",
+      "access": "yonsei-sso-authorized-roles",
+      "mutation_policy": "read-only-default-confirm-each-write",
+      "vpn_policy": "probe-direct-first"
+    },
+    "groupware": {
+      "label": "Yonsei Groupware",
+      "entry_url": "https://ysgw.yonsei.ac.kr/",
+      "portal_key": "LK007_A",
+      "access": "yonsei-sso-authorized-roles",
+      "mutation_policy": "confirm-before-send-approve-or-share",
+      "vpn_policy": "probe-direct-first"
+    }
+  }
+}

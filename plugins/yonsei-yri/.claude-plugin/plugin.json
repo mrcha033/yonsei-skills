@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "yonsei-yri",
+  "displayName": "Yonsei YRI",
+  "version": "0.1.0",
+  "description": "Open and inspect authorized Yonsei Researcher Information records with confirmation required for every write.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "keywords": [
+    "yonsei",
+    "yri",
+    "research",
+    "achievements"
+  ],
+  "skills": "./skills/"
+}

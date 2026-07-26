@@ -1,0 +1,34 @@
+{
+  "name": "yonsei-attendance-copilot",
+  "version": "0.1.0",
+  "description": "Review the user's authorized Yonsei electronic attendance records without performing check-ins or location spoofing.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "keywords": [
+    "yonsei",
+    "attendance",
+    "rollbook",
+    "student"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Yonsei Attendance Copilot",
+    "shortDescription": "Review electronic attendance records safely",
+    "longDescription": "Reach the official electronic attendance system and summarize authorized records in a strictly read-only workflow.",
+    "developerName": "mrcha033",
+    "category": "Education",
+    "capabilities": [
+      "Attendance system diagnostics",
+      "Authorized record review",
+      "Read-only summaries"
+    ],
+    "websiteURL": "https://github.com/mrcha033/yonsei-skills",
+    "defaultPrompt": [
+      "Review my authorized Yonsei attendance records."
+    ]
+  }
+}

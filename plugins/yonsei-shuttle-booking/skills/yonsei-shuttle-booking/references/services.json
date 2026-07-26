@@ -1,0 +1,19 @@
+{
+  "schema": "yonsei-service-catalog/v1",
+  "services": {
+    "shuttle": {
+      "access": "yonsei-sso",
+      "entry_url": "https://underwood1.yonsei.ac.kr/passni/spLogin.jsp?returnUrl=L2NvbS9sZ2luL1Nzb0N0ci9pbml0RXh0UGFnZVdvcmsuZG8%2FbGluaz1zaHV0dGxl&locale=ko",
+      "label": "International Campus Shuttle",
+      "mutation_policy": "confirm-before-reservation",
+      "portal_key": "LK014_S",
+      "vpn_policy": "probe-direct-first"
+    }
+  },
+  "sources": {
+    "portal": "https://portal.yonsei.ac.kr/ui/index.html",
+    "portal_link_map": "https://portal.yonsei.ac.kr/ui/thirdparty/portal/lib/js/linkAddress.js",
+    "vpn_guide": "https://yis.yonsei.ac.kr/ics/service/PolicyApplyInfo.do"
+  },
+  "updated_at": "2026-07-27"
+}

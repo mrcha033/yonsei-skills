@@ -1,0 +1,6 @@
+interface:
+  display_name: "Yonsei Shuttle Booking"
+  short_description: "Check shuttle seats and confirm reservations"
+  default_prompt: "Use $yonsei-shuttle-booking to find a shuttle and prepare a reservation."
+policy:
+  allow_implicit_invocation: false

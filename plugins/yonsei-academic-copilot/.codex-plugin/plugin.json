@@ -1,0 +1,34 @@
+{
+  "name": "yonsei-academic-copilot",
+  "version": "0.1.0",
+  "description": "Inspect authorized Yonsei academic information through the official academic system with a read-only first release.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "keywords": [
+    "yonsei",
+    "academic",
+    "records",
+    "student"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Yonsei Academic Copilot",
+    "shortDescription": "Inspect authorized academic information safely",
+    "longDescription": "Reach the official academic information system, verify the authenticated scope, and summarize only the records explicitly requested by the user.",
+    "developerName": "mrcha033",
+    "category": "Education",
+    "capabilities": [
+      "Academic system diagnostics",
+      "Authorized record inspection",
+      "Read-only summaries"
+    ],
+    "websiteURL": "https://github.com/mrcha033/yonsei-skills",
+    "defaultPrompt": [
+      "Inspect my authorized Yonsei academic information."
+    ]
+  }
+}

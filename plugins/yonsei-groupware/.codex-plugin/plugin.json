@@ -1,0 +1,34 @@
+{
+  "name": "yonsei-groupware",
+  "version": "0.1.0",
+  "description": "Open and inspect authorized Yonsei groupware while requiring explicit confirmation before sending, approving, or sharing.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "keywords": [
+    "yonsei",
+    "groupware",
+    "collaboration",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Yonsei Groupware",
+    "shortDescription": "Use authorized groupware workflows safely",
+    "longDescription": "Use the official groupware endpoint, keep messages and documents scoped to the request, and stop before any external communication or approval.",
+    "developerName": "mrcha033",
+    "category": "Education",
+    "capabilities": [
+      "Groupware access diagnostics",
+      "Authorized content inspection",
+      "Confirmation-gated actions"
+    ],
+    "websiteURL": "https://github.com/mrcha033/yonsei-skills",
+    "defaultPrompt": [
+      "Open and inspect my authorized Yonsei groupware."
+    ]
+  }
+}

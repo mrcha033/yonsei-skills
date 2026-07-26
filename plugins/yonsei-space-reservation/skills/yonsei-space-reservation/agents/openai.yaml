@@ -1,0 +1,6 @@
+interface:
+  display_name: "Yonsei Space Reservation"
+  short_description: "Check spaces and confirm reservation requests"
+  default_prompt: "Use $yonsei-space-reservation to find an available space and prepare a reservation request."
+policy:
+  allow_implicit_invocation: false

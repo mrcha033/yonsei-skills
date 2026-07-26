@@ -1,0 +1,34 @@
+{
+  "name": "yonsei-space-reservation",
+  "version": "0.1.0",
+  "description": "Check Yonsei space availability and require explicit confirmation before sending a reservation request.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "keywords": [
+    "yonsei",
+    "space",
+    "room",
+    "reservation"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Yonsei Space Reservation",
+    "shortDescription": "Check spaces and guard reservation requests",
+    "longDescription": "Use the official space reservation system, summarize constraints and availability, and stop for confirmation before submitting a request.",
+    "developerName": "mrcha033",
+    "category": "Education",
+    "capabilities": [
+      "Space system diagnostics",
+      "Availability review",
+      "Confirmation-gated requests"
+    ],
+    "websiteURL": "https://github.com/mrcha033/yonsei-skills",
+    "defaultPrompt": [
+      "Find an available Yonsei space and prepare a reservation request."
+    ]
+  }
+}

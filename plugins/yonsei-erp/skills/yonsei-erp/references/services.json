@@ -1,0 +1,19 @@
+{
+  "schema": "yonsei-service-catalog/v1",
+  "services": {
+    "erp": {
+      "access": "yonsei-sso-authorized-roles",
+      "entry_url": "https://infra.yonsei.ac.kr/sso/sapep_gw_prd.jsp",
+      "label": "ERP Administration Information System",
+      "mutation_policy": "read-only-default-confirm-each-write",
+      "portal_key": "LK008_A",
+      "vpn_policy": "probe-direct-first"
+    }
+  },
+  "sources": {
+    "portal": "https://portal.yonsei.ac.kr/ui/index.html",
+    "portal_link_map": "https://portal.yonsei.ac.kr/ui/thirdparty/portal/lib/js/linkAddress.js",
+    "vpn_guide": "https://yis.yonsei.ac.kr/ics/service/PolicyApplyInfo.do"
+  },
+  "updated_at": "2026-07-27"
+}

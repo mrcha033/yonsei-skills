@@ -1,0 +1,6 @@
+interface:
+  display_name: "Yonsei Course Registration"
+  short_description: "Plan courses and guard enrollment submissions"
+  default_prompt: "Use $yonsei-course-registration to review courses and prepare a safe enrollment plan."
+policy:
+  allow_implicit_invocation: false

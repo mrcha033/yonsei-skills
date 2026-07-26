@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yonsei Certificate Assistant"
+  short_description: "Issue valid Yonsei certificates safely on macOS"
+  default_prompt: "Use $yonsei-certificate-assistant to choose and complete an official Yonsei certificate issuance path."

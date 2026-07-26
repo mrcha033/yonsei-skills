@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "yonsei-course-registration",
+  "displayName": "Yonsei Course Registration",
+  "version": "0.1.0",
+  "description": "Review Yonsei course offerings, detect schedule conflicts, and prepare an enrollment plan without submitting registrations in version 0.1.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "keywords": [
+    "yonsei",
+    "courses",
+    "registration",
+    "schedule"
+  ],
+  "skills": "./skills/"
+}

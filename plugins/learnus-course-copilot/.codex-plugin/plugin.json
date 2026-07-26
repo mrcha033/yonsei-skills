@@ -1,0 +1,38 @@
+{
+  "name": "learnus-course-copilot",
+  "version": "0.2.0",
+  "description": "Use password-prompted headless or browser LearnUs sessions to turn authorized course pages into materials, deadlines, and study actions.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "keywords": [
+    "learnus",
+    "yonsei",
+    "lms",
+    "course"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "LearnUs Course Copilot",
+    "shortDescription": "Headless LearnUs login and study actions",
+    "longDescription": "Use a hidden terminal password prompt and memory-only local session service, or an existing browser login, to inspect authorized LearnUs pages and recover automatically from session expiry.",
+    "developerName": "mrcha033",
+    "category": "Education",
+    "capabilities": [
+      "Headless SSO authentication",
+      "Automatic session recovery",
+      "Course snapshot analysis",
+      "Material discovery",
+      "Deadline extraction"
+    ],
+    "websiteURL": "https://github.com/mrcha033/yonsei-skills",
+    "defaultPrompt": [
+      "Collect the materials and deadlines from this LearnUs course.",
+      "Start a headless LearnUs session on this GUI-less host.",
+      "Structure this authorized LearnUs page into study actions."
+    ]
+  }
+}

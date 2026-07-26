@@ -1,0 +1,6 @@
+interface:
+  display_name: "Yonsei YRI"
+  short_description: "Use authorized research achievement records safely"
+  default_prompt: "Use $yonsei-yri to inspect my authorized YRI research achievement records."
+policy:
+  allow_implicit_invocation: false

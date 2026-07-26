@@ -1,0 +1,152 @@
+{
+  "name": "yonsei-skills",
+  "interface": {
+    "displayName": "Yonsei Skills"
+  },
+  "plugins": [
+    {
+      "name": "learnus-course-copilot",
+      "source": {
+        "source": "local",
+        "path": "./plugins/learnus-course-copilot"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "yonsei-certificate-assistant",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yonsei-certificate-assistant"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "yonsei-notice-monitor",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yonsei-notice-monitor"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "yonsei-academic-copilot",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yonsei-academic-copilot"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "yonsei-course-registration",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yonsei-course-registration"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "yonsei-attendance-copilot",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yonsei-attendance-copilot"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "yonsei-shuttle-booking",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yonsei-shuttle-booking"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "yonsei-space-reservation",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yonsei-space-reservation"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "yonsei-yri",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yonsei-yri"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "yonsei-rms",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yonsei-rms"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "yonsei-erp",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yonsei-erp"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "yonsei-groupware",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yonsei-groupware"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    }
+  ]
+}

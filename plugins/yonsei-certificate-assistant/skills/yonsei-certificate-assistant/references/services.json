@@ -1,0 +1,25 @@
+{
+  "schema": "yonsei-service-catalog/v1",
+  "services": {
+    "certificate": {
+      "access": "portal-authenticated-issuance",
+      "direct_url": "https://icert.yonsei.ac.kr/servlet/YSID?COMMAND=VERIFY&LANG=0",
+      "entry_url": "https://portal.yonsei.ac.kr/ui/index.html",
+      "label": "Internet Certificate Issuance",
+      "mutation_policy": "official-issuance-only",
+      "notes": [
+        "The direct pre-login URL is for original-document verification.",
+        "Start issuance from the authenticated portal Internet Certificate menu."
+      ],
+      "portal_key": "LK011_A",
+      "portal_url": "https://icert.yonsei.ac.kr/servlet/YSID?COMMAND=VERIFY&LANG=0",
+      "vpn_policy": "probe-direct-first"
+    }
+  },
+  "sources": {
+    "portal": "https://portal.yonsei.ac.kr/ui/index.html",
+    "portal_link_map": "https://portal.yonsei.ac.kr/ui/thirdparty/portal/lib/js/linkAddress.js",
+    "vpn_guide": "https://yis.yonsei.ac.kr/ics/service/PolicyApplyInfo.do"
+  },
+  "updated_at": "2026-07-27"
+}

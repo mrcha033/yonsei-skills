@@ -1,0 +1,29 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Render manifests
+        run: python3 scripts/render_manifests.py
+      - name: Check generated files
+        run: git diff --exit-code
+      - name: Check vendored runtime
+        run: python3 scripts/sync_runtime.py --check
+      - name: Validate repository
+        run: python3 scripts/validate_repo.py
+      - name: Run tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Compile Python
+        run: python3 -m compileall -q packages scripts plugins tests

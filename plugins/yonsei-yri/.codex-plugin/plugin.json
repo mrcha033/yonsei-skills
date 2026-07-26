@@ -1,0 +1,34 @@
+{
+  "name": "yonsei-yri",
+  "version": "0.1.0",
+  "description": "Open and inspect authorized Yonsei Researcher Information records with confirmation required for every write.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "keywords": [
+    "yonsei",
+    "yri",
+    "research",
+    "achievements"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Yonsei YRI",
+    "shortDescription": "Inspect research achievement records safely",
+    "longDescription": "Use the official YRI endpoint, verify the user's authorized scope, summarize requested records, and present a field-level diff before any write.",
+    "developerName": "mrcha033",
+    "category": "Education",
+    "capabilities": [
+      "YRI access diagnostics",
+      "Authorized record inspection",
+      "Confirmation-gated writes"
+    ],
+    "websiteURL": "https://github.com/mrcha033/yonsei-skills",
+    "defaultPrompt": [
+      "Inspect my authorized YRI research achievement records."
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "yonsei-certificate-assistant",
+  "version": "0.1.0",
+  "description": "Choose and complete an official Yonsei electronic or paper certificate issuance path without bypassing print controls.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "keywords": [
+    "yonsei",
+    "certificate",
+    "pdf",
+    "macos"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Yonsei Certificate Assistant",
+    "shortDescription": "Issue valid Yonsei certificates on macOS",
+    "longDescription": "Choose the valid electronic-original or paper-original workflow, enter through the official portal, and avoid print-control bypasses that would produce an invalid copy.",
+    "developerName": "mrcha033",
+    "category": "Education",
+    "capabilities": [
+      "Certificate path selection",
+      "Official issuance guidance",
+      "Mac compatibility checks"
+    ],
+    "websiteURL": "https://github.com/mrcha033/yonsei-skills",
+    "defaultPrompt": [
+      "Help me issue a valid Yonsei certificate from my Mac."
+    ]
+  }
+}

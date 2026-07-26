@@ -1,0 +1,6 @@
+interface:
+  display_name: "Yonsei RMS"
+  short_description: "Inspect authorized research management records"
+  default_prompt: "Use $yonsei-rms to inspect my authorized Yonsei research management records."
+policy:
+  allow_implicit_invocation: false

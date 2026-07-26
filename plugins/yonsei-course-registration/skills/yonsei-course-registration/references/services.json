@@ -1,0 +1,35 @@
+{
+  "schema": "yonsei-service-catalog/v1",
+  "services": {
+    "course-catalog": {
+      "access": "public-or-yonsei-sso",
+      "entry_url": "https://underwood1.yonsei.ac.kr/com/lgin/SsoCtr/initExtPageWork.do?link=handbList&locale=ko",
+      "label": "Course Catalogue and Syllabus",
+      "mutation_policy": "read-only",
+      "portal_key": "LK004_A",
+      "vpn_policy": "probe-direct-first"
+    },
+    "course-graduate": {
+      "access": "yonsei-sso",
+      "entry_url": "https://ysweb.yonsei.ac.kr/com/lgin/SsoCtr/initPageWork.do?univDivCd=gsch",
+      "label": "Graduate Course Registration",
+      "mutation_policy": "submission-disabled-v0.1",
+      "portal_key": "LK003_A",
+      "vpn_policy": "probe-direct-first"
+    },
+    "course-undergraduate": {
+      "access": "yonsei-sso",
+      "entry_url": "https://ysweb.yonsei.ac.kr/com/lgin/SsoCtr/initPageWork.do?univDivCd=facly",
+      "label": "Undergraduate Course Registration",
+      "mutation_policy": "submission-disabled-v0.1",
+      "portal_key": "LK002_A",
+      "vpn_policy": "probe-direct-first"
+    }
+  },
+  "sources": {
+    "portal": "https://portal.yonsei.ac.kr/ui/index.html",
+    "portal_link_map": "https://portal.yonsei.ac.kr/ui/thirdparty/portal/lib/js/linkAddress.js",
+    "vpn_guide": "https://yis.yonsei.ac.kr/ics/service/PolicyApplyInfo.do"
+  },
+  "updated_at": "2026-07-27"
+}

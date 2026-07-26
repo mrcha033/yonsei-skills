@@ -1,0 +1,34 @@
+{
+  "name": "yonsei-course-registration",
+  "version": "0.1.0",
+  "description": "Review Yonsei course offerings, detect schedule conflicts, and prepare an enrollment plan without submitting registrations in version 0.1.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "keywords": [
+    "yonsei",
+    "courses",
+    "registration",
+    "schedule"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Yonsei Course Registration",
+    "shortDescription": "Plan courses without automated submission",
+    "longDescription": "Use the official undergraduate, graduate, and course-catalogue entry points to build a conflict-checked plan while keeping registration submission disabled.",
+    "developerName": "mrcha033",
+    "category": "Education",
+    "capabilities": [
+      "Course catalogue lookup",
+      "Schedule conflict checks",
+      "Enrollment planning"
+    ],
+    "websiteURL": "https://github.com/mrcha033/yonsei-skills",
+    "defaultPrompt": [
+      "Build a conflict-free Yonsei course plan for me."
+    ]
+  }
+}

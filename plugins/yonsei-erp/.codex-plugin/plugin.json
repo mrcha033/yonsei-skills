@@ -1,0 +1,34 @@
+{
+  "name": "yonsei-erp",
+  "version": "0.1.0",
+  "description": "Open and inspect authorized Yonsei ERP workflows with a read-only default and confirmation before any administrative write.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "keywords": [
+    "yonsei",
+    "erp",
+    "administration",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Yonsei ERP",
+    "shortDescription": "Use authorized ERP workflows safely",
+    "longDescription": "Use the official ERP SSO endpoint, minimize sensitive-data exposure, and require explicit confirmation before any write, approval, or submission.",
+    "developerName": "mrcha033",
+    "category": "Education",
+    "capabilities": [
+      "ERP access diagnostics",
+      "Read-only workflow inspection",
+      "Confirmation-gated writes"
+    ],
+    "websiteURL": "https://github.com/mrcha033/yonsei-skills",
+    "defaultPrompt": [
+      "Open and inspect an authorized Yonsei ERP workflow."
+    ]
+  }
+}

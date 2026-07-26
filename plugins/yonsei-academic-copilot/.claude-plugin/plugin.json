@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "yonsei-academic-copilot",
+  "displayName": "Yonsei Academic Copilot",
+  "version": "0.1.0",
+  "description": "Inspect authorized Yonsei academic information through the official academic system with a read-only first release.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "keywords": [
+    "yonsei",
+    "academic",
+    "records",
+    "student"
+  ],
+  "skills": "./skills/"
+}

@@ -1,0 +1,19 @@
+{
+  "schema": "yonsei-service-catalog/v1",
+  "services": {
+    "academic": {
+      "access": "yonsei-sso",
+      "entry_url": "https://underwood1.yonsei.ac.kr/passni/spLogin.jsp?locale=ko",
+      "label": "Academic Information System",
+      "mutation_policy": "read-only-v0.1",
+      "portal_key": "LK001_A",
+      "vpn_policy": "probe-direct-first"
+    }
+  },
+  "sources": {
+    "portal": "https://portal.yonsei.ac.kr/ui/index.html",
+    "portal_link_map": "https://portal.yonsei.ac.kr/ui/thirdparty/portal/lib/js/linkAddress.js",
+    "vpn_guide": "https://yis.yonsei.ac.kr/ics/service/PolicyApplyInfo.do"
+  },
+  "updated_at": "2026-07-27"
+}

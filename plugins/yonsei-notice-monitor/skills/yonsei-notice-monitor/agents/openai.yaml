@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yonsei Notice Monitor"
+  short_description: "Monitor university and IT service notices"
+  default_prompt: "Use $yonsei-notice-monitor to find current Yonsei and IT service notices."
