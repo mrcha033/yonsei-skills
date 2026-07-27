@@ -1,7 +1,7 @@
 {
   "name": "yonsei-space-reservation",
-  "version": "0.1.0",
-  "description": "Check Yonsei space availability and require explicit confirmation before sending a reservation request.",
+  "version": "0.2.0",
+  "description": "Filter supplied room snapshots, check a proposal against official public rules, or prepare an unsent reservation draft without submission.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -16,19 +16,21 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Space Reservation",
-    "shortDescription": "Check spaces and guard reservation requests",
-    "longDescription": "Use the official space reservation system, summarize constraints and availability, and stop for confirmation before submitting a request.",
+    "displayName": "Yonsei Space Planning Tools",
+    "shortDescription": "Check space candidates, rules, and drafts",
+    "longDescription": "Install separate skills for snapshot filtering, evidence-linked rule checks, and unsent request preparation while availability claims, payment, approval, and submission stay disabled.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
-      "Space system diagnostics",
-      "Availability review",
-      "Confirmation-gated requests"
+      "Supplied space snapshot filtering",
+      "Official public booking-rule checks",
+      "Unsent reservation drafts"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Find an available Yonsei space and prepare a reservation request."
+      "Filter this supplied Yonsei space snapshot.",
+      "Check this proposed booking against Yonsei public rules.",
+      "Prepare but do not submit a space request."
     ]
   }
 }

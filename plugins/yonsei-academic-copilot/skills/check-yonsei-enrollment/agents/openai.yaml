@@ -1,0 +1,6 @@
+interface:
+  display_name: "Check Yonsei Enrollment"
+  short_description: "Check a supplied enrollment-status snapshot"
+  default_prompt: "Use $check-yonsei-enrollment to check the status fields in my supplied Yonsei academic snapshot."
+policy:
+  allow_implicit_invocation: true

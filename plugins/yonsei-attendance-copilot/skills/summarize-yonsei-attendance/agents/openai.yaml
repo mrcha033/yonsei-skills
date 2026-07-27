@@ -1,0 +1,6 @@
+interface:
+  display_name: "Summarize Yonsei Attendance"
+  short_description: "Summarize a supplied attendance snapshot"
+  default_prompt: "Use $summarize-yonsei-attendance to summarize my supplied Yonsei attendance records."
+policy:
+  allow_implicit_invocation: true

@@ -9,6 +9,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "contracts" / "skill-outcomes.json"
 SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+RECOVERED_PLUGINS = {
+    "yonsei-academic-copilot",
+    "yonsei-attendance-copilot",
+    "yonsei-shuttle-booking",
+    "yonsei-space-reservation",
+    "yonsei-yri",
+    "yonsei-rms",
+    "yonsei-erp",
+    "yonsei-groupware",
+}
 
 
 class SkillOutcomeContractTests(unittest.TestCase):
@@ -64,6 +74,30 @@ class SkillOutcomeContractTests(unittest.TestCase):
                     for outcome in plugin["outcomes"]
                 ),
                 plugin["plugin"],
+            )
+
+    def test_recovered_plugins_remain_installable_and_result_specific(self) -> None:
+        by_name = {
+            plugin["plugin"]: plugin
+            for plugin in self.contract["plugins"]
+        }
+        self.assertEqual(RECOVERED_PLUGINS, RECOVERED_PLUGINS & set(by_name))
+        for name in sorted(RECOVERED_PLUGINS):
+            plugin = by_name[name]
+            self.assertEqual("AVAILABLE", plugin["installation"], name)
+            implemented = {
+                outcome["skill"]
+                for outcome in plugin["outcomes"]
+                if outcome["state"] == "implemented"
+            }
+            self.assertGreaterEqual(len(implemented), 3, name)
+            self.assertNotIn(name, implemented)
+            self.assertTrue(
+                all(
+                    (ROOT / "plugins" / name / "skills" / skill / "SKILL.md").is_file()
+                    for skill in implemented
+                ),
+                name,
             )
 
 

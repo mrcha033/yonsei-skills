@@ -1,7 +1,7 @@
 {
   "name": "yonsei-shuttle-booking",
-  "version": "0.1.0",
-  "description": "Check Yonsei International Campus shuttle options and require explicit confirmation before a reservation is submitted.",
+  "version": "0.2.0",
+  "description": "Diagnose the official shuttle client or filter supplied trip and seat snapshots without reserving, waitlisting, cancelling, or polling.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -16,19 +16,21 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Shuttle Booking",
-    "shortDescription": "Check shuttle seats and guard reservations",
-    "longDescription": "Use the official shuttle entry point, present exact route and time details, and stop for confirmation immediately before reservation submission.",
+    "displayName": "Yonsei Shuttle Review Tools",
+    "shortDescription": "Review shuttle options and seat snapshots",
+    "longDescription": "Install separate skills for official entry diagnostics, trip filtering, and conservative seat or waitlist verdicts while every reservation write remains disabled.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
-      "Shuttle entry diagnostics",
-      "Trip option review",
-      "Confirmation-gated booking"
+      "Official shuttle client diagnostics",
+      "Supplied trip option filtering",
+      "Conservative seat and waitlist status"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Find a Yonsei shuttle option and prepare a reservation."
+      "Diagnose the Yonsei shuttle entry.",
+      "Filter these supplied shuttle options.",
+      "Check the seat status in this supplied trip snapshot."
     ]
   }
 }

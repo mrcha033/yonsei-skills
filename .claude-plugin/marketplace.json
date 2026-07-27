@@ -45,6 +45,25 @@
       ]
     },
     {
+      "name": "yonsei-academic-copilot",
+      "displayName": "Yonsei Academic Snapshot Tools",
+      "source": "./plugins/yonsei-academic-copilot",
+      "description": "Normalize supplied class and enrollment snapshots or calculate a conservative grade summary without live-system claims or academic writes.",
+      "version": "0.2.0",
+      "author": {
+        "name": "mrcha033"
+      },
+      "homepage": "https://github.com/mrcha033/yonsei-skills",
+      "repository": "https://github.com/mrcha033/yonsei-skills",
+      "category": "education",
+      "tags": [
+        "yonsei",
+        "academic",
+        "records",
+        "student"
+      ]
+    },
+    {
       "name": "yonsei-course-registration",
       "displayName": "Yonsei Course Planner",
       "source": "./plugins/yonsei-course-registration",
@@ -61,6 +80,139 @@
         "courses",
         "registration",
         "schedule"
+      ]
+    },
+    {
+      "name": "yonsei-attendance-copilot",
+      "displayName": "Yonsei Attendance Review Tools",
+      "source": "./plugins/yonsei-attendance-copilot",
+      "description": "Summarize supplied attendance records, identify user-review discrepancies, or prepare an unsent correction draft without check-in or location inference.",
+      "version": "0.2.0",
+      "author": {
+        "name": "mrcha033"
+      },
+      "homepage": "https://github.com/mrcha033/yonsei-skills",
+      "repository": "https://github.com/mrcha033/yonsei-skills",
+      "category": "education",
+      "tags": [
+        "yonsei",
+        "attendance",
+        "rollbook",
+        "student"
+      ]
+    },
+    {
+      "name": "yonsei-shuttle-booking",
+      "displayName": "Yonsei Shuttle Review Tools",
+      "source": "./plugins/yonsei-shuttle-booking",
+      "description": "Diagnose the official shuttle client or filter supplied trip and seat snapshots without reserving, waitlisting, cancelling, or polling.",
+      "version": "0.2.0",
+      "author": {
+        "name": "mrcha033"
+      },
+      "homepage": "https://github.com/mrcha033/yonsei-skills",
+      "repository": "https://github.com/mrcha033/yonsei-skills",
+      "category": "education",
+      "tags": [
+        "yonsei",
+        "shuttle",
+        "booking",
+        "campus"
+      ]
+    },
+    {
+      "name": "yonsei-space-reservation",
+      "displayName": "Yonsei Space Planning Tools",
+      "source": "./plugins/yonsei-space-reservation",
+      "description": "Filter supplied room snapshots, check a proposal against official public rules, or prepare an unsent reservation draft without submission.",
+      "version": "0.2.0",
+      "author": {
+        "name": "mrcha033"
+      },
+      "homepage": "https://github.com/mrcha033/yonsei-skills",
+      "repository": "https://github.com/mrcha033/yonsei-skills",
+      "category": "education",
+      "tags": [
+        "yonsei",
+        "space",
+        "room",
+        "reservation"
+      ]
+    },
+    {
+      "name": "yonsei-yri",
+      "displayName": "Yonsei YRI Export Tools",
+      "source": "./plugins/yonsei-yri",
+      "description": "Normalize an authorized YRI export, reconcile it with a supplied reference list, or prepare an unsaved field-level change draft.",
+      "version": "0.2.0",
+      "author": {
+        "name": "mrcha033"
+      },
+      "homepage": "https://github.com/mrcha033/yonsei-skills",
+      "repository": "https://github.com/mrcha033/yonsei-skills",
+      "category": "education",
+      "tags": [
+        "yonsei",
+        "yri",
+        "research",
+        "achievements"
+      ]
+    },
+    {
+      "name": "yonsei-rms",
+      "displayName": "Yonsei RMS Snapshot Tools",
+      "source": "./plugins/yonsei-rms",
+      "description": "Summarize supplied RMS project data and audit its budget arithmetic or participant roles and periods without uploads, approvals, or submissions.",
+      "version": "0.2.0",
+      "author": {
+        "name": "mrcha033"
+      },
+      "homepage": "https://github.com/mrcha033/yonsei-skills",
+      "repository": "https://github.com/mrcha033/yonsei-skills",
+      "category": "education",
+      "tags": [
+        "yonsei",
+        "rms",
+        "research",
+        "management"
+      ]
+    },
+    {
+      "name": "yonsei-erp",
+      "displayName": "Yonsei ERP Snapshot Tools",
+      "source": "./plugins/yonsei-erp",
+      "description": "Filter supplied ERP request and approval snapshots or audit payment lifecycle status without accessing payroll, approving, paying, or submitting.",
+      "version": "0.2.0",
+      "author": {
+        "name": "mrcha033"
+      },
+      "homepage": "https://github.com/mrcha033/yonsei-skills",
+      "repository": "https://github.com/mrcha033/yonsei-skills",
+      "category": "education",
+      "tags": [
+        "yonsei",
+        "erp",
+        "administration",
+        "workflow"
+      ]
+    },
+    {
+      "name": "yonsei-groupware",
+      "displayName": "Yonsei Groupware Offline Tools",
+      "source": "./plugins/yonsei-groupware",
+      "description": "Triage supplied approval data, search an explicit authorized document export, or prepare an unsent message without approving, sending, or sharing.",
+      "version": "0.2.0",
+      "author": {
+        "name": "mrcha033"
+      },
+      "homepage": "https://github.com/mrcha033/yonsei-skills",
+      "repository": "https://github.com/mrcha033/yonsei-skills",
+      "category": "education",
+      "tags": [
+        "yonsei",
+        "groupware",
+        "collaboration",
+        "workflow"
       ]
     }
   ]

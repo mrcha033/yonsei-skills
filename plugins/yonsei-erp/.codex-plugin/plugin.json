@@ -1,7 +1,7 @@
 {
   "name": "yonsei-erp",
-  "version": "0.1.0",
-  "description": "Open and inspect authorized Yonsei ERP workflows with a read-only default and confirmation before any administrative write.",
+  "version": "0.2.0",
+  "description": "Filter supplied ERP request and approval snapshots or audit payment lifecycle status without accessing payroll, approving, paying, or submitting.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -16,19 +16,21 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei ERP",
-    "shortDescription": "Use authorized ERP workflows safely",
-    "longDescription": "Use the official ERP SSO endpoint, minimize sensitive-data exposure, and require explicit confirmation before any write, approval, or submission.",
+    "displayName": "Yonsei ERP Snapshot Tools",
+    "shortDescription": "Review supplied ERP workflow snapshots",
+    "longDescription": "Install separate snapshot-only skills for request status, approval inbox, and payment lifecycle review with strict field whitelists and no administrative writes.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
-      "ERP access diagnostics",
-      "Read-only workflow inspection",
-      "Confirmation-gated writes"
+      "Supplied request status lists",
+      "Approval inbox triage",
+      "Payment lifecycle audits"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Open and inspect an authorized Yonsei ERP workflow."
+      "List requests in this authorized ERP snapshot.",
+      "Triage this supplied ERP approval inbox.",
+      "Check payment status in this supplied ERP snapshot."
     ]
   }
 }

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Check RMS Participants"
+  short_description: "Check a supplied RMS participant snapshot"
+  default_prompt: "Use $check-rms-participants to check participant periods and allocations in my supplied RMS project snapshot."

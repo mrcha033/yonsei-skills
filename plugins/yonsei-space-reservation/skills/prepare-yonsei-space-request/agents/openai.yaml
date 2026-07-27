@@ -1,0 +1,6 @@
+interface:
+  display_name: "Prepare Yonsei Space Request"
+  short_description: "Prepare an unsent request and checklist"
+  default_prompt: "Use $prepare-yonsei-space-request to prepare an unsent Yonsei space request and evidence checklist."
+policy:
+  allow_implicit_invocation: true

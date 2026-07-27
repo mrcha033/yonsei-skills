@@ -1,7 +1,7 @@
 {
   "name": "yonsei-academic-copilot",
-  "version": "0.1.0",
-  "description": "Inspect authorized Yonsei academic information through the official academic system with a read-only first release.",
+  "version": "0.2.0",
+  "description": "Normalize supplied class and enrollment snapshots or calculate a conservative grade summary without live-system claims or academic writes.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -16,19 +16,21 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Academic Copilot",
-    "shortDescription": "Inspect authorized academic information safely",
-    "longDescription": "Reach the official academic information system, verify the authenticated scope, and summarize only the records explicitly requested by the user.",
+    "displayName": "Yonsei Academic Snapshot Tools",
+    "shortDescription": "Audit supplied academic records safely",
+    "longDescription": "Install separate snapshot-only skills for class-list normalization, conservative grade calculations, and enrollment-status checks with completeness and privacy guards.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
-      "Academic system diagnostics",
-      "Authorized record inspection",
-      "Read-only summaries"
+      "Supplied class snapshot normalization",
+      "Conservative term grade summaries",
+      "Enrollment and registration status checks"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Inspect my authorized Yonsei academic information."
+      "Normalize this authorized Yonsei class snapshot.",
+      "Summarize this supplied Yonsei grade snapshot.",
+      "Check this supplied enrollment status."
     ]
   }
 }

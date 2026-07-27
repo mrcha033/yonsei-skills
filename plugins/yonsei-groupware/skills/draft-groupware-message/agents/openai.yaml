@@ -1,0 +1,4 @@
+interface:
+  display_name: "Draft Groupware Message"
+  short_description: "Create a review-only groupware message draft"
+  default_prompt: "Use $draft-groupware-message to create a structured draft from my supplied snapshot without sending it."

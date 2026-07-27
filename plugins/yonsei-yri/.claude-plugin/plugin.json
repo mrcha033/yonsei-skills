@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-yri",
-  "displayName": "Yonsei YRI",
-  "version": "0.1.0",
-  "description": "Open and inspect authorized Yonsei Researcher Information records with confirmation required for every write.",
+  "displayName": "Yonsei YRI Export Tools",
+  "version": "0.2.0",
+  "description": "Normalize an authorized YRI export, reconcile it with a supplied reference list, or prepare an unsaved field-level change draft.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

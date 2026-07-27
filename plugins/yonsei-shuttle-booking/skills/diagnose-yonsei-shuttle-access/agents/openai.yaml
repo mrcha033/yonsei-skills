@@ -1,0 +1,6 @@
+interface:
+  display_name: "Diagnose Yonsei Shuttle Access"
+  short_description: "Probe the official shuttle entry and module"
+  default_prompt: "Use $diagnose-yonsei-shuttle-access to diagnose the official Yonsei shuttle service."
+policy:
+  allow_implicit_invocation: true

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Vendor the legacy service probe into certificate and held plugin scaffolds."""
+"""Vendor the legacy service probe only into its remaining packaged skill."""
 
 from __future__ import annotations
 
@@ -14,14 +14,6 @@ ROOT = Path(__file__).resolve().parent.parent
 PACKAGE = ROOT / "packages" / "yonsei-service-runtime"
 PLUGIN_SERVICES = {
     "yonsei-certificate-assistant": ["certificate"],
-    "yonsei-academic-copilot": ["academic"],
-    "yonsei-attendance-copilot": ["attendance"],
-    "yonsei-shuttle-booking": ["shuttle"],
-    "yonsei-space-reservation": ["space"],
-    "yonsei-yri": ["yri"],
-    "yonsei-rms": ["rms"],
-    "yonsei-erp": ["erp"],
-    "yonsei-groupware": ["groupware"],
 }
 
 

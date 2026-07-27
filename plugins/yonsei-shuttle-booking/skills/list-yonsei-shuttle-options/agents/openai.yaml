@@ -1,0 +1,6 @@
+interface:
+  display_name: "List Yonsei Shuttle Options"
+  short_description: "Filter a supplied shuttle snapshot"
+  default_prompt: "Use $list-yonsei-shuttle-options to list matching trips from my Yonsei shuttle snapshot."
+policy:
+  allow_implicit_invocation: true

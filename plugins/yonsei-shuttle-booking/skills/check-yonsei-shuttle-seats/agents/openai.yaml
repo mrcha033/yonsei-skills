@@ -1,0 +1,6 @@
+interface:
+  display_name: "Check Yonsei Shuttle Seats"
+  short_description: "Classify one supplied seat snapshot"
+  default_prompt: "Use $check-yonsei-shuttle-seats to evaluate seat and waitlist status for this trip."
+policy:
+  allow_implicit_invocation: true

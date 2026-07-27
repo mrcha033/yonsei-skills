@@ -1,0 +1,4 @@
+interface:
+  display_name: "Draft YRI Change"
+  short_description: "Draft a YRI record modification request"
+  default_prompt: "Use $draft-yri-change to draft a change request for my supplied YRI record snapshot."

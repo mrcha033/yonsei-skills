@@ -1,7 +1,7 @@
 {
   "name": "yonsei-yri",
-  "version": "0.1.0",
-  "description": "Open and inspect authorized Yonsei Researcher Information records with confirmation required for every write.",
+  "version": "0.2.0",
+  "description": "Normalize an authorized YRI export, reconcile it with a supplied reference list, or prepare an unsaved field-level change draft.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -16,19 +16,21 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei YRI",
-    "shortDescription": "Inspect research achievement records safely",
-    "longDescription": "Use the official YRI endpoint, verify the user's authorized scope, summarize requested records, and present a field-level diff before any write.",
+    "displayName": "Yonsei YRI Export Tools",
+    "shortDescription": "Audit supplied YRI research achievements",
+    "longDescription": "Install separate export-only skills for achievement listing, conservative missing-record reconciliation, and unsaved field-level change preparation.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
-      "YRI access diagnostics",
-      "Authorized record inspection",
-      "Confirmation-gated writes"
+      "Authorized YRI export normalization",
+      "Missing and duplicate candidate review",
+      "Unsaved field-level change drafts"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Inspect my authorized YRI research achievement records."
+      "List the achievements in this YRI export.",
+      "Compare my YRI export with this reference bibliography.",
+      "Prepare but do not save this YRI field change."
     ]
   }
 }

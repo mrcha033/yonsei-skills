@@ -1,0 +1,4 @@
+interface:
+  display_name: "Summarize RMS Project"
+  short_description: "Summarize a supplied RMS project snapshot"
+  default_prompt: "Use $summarize-rms-project to summarize my supplied RMS project snapshot."

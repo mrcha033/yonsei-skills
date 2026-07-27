@@ -1,0 +1,4 @@
+interface:
+  display_name: "Search Groupware Documents"
+  short_description: "Search an explicitly supplied groupware document export"
+  default_prompt: "Use $search-groupware-documents to search only the explicit groupware export I supplied."

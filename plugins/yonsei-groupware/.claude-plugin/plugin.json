@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-groupware",
-  "displayName": "Yonsei Groupware",
-  "version": "0.1.0",
-  "description": "Open and inspect authorized Yonsei groupware while requiring explicit confirmation before sending, approving, or sharing.",
+  "displayName": "Yonsei Groupware Offline Tools",
+  "version": "0.2.0",
+  "description": "Triage supplied approval data, search an explicit authorized document export, or prepare an unsent message without approving, sending, or sharing.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

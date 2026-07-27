@@ -1,0 +1,4 @@
+interface:
+  display_name: "Check RMS Budget"
+  short_description: "Check a supplied RMS budget snapshot"
+  default_prompt: "Use $check-rms-budget to check totals and exceptions in my supplied RMS budget snapshot."

@@ -19,15 +19,79 @@ Independently installable Codex and Claude Code plugins for authorized Yonsei Un
   - `audit-yonsei-course-plan`: one selected plan against explicit credit, course, campus, and time constraints
   - `build-yonsei-timetable`: ranked conflict-free schedule candidates
   - `diagnose-yonsei-course-access`: bounded official entry-point diagnosis
+- `yonsei-academic-copilot`
+  - `list-yonsei-classes`: normalized class list from an authorized supplied snapshot
+  - `summarize-yonsei-grades`: conservative 4.3-scale term summary with completeness checks
+  - `check-yonsei-enrollment`: enrollment and term-registration status audit
+- `yonsei-attendance-copilot`
+  - `summarize-yonsei-attendance`: per-course and overall supplied-record totals
+  - `find-yonsei-attendance-discrepancies`: user-review candidates without presence inference
+  - `draft-yonsei-attendance-correction`: unsent correction draft and evidence checklist
+- `yonsei-shuttle-booking`
+  - `list-yonsei-shuttle-options`: filter official-screen snapshots using documented shuttle fields
+  - `check-yonsei-shuttle-seats`: conservative seat, waitlist, sold-out, or unknown verdict
+  - `diagnose-yonsei-shuttle-access`: public entry and official client-contract diagnosis
+- `yonsei-space-reservation`
+  - `search-yonsei-spaces`: filter a supplied room-availability snapshot
+  - `check-yonsei-space-rules`: official public lead-time, duration, count, and restricted-period checks
+  - `prepare-yonsei-space-request`: complete but unsent request and review checklist
+- `yonsei-yri`
+  - `list-yri-achievements`: normalized authorized YRI export
+  - `find-missing-yri-achievements`: conservative export-to-reference reconciliation
+  - `draft-yri-change`: field-level unsaved change draft
+- `yonsei-rms`
+  - `summarize-rms-project`: project, period, participant, and supplied-budget summary
+  - `check-rms-budget`: budget arithmetic and inconsistency report
+  - `check-rms-participants`: role and participation-period validation
+- `yonsei-erp`
+  - `list-erp-requests`: filtered supplied administrative-request status list
+  - `list-erp-approvals`: supplied approval-inbox triage
+  - `check-erp-payment-status`: supplied payment lifecycle audit
+- `yonsei-groupware`
+  - `list-groupware-approvals`: supplied approval-inbox triage
+  - `search-groupware-documents`: local search over an explicit authorized export
+  - `draft-groupware-message`: unsent message and recipient/attachment checklist
 - `yonsei-certificate-assistant`: developed and validated separately.
 
-The marketplace currently exposes the certificate assistant, notice tools, and course planner. LearnUs remains a local alpha until its current SSO flow, authenticated DOM, and expiry recovery pass a live authorized test. Course planning uses supplied snapshots and does not claim live catalogue rows or seat availability. Notice results are bounded by the official source windows and identify partial fetches.
+The marketplace exposes every set above except LearnUs, which remains a local
+alpha until its current SSO flow, authenticated DOM, and expiry recovery pass a
+live authorized test.
 
-## Held from installation
+## Evidence and release boundaries
 
-Academic records, attendance, shuttle, space reservation, YRI, RMS, ERP, and groupware plugins remain `NOT_AVAILABLE`. Their intended fine-grained outcomes are recorded in `contracts/skill-outcomes.json`, but they will not be published as working skills until service-specific authenticated fixtures and authorized live tests exist.
+An installable plugin is not automatically a live authenticated integration.
+Academic, attendance, shuttle-seat, space-availability, YRI, RMS, ERP, and
+groupware result skills process an explicit user-supplied authorized snapshot or
+export and label it as such. They are useful before authenticated adapters exist,
+but they do not claim current server state.
 
-No skill accepts a Yonsei password in chat. The VPN adapter is intentionally not packaged while its underlying client is being repaired, and VPN need is not inferred from a generic portal redirect.
+Public evidence is used where it exists:
+
+- the current portal link map resolves distinct service keys rather than
+  treating copied `main.jsp#` links as service addresses;
+- the public shuttle client identifies its trip, remaining-seat, waitlist,
+  reservation, and cancellation contracts;
+- the public space guide defines the implemented booking rules;
+- the YRI manual documents role-scoped records, Excel export, KRI checks,
+  approval status, and modification requests;
+- current RMS guidance documents project, participant, budget, document, and
+  multi-stage approval workflows.
+
+The durable service-by-service evidence, authenticated gaps, and write
+boundaries are recorded in `docs/service-evidence-matrix.md`.
+
+Live record retrieval remains pending authenticated, role-authorized mapping.
+Reservation, cancellation, approval, payment, submission, attendance check-in,
+record modification, message sending, and document sharing remain disabled.
+The observed ERP SSO chain also contains an HTTPS-to-HTTP legacy redirect, so no
+live credential adapter is released for ERP even though its offline snapshot
+tools are installable.
+
+No skill accepts a Yonsei password in chat. The VPN adapter is intentionally not
+packaged while its underlying client is being repaired. The public front doors
+for the investigated services were reachable without VPN; role-specific
+post-login VPN need remains `unknown` and must be diagnosed per service rather
+than inferred from SSO or a portal redirect.
 
 ## Local installation
 

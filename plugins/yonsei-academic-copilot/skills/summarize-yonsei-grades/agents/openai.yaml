@@ -1,0 +1,6 @@
+interface:
+  display_name: "Summarize Yonsei Grades"
+  short_description: "Summarize one supplied term-grade snapshot"
+  default_prompt: "Use $summarize-yonsei-grades to summarize the grades in my supplied Yonsei snapshot."
+policy:
+  allow_implicit_invocation: true

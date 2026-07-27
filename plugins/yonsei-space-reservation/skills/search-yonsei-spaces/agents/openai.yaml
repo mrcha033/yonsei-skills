@@ -1,0 +1,6 @@
+interface:
+  display_name: "Search Yonsei Spaces"
+  short_description: "Filter a supplied room snapshot"
+  default_prompt: "Use $search-yonsei-spaces to find matching rooms in my supplied availability snapshot."
+policy:
+  allow_implicit_invocation: true

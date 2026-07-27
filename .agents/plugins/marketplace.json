@@ -47,7 +47,7 @@
         "path": "./plugins/yonsei-academic-copilot"
       },
       "policy": {
-        "installation": "NOT_AVAILABLE",
+        "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -71,7 +71,7 @@
         "path": "./plugins/yonsei-attendance-copilot"
       },
       "policy": {
-        "installation": "NOT_AVAILABLE",
+        "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -83,7 +83,7 @@
         "path": "./plugins/yonsei-shuttle-booking"
       },
       "policy": {
-        "installation": "NOT_AVAILABLE",
+        "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -95,7 +95,7 @@
         "path": "./plugins/yonsei-space-reservation"
       },
       "policy": {
-        "installation": "NOT_AVAILABLE",
+        "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -107,7 +107,7 @@
         "path": "./plugins/yonsei-yri"
       },
       "policy": {
-        "installation": "NOT_AVAILABLE",
+        "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -119,7 +119,7 @@
         "path": "./plugins/yonsei-rms"
       },
       "policy": {
-        "installation": "NOT_AVAILABLE",
+        "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -131,7 +131,7 @@
         "path": "./plugins/yonsei-erp"
       },
       "policy": {
-        "installation": "NOT_AVAILABLE",
+        "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"
@@ -143,7 +143,7 @@
         "path": "./plugins/yonsei-groupware"
       },
       "policy": {
-        "installation": "NOT_AVAILABLE",
+        "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"

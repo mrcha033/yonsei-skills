@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-attendance-copilot",
-  "displayName": "Yonsei Attendance Copilot",
-  "version": "0.1.0",
-  "description": "Review the user's authorized Yonsei electronic attendance records without performing check-ins or location spoofing.",
+  "displayName": "Yonsei Attendance Review Tools",
+  "version": "0.2.0",
+  "description": "Summarize supplied attendance records, identify user-review discrepancies, or prepare an unsent correction draft without check-in or location inference.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

@@ -69,23 +69,23 @@
     },
     {
       "plugin": "yonsei-academic-copilot",
-      "release": "not-available",
-      "installation": "NOT_AVAILABLE",
+      "release": "beta-supplied-snapshot",
+      "installation": "AVAILABLE",
       "outcomes": [
         {
           "skill": "list-yonsei-classes",
           "primary_result": "current-term class schedule",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         },
         {
           "skill": "summarize-yonsei-grades",
           "primary_result": "term and cumulative grade summary",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         },
         {
           "skill": "check-yonsei-enrollment",
           "primary_result": "current enrollment and academic status",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         }
       ]
     },
@@ -128,40 +128,45 @@
     },
     {
       "plugin": "yonsei-attendance-copilot",
-      "release": "not-available",
-      "installation": "NOT_AVAILABLE",
+      "release": "beta-supplied-snapshot",
+      "installation": "AVAILABLE",
       "outcomes": [
         {
           "skill": "summarize-yonsei-attendance",
           "primary_result": "absence and lateness totals by course and date range",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         },
         {
           "skill": "find-yonsei-attendance-discrepancies",
           "primary_result": "attendance records needing user review",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         },
         {
           "skill": "draft-yonsei-attendance-correction",
           "primary_result": "unsent correction request with evidence checklist",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         }
       ]
     },
     {
       "plugin": "yonsei-shuttle-booking",
-      "release": "not-available",
-      "installation": "NOT_AVAILABLE",
+      "release": "beta-public-contract-and-snapshot",
+      "installation": "AVAILABLE",
       "outcomes": [
         {
           "skill": "list-yonsei-shuttle-options",
           "primary_result": "dated route and departure options",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         },
         {
           "skill": "check-yonsei-shuttle-seats",
           "primary_result": "current seat availability for one trip",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
+        },
+        {
+          "skill": "diagnose-yonsei-shuttle-access",
+          "primary_result": "official entry and public client contract access diagnosis",
+          "state": "implemented"
         },
         {
           "skill": "reserve-yonsei-shuttle",
@@ -177,18 +182,23 @@
     },
     {
       "plugin": "yonsei-space-reservation",
-      "release": "not-available",
-      "installation": "NOT_AVAILABLE",
+      "release": "beta-public-rules-and-snapshot",
+      "installation": "AVAILABLE",
       "outcomes": [
         {
           "skill": "search-yonsei-spaces",
           "primary_result": "available spaces matching time, capacity, and equipment",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         },
         {
           "skill": "check-yonsei-space-rules",
           "primary_result": "eligibility and rule report for one proposed booking",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
+        },
+        {
+          "skill": "prepare-yonsei-space-request",
+          "primary_result": "complete unsent reservation request and evidence checklist",
+          "state": "implemented"
         },
         {
           "skill": "request-yonsei-space",
@@ -199,89 +209,89 @@
     },
     {
       "plugin": "yonsei-yri",
-      "release": "not-available",
-      "installation": "NOT_AVAILABLE",
+      "release": "beta-export-analysis",
+      "installation": "AVAILABLE",
       "outcomes": [
         {
           "skill": "list-yri-achievements",
           "primary_result": "structured authorized research achievement list",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         },
         {
           "skill": "find-missing-yri-achievements",
           "primary_result": "candidate missing or duplicate achievement report",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         },
         {
           "skill": "draft-yri-change",
           "primary_result": "field-level unsaved before and after diff",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         }
       ]
     },
     {
       "plugin": "yonsei-rms",
-      "release": "not-available",
-      "installation": "NOT_AVAILABLE",
+      "release": "beta-supplied-snapshot",
+      "installation": "AVAILABLE",
       "outcomes": [
         {
           "skill": "summarize-rms-project",
           "primary_result": "authorized project, participant, and period summary",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         },
         {
           "skill": "check-rms-budget",
           "primary_result": "budget totals and inconsistency report",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         },
         {
           "skill": "check-rms-participants",
           "primary_result": "participant role and period validation report",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         }
       ]
     },
     {
       "plugin": "yonsei-erp",
-      "release": "not-available",
-      "installation": "NOT_AVAILABLE",
+      "release": "beta-supplied-snapshot",
+      "installation": "AVAILABLE",
       "outcomes": [
         {
           "skill": "list-erp-requests",
           "primary_result": "authorized administrative request status list",
-          "state": "blocked-https-auth-path"
+          "state": "implemented"
         },
         {
           "skill": "list-erp-approvals",
           "primary_result": "authorized approval inbox",
-          "state": "blocked-https-auth-path"
+          "state": "implemented"
         },
         {
           "skill": "check-erp-payment-status",
           "primary_result": "authorized payment status report",
-          "state": "blocked-https-auth-path"
+          "state": "implemented"
         }
       ]
     },
     {
       "plugin": "yonsei-groupware",
-      "release": "not-available",
-      "installation": "NOT_AVAILABLE",
+      "release": "beta-supplied-snapshot",
+      "installation": "AVAILABLE",
       "outcomes": [
         {
           "skill": "list-groupware-approvals",
           "primary_result": "authorized approval inbox",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         },
         {
           "skill": "search-groupware-documents",
           "primary_result": "authorized document search results",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         },
         {
           "skill": "draft-groupware-message",
           "primary_result": "unsent message with recipient and attachment checklist",
-          "state": "blocked-authenticated-fixture"
+          "state": "implemented"
         }
       ]
     }

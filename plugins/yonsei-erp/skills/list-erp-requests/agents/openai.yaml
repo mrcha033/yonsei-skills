@@ -1,0 +1,4 @@
+interface:
+  display_name: "List ERP Requests"
+  short_description: "List ERP requests from a supplied offline snapshot"
+  default_prompt: "Use $list-erp-requests to list whitelisted ERP request fields from my supplied JSON snapshot."

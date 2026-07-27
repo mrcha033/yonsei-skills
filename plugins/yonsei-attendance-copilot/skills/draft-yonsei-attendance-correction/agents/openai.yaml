@@ -1,0 +1,6 @@
+interface:
+  display_name: "Draft Yonsei Attendance Correction"
+  short_description: "Create an unsent attendance correction draft"
+  default_prompt: "Use $draft-yonsei-attendance-correction to draft, but not submit, a correction for this attendance discrepancy."
+policy:
+  allow_implicit_invocation: true

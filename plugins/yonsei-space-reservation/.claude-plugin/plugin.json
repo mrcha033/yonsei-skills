@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-space-reservation",
-  "displayName": "Yonsei Space Reservation",
-  "version": "0.1.0",
-  "description": "Check Yonsei space availability and require explicit confirmation before sending a reservation request.",
+  "displayName": "Yonsei Space Planning Tools",
+  "version": "0.2.0",
+  "description": "Filter supplied room snapshots, check a proposal against official public rules, or prepare an unsent reservation draft without submission.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

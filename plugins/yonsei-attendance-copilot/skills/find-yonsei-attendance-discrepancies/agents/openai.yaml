@@ -1,0 +1,6 @@
+interface:
+  display_name: "Find Yonsei Attendance Discrepancies"
+  short_description: "Find explicitly reviewable attendance mismatches"
+  default_prompt: "Use $find-yonsei-attendance-discrepancies to review my supplied attendance snapshot for mismatches."
+policy:
+  allow_implicit_invocation: true

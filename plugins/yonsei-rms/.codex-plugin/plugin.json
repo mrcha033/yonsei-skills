@@ -1,7 +1,7 @@
 {
   "name": "yonsei-rms",
-  "version": "0.1.0",
-  "description": "Open and inspect authorized Yonsei Research Management System records with confirmation required for every write.",
+  "version": "0.2.0",
+  "description": "Summarize supplied RMS project data and audit its budget arithmetic or participant roles and periods without uploads, approvals, or submissions.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -16,19 +16,21 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei RMS",
-    "shortDescription": "Inspect research management records safely",
-    "longDescription": "Use the official RMS endpoint, limit inspection to the user's authorized scope, and require a field-level review before any submission or change.",
+    "displayName": "Yonsei RMS Snapshot Tools",
+    "shortDescription": "Audit supplied RMS project snapshots",
+    "longDescription": "Install separate snapshot-only skills for project summaries, budget consistency checks, and participant-period validation against explicit supplied data.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
-      "RMS access diagnostics",
-      "Authorized record inspection",
-      "Confirmation-gated writes"
+      "Supplied project summaries",
+      "Budget arithmetic audits",
+      "Participant role and period checks"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Inspect my authorized Yonsei RMS records."
+      "Summarize this supplied RMS project snapshot.",
+      "Check this RMS budget snapshot for inconsistencies.",
+      "Validate these RMS participant roles and periods."
     ]
   }
 }

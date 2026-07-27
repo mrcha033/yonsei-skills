@@ -1,0 +1,4 @@
+interface:
+  display_name: "List ERP Approvals"
+  short_description: "List pending ERP approvals from an offline snapshot"
+  default_prompt: "Use $list-erp-approvals to summarize approval items in my supplied ERP snapshot without changing them."

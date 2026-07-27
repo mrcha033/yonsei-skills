@@ -1,0 +1,4 @@
+interface:
+  display_name: "List Groupware Approvals"
+  short_description: "List groupware approvals from an offline snapshot"
+  default_prompt: "Use $list-groupware-approvals to list approval items from my supplied groupware snapshot without approving them."

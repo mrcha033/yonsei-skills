@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-academic-copilot",
-  "displayName": "Yonsei Academic Copilot",
-  "version": "0.1.0",
-  "description": "Inspect authorized Yonsei academic information through the official academic system with a read-only first release.",
+  "displayName": "Yonsei Academic Snapshot Tools",
+  "version": "0.2.0",
+  "description": "Normalize supplied class and enrollment snapshots or calculate a conservative grade summary without live-system claims or academic writes.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

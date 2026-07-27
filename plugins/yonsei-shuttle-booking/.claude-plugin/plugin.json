@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-shuttle-booking",
-  "displayName": "Yonsei Shuttle Booking",
-  "version": "0.1.0",
-  "description": "Check Yonsei International Campus shuttle options and require explicit confirmation before a reservation is submitted.",
+  "displayName": "Yonsei Shuttle Review Tools",
+  "version": "0.2.0",
+  "description": "Diagnose the official shuttle client or filter supplied trip and seat snapshots without reserving, waitlisting, cancelling, or polling.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

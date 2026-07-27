@@ -1,0 +1,6 @@
+interface:
+  display_name: "Check Yonsei Space Rules"
+  short_description: "Check a proposal against public rules"
+  default_prompt: "Use $check-yonsei-space-rules to check this proposed booking against Yonsei public rules."
+policy:
+  allow_implicit_invocation: true

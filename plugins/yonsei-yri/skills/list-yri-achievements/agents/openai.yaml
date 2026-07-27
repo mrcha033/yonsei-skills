@@ -1,0 +1,4 @@
+interface:
+  display_name: "List YRI Achievements"
+  short_description: "Normalize a supplied YRI achievement snapshot"
+  default_prompt: "Use $list-yri-achievements to list the records in my supplied YRI achievement snapshot."

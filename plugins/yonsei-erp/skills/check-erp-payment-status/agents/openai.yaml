@@ -1,0 +1,4 @@
+interface:
+  display_name: "Check ERP Payment Status"
+  short_description: "Check one ERP payment in a supplied offline snapshot"
+  default_prompt: "Use $check-erp-payment-status to check one payment in my supplied ERP snapshot without initiating payment."

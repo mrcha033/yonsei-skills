@@ -1,0 +1,4 @@
+interface:
+  display_name: "Find Missing YRI Achievements"
+  short_description: "Compare supplied records with a YRI snapshot"
+  default_prompt: "Use $find-missing-yri-achievements to compare my supplied reference records with my YRI snapshot."

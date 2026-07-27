@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-erp",
-  "displayName": "Yonsei ERP",
-  "version": "0.1.0",
-  "description": "Open and inspect authorized Yonsei ERP workflows with a read-only default and confirmation before any administrative write.",
+  "displayName": "Yonsei ERP Snapshot Tools",
+  "version": "0.2.0",
+  "description": "Filter supplied ERP request and approval snapshots or audit payment lifecycle status without accessing payroll, approving, paying, or submitting.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

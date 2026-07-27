@@ -1,7 +1,7 @@
 {
   "name": "yonsei-groupware",
-  "version": "0.1.0",
-  "description": "Open and inspect authorized Yonsei groupware while requiring explicit confirmation before sending, approving, or sharing.",
+  "version": "0.2.0",
+  "description": "Triage supplied approval data, search an explicit authorized document export, or prepare an unsent message without approving, sending, or sharing.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -16,19 +16,21 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Groupware",
-    "shortDescription": "Use authorized groupware workflows safely",
-    "longDescription": "Use the official groupware endpoint, keep messages and documents scoped to the request, and stop before any external communication or approval.",
+    "displayName": "Yonsei Groupware Offline Tools",
+    "shortDescription": "Review supplied groupware exports safely",
+    "longDescription": "Install separate offline skills for approval inbox triage, local authorized-export search, and unsent message drafting with no external communication or workflow mutation.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
-      "Groupware access diagnostics",
-      "Authorized content inspection",
-      "Confirmation-gated actions"
+      "Supplied approval inbox triage",
+      "Authorized export document search",
+      "Unsent message drafts"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Open and inspect my authorized Yonsei groupware."
+      "Triage this supplied groupware approval snapshot.",
+      "Search this authorized local groupware export.",
+      "Draft but do not send this groupware message."
     ]
   }
 }

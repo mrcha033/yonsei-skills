@@ -1,7 +1,7 @@
 {
   "name": "yonsei-attendance-copilot",
-  "version": "0.1.0",
-  "description": "Review the user's authorized Yonsei electronic attendance records without performing check-ins or location spoofing.",
+  "version": "0.2.0",
+  "description": "Summarize supplied attendance records, identify user-review discrepancies, or prepare an unsent correction draft without check-in or location inference.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -16,19 +16,21 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Attendance Copilot",
-    "shortDescription": "Review electronic attendance records safely",
-    "longDescription": "Reach the official electronic attendance system and summarize authorized records in a strictly read-only workflow.",
+    "displayName": "Yonsei Attendance Review Tools",
+    "shortDescription": "Review supplied attendance records safely",
+    "longDescription": "Install three snapshot-only skills for attendance totals, conservative discrepancy review, and unsent correction drafting while check-in and record changes stay disabled.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
-      "Attendance system diagnostics",
-      "Authorized record review",
-      "Read-only summaries"
+      "Supplied attendance summaries",
+      "User-review discrepancy detection",
+      "Unsent correction drafts"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Review my authorized Yonsei attendance records."
+      "Summarize this Yonsei attendance snapshot.",
+      "Find records in this attendance snapshot that I should review.",
+      "Draft but do not send an attendance correction request."
     ]
   }
 }

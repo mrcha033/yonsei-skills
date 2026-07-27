@@ -1,0 +1,6 @@
+interface:
+  display_name: "List Yonsei Classes"
+  short_description: "Normalize an academic class snapshot"
+  default_prompt: "Use $list-yonsei-classes to list the classes in my supplied Yonsei academic snapshot."
+policy:
+  allow_implicit_invocation: true
