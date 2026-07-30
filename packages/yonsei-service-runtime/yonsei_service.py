@@ -91,7 +91,7 @@ def validate_catalog(payload: dict[str, Any]) -> None:
             if not isinstance(service.get(key), str) or not service[key]:
                 raise CatalogError(f"Service {service_id!r} is missing {key!r}.")
         validate_https_url(service["entry_url"], service_id)
-        for optional_url in ("direct_url", "portal_url"):
+        for optional_url in ("direct_url", "portal_url", "portal_catalog_url"):
             if service.get(optional_url):
                 validate_https_url(service[optional_url], service_id)
 

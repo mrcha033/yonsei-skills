@@ -15,7 +15,7 @@ live radar input. Use screenshots only as a fallback.
 
 ## Workflow
 
-1. Follow `$connect-yonsei-session` and reuse the authenticated ordinary browser
+1. Follow `$connect-yonsei-session` and reuse the authenticated managed browser
    profile. Open Portal, then Underwood through the official SSO link.
 2. Read visible application menus and current rows for leave or return, major
    changes, multiple majors or minors, graduation, credit recognition, exams,

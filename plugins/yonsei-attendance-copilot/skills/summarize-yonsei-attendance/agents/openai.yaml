@@ -1,4 +1,4 @@
 interface:
   display_name: "연세 출결 요약"
   short_description: "전자출결 화면에서 결석·지각을 과목별로 정리합니다"
-  default_prompt: "Use $summarize-yonsei-attendance to 첨부한 전자출결 화면의 결석과 지각을 과목별로 정리해 줘."
+  default_prompt: "Use $summarize-yonsei-attendance to 로그인된 전자출결 화면에서 결석과 지각을 과목별로 정리하고, 열 수 없으면 첨부 자료를 사용해 줘."

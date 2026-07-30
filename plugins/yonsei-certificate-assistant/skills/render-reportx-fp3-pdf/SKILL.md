@@ -1,6 +1,6 @@
 ---
 name: render-reportx-fp3-pdf
-description: Render a decoded ReportX/FastReport VCL prepared-report FP3 XML stream into a local PDF without Windows, ReportX, a browser, or a printer. Use when a Yonsei icert ReportX response has already been decrypted into a primary FP3 component plus image components, when inspecting FP3 classes and resources, or when validating a compatibility PDF before an explicit print. Do not use to create or alter certificate content, render FR3 templates, bypass issuance, or claim that the PDF is an officially verified original.
+description: Render a decoded ReportX/FastReport VCL prepared-report FP3 XML stream into a local PDF on Windows, macOS, or Linux without native ReportX, a browser, or a physical printer. Use when a Yonsei icert ReportX response has already been decrypted into a primary FP3 component plus image components, when inspecting FP3 classes and resources, or when validating a compatibility PDF before an explicit print. Do not use to create or alter certificate content, render FR3 templates, bypass issuance, or claim that the PDF is an officially verified original.
 ---
 
 # Render ReportX FP3 to PDF

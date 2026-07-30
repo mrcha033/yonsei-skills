@@ -1,7 +1,7 @@
 {
   "name": "yonsei-student-companion",
-  "version": "0.5.0",
-  "description": "한 번 로그인한 공통 브라우저를 이어 쓰고 포털·Underwood·LearnUs·출결·셔틀·공간·증명서를 빠른 명령으로 처리합니다.",
+  "version": "0.5.1",
+  "description": "한 번 로그인한 전용 관리 브라우저를 이어 쓰고 포털·Underwood·LearnUs·출결과 생활관·장학금·교환학생 업무를 자연어로 처리합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -23,7 +23,7 @@
   "interface": {
     "displayName": "오늘의 연세·포털 연결",
     "shortDescription": "한 번 로그인하고 학교생활을 한눈에",
-    "longDescription": "학생이 이미 로그인한 일반 브라우저 프로필을 먼저 찾아 Portal에서 Underwood까지 공식 SSO로 이어갑니다. 오늘과 7일 안의 수업·마감·예약을 정리하고 생활관, 장학금, 교환학생의 현재 상태와 다음 절차를 자연어로 관리합니다.",
+    "longDescription": "앱이 여는 연세 전용 관리 브라우저에서 학생이 직접 로그인하면 같은 프로필을 계속 재사용합니다. 지원되는 환경에서는 이미 열린 공식 탭에도 연결할 수 있습니다. 포털·Underwood·LearnUs·출결의 읽기 결과와 생활관·장학금·교환학생의 공식 화면 진행을 자연어로 돕습니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
@@ -31,8 +31,8 @@
       "Current official portal service routing",
       "Read-only daily student briefing",
       "Dorm-life workflows",
-      "Scholarship opportunity and application tracking",
-      "Exchange journey tracking",
+      "Browser-guided scholarship tracking",
+      "Browser-guided exchange journey tracking",
       "Fast authenticated Portal and Underwood commands",
       "Direct official Underwood course-handbook search",
       "Cross-platform shuttle, space, dorm, and document actions",
@@ -43,7 +43,7 @@
     "defaultPrompt": [
       "연세 포털에 한 번 로그인하고 계속 이어서 써 줘.",
       "도서관 좌석 예약 화면을 찾아 바로 열어 줘.",
-      "오늘 수업, LearnUs 마감, 출결, 예약을 한 번에 정리해 줘.",
+      "오늘 수업, LearnUs, 출결과 학사 진행 상황을 한 번에 정리해 줘.",
       "내가 지원할 수 있는 장학금과 생활관 마감을 정리해 줘.",
       "교환학생 준비에서 다음에 해야 할 일을 알려 줘."
     ]

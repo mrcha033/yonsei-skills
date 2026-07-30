@@ -1,7 +1,7 @@
 {
   "name": "yonsei-shuttle-booking",
-  "version": "0.6.1",
-  "description": "Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 예약·대기·취소하며, 접속 문제는 같은 흐름 안에서 자동 복구합니다.",
+  "version": "0.6.2",
+  "description": "‘오늘의 연세·포털 연결’과 함께 Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 확인 후 예약·대기·취소합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -22,7 +22,7 @@
   "interface": {
     "displayName": "연세 셔틀 조회·예약",
     "shortDescription": "신촌·국제캠퍼스 셔틀 조회와 예약",
-    "longDescription": "Windows·macOS·Linux의 기존 연세 브라우저 로그인 세션으로 공식 셔틀 화면을 열어 조건에 맞는 편을 정리합니다. 화면이 열리지 않으면 로그인 만료, 학교 서비스 장애, 화면 변경을 내부에서 자동 점검하고 원래 요청을 이어갑니다. 정확한 차량과 시간을 다시 확인한 뒤 한 번만 예약·대기·취소하고 공식 내역에서 결과를 검증합니다.",
+    "longDescription": "‘오늘의 연세·포털 연결’을 함께 설치하면 Windows·macOS·Linux의 전용 관리 브라우저 로그인으로 공식 셔틀 화면을 열어 조건에 맞는 편을 정리합니다. 화면이 열리지 않으면 로그인 만료, 학교 서비스 장애, 화면 변경을 내부 점검합니다. 정확한 차량과 시간을 다시 확인한 뒤 한 번만 예약·대기·취소하고 공식 내역에서 결과를 검증합니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [

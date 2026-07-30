@@ -43,16 +43,19 @@ def main() -> int:
     shuttle.add_argument("--depart-after")
     shuttle.add_argument("--depart-before")
     shuttle.add_argument("--action", choices=("search", "reserve", "waitlist", "cancel"), default="search")
-    shuttle.add_argument("--row-term", action="append", default=[])
+    shuttle.add_argument("--selection-id")
     shuttle.add_argument("--reason")
     shuttle.add_argument("--confirmed", action="store_true")
     services = sub.add_parser("service")
     services.add_argument("service", choices=("space", "dorm", "learnus", "attendance"))
     services.add_argument("--menu")
     services.add_argument("--action", default="status")
-    services.add_argument("--field", action="append", default=[], help="Exact visible label=value.")
-    services.add_argument("--row-term", action="append", default=[])
-    services.add_argument("--submit-button")
+    services.add_argument(
+        "--request",
+        default="{}",
+        help="JSON object with student-language details.",
+    )
+    services.add_argument("--selection-id")
     services.add_argument("--confirmed", action="store_true")
     documents = sub.add_parser("document")
     documents.add_argument("document_type")
@@ -93,24 +96,20 @@ def main() -> int:
                 depart_after=args.depart_after,
                 depart_before=args.depart_before,
                 action=args.action,
-                row_terms=args.row_term,
+                selection_id=args.selection_id,
                 reason=args.reason,
                 confirmed=args.confirmed,
             )
         elif args.command == "service" and args.service in {"space", "dorm"}:
-            fields = {}
-            for item in args.field:
-                if "=" not in item:
-                    raise BridgeError("--field must use exact-visible-label=value.")
-                label, value = item.split("=", 1)
-                fields[label] = value
+            request = json.loads(args.request)
+            if not isinstance(request, dict):
+                raise BridgeError("--request must be a JSON object.")
             result = bridge.space_dorm(
                 service=args.service,
                 menu=args.menu,
                 action=args.action,
-                fields=fields,
-                row_terms=args.row_term,
-                submit_button=args.submit_button,
+                request=request,
+                selection_id=args.selection_id,
                 confirmed=args.confirmed,
             )
         elif args.command == "service":

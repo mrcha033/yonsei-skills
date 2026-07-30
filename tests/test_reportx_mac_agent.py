@@ -370,8 +370,9 @@ class ReportXMacAgentHTTPTests(unittest.TestCase):
             time.sleep(0.05)
         self.assertTrue(files)
         manifest = files[-1]
-        self.assertEqual(0o600, stat.S_IMODE(manifest.stat().st_mode))
-        self.assertEqual(0o700, stat.S_IMODE(self.cache.stat().st_mode))
+        if os.name != "nt":
+            self.assertEqual(0o600, stat.S_IMODE(manifest.stat().st_mode))
+            self.assertEqual(0o700, stat.S_IMODE(self.cache.stat().st_mode))
         text = manifest.read_text(encoding="utf-8")
         self.assertNotIn(PLAIN_TICKET, text)
         self.assertNotIn("T-SYNTH", text)
@@ -486,6 +487,7 @@ class ReportXMacAgentWorkerTests(unittest.TestCase):
             public["rendered_pdf"]["fonts"],
         )
 
+    @unittest.skipIf(os.name == "nt", "POSIX mode bits are not Windows ACLs")
     def test_existing_private_tree_permissions_are_repaired(self) -> None:
         with tempfile.TemporaryDirectory(prefix="yonsei-permissions-") as tmp:
             root = Path(tmp) / "cache"
@@ -520,6 +522,7 @@ class ReportXMacAgentWorkerTests(unittest.TestCase):
             finally:
                 state.close()
 
+    @unittest.skipIf(os.name == "nt", "POSIX mode bits are not Windows ACLs")
     def test_cli_refuses_insecure_or_nonregular_token_file(self) -> None:
         with tempfile.TemporaryDirectory(prefix="yonsei-token-") as tmp:
             root = Path(tmp)
@@ -534,6 +537,14 @@ class ReportXMacAgentWorkerTests(unittest.TestCase):
             token.unlink()
             token.symlink_to(root / "missing-target")
             self.assertIsNone(cli.read_token(root))
+
+    def test_cli_reads_regular_token_on_windows_without_posix_mode_bits(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="yonsei-windows-token-") as tmp:
+            root = Path(tmp)
+            token = root / "agent.token"
+            token.write_text("test-token", encoding="utf-8")
+            with mock.patch.object(cli.os, "name", "nt"):
+                self.assertEqual("test-token", cli.read_token(root))
 
     def test_public_job_view_redacts_private_path_and_fingerprints(self) -> None:
         job = agent.Job(
@@ -701,7 +712,8 @@ class ReportXMacAgentWorkerTests(unittest.TestCase):
         self.state.finish_document_reservation(first, "reserved")
         self.assertFalse(self.state.begin_document_reservation(second))
         guard = self.state.reservations_dir / f"{digest}.json"
-        self.assertEqual(0o600, stat.S_IMODE(guard.stat().st_mode))
+        if os.name != "nt":
+            self.assertEqual(0o600, stat.S_IMODE(guard.stat().st_mode))
         self.assertEqual(
             "reserved",
             json.loads(guard.read_text(encoding="utf-8"))["status"],

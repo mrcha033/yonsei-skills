@@ -1,4 +1,4 @@
 interface:
   display_name: "연세 공지 검색"
   short_description: "연세대학교 공식 공지를 주제와 날짜로 찾아 정리합니다"
-  default_prompt: "Use $search-yonsei-notices to 이번 주에 놓치면 안 되는 연세대 공지를 찾아 줘."
+  default_prompt: "Use $search-yonsei-notices to 현재 공식 연세대 공지에서 이번 주에 놓치면 안 되는 내용을 찾아 줘."

@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import json
 import subprocess
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,17 +19,52 @@ BRIDGE_DIR = (
 sys.path.insert(0, str(BRIDGE_DIR.parent))
 
 from yonsei_bridge.bridge import (  # noqa: E402
+    BridgeError,
     BrowserPage,
     MENU_ROUTES,
     PageSnapshot,
     SPACE_REQUEST_FIELDS,
     YonseiBridge,
+    _redact,
 )
 from yonsei_bridge.mcp_server import TOOLS  # noqa: E402
+from yonsei_bridge.cdp import CdpError, ChromeRuntime  # noqa: E402
 from yonsei_bridge.router import INTENTS, StudentRouter, friendly_error  # noqa: E402
 
 
+def page_snapshot(
+    *,
+    headers: list[str] | None = None,
+    rows: list[list[str]] | None = None,
+    text: str = "",
+) -> PageSnapshot:
+    grids = []
+    if headers is not None:
+        grids.append(
+            {
+                "headers": headers,
+                "rows": rows or [],
+                "lines": [],
+            }
+        )
+    return PageSnapshot(
+        url="https://underwood1.yonsei.ac.kr/",
+        title="Official Yonsei page",
+        text=text,
+        grids=grids,
+        buttons=[],
+        inputs=[],
+        links=[],
+    )
+
+
 class YonseiBridgeTests(unittest.TestCase):
+    def test_portal_login_name_is_redacted(self):
+        self.assertEqual(
+            "[student] 로그인",
+            _redact("홍길동 님이 로그인 하셨습니다."),
+        )
+
     def test_one_student_router_covers_all_student_intents(self):
         self.assertEqual(
             {tool["name"] for tool in TOOLS},
@@ -55,6 +93,59 @@ class YonseiBridgeTests(unittest.TestCase):
         self.assertIn("semester", request_properties)
         self.assertNotIn("row_terms", request_properties)
         self.assertNotIn("fields", request_properties)
+        self.assertIn("enrollment", request_properties["document_type"]["enum"])
+
+    def test_document_print_action_defaults_to_physical_output(self):
+        bridge = mock.Mock()
+        bridge.documents.return_value = {
+            "state": "official_reportx_physical_ready",
+            "document_type": "enrollment",
+            "output_format": "print",
+        }
+        result = StudentRouter(bridge).run(
+            intent="documents",
+            action="print",
+            request={"document_type": "enrollment"},
+            confirmed=True,
+        )
+        bridge.documents.assert_called_once_with(
+            document_type="enrollment",
+            action="issue",
+            output_format="print",
+            language=None,
+            copies=None,
+            purpose=None,
+            confirmed=True,
+        )
+        self.assertEqual("print", result["primary_result"]["output_format"])
+
+    def test_completed_document_primary_result_exposes_saved_pdf(self):
+        bridge = mock.Mock()
+        bridge.documents.return_value = {
+            "state": "completed",
+            "document_type": "enrollment",
+            "output_format": "pdf",
+            "official_result_verified": True,
+            "official_result": {
+                "pdf_path": "/safe/output/enrollment.pdf",
+                "sha256": "abc123",
+                "page_count": 1,
+                "completion_notified": True,
+            },
+            "next_step": "done",
+        }
+        result = StudentRouter(bridge).run(
+            intent="documents",
+            action="issue",
+            request={"document_type": "enrollment"},
+            confirmed=True,
+        )
+        self.assertEqual("completed", result["status"])
+        self.assertEqual(
+            "/safe/output/enrollment.pdf",
+            result["primary_result"]["pdf_path"],
+        )
+        self.assertTrue(result["primary_result"]["completion_notified"])
 
     def test_course_handbook_has_its_own_underwood_route(self):
         self.assertEqual(MENU_ROUTES["handbook"], ("수업", "수강편람"))
@@ -90,6 +181,114 @@ class YonseiBridgeTests(unittest.TestCase):
         self.assertTrue((script.parent.parent / "assets" / "fonts" / "연세제목.TTF").is_file())
         self.assertTrue((script.parent.parent / "assets" / "fonts" / "연세본문.TTF").is_file())
 
+    def test_browser_reuses_portal_first_and_retries_one_transient_connection(self):
+        runtime = ChromeRuntime.__new__(ChromeRuntime)
+        runtime.ensure = lambda: "http://127.0.0.1:9222"
+        runtime.targets = lambda: [
+            {
+                "type": "page",
+                "url": "https://underwood1.yonsei.ac.kr/",
+                "webSocketDebuggerUrl": "ws://127.0.0.1:9222/underwood",
+            },
+            {
+                "type": "page",
+                "url": "https://portal.yonsei.ac.kr/ui/index.html",
+                "webSocketDebuggerUrl": "ws://127.0.0.1:9222/portal",
+            },
+        ]
+        with mock.patch(
+            "yonsei_bridge.cdp.CdpConnection",
+            side_effect=[CdpError("temporary"), mock.sentinel.connection],
+        ) as connect:
+            with mock.patch(
+                "yonsei_bridge.cdp.time.sleep",
+                return_value=None,
+            ):
+                result = runtime.open(
+                    "https://portal.yonsei.ac.kr/ui/index.html",
+                    reuse_hosts={
+                        "portal.yonsei.ac.kr",
+                        "underwood1.yonsei.ac.kr",
+                    },
+                )
+        self.assertIs(result, mock.sentinel.connection)
+        self.assertEqual(
+            [call.args[0] for call in connect.call_args_list],
+            [
+                "ws://127.0.0.1:9222/portal",
+                "ws://127.0.0.1:9222/portal",
+            ],
+        )
+
+    def test_login_wait_tolerates_sso_frame_loading(self):
+        page = BrowserPage.__new__(BrowserPage)
+        states = iter(("unknown", "login_required", "connected"))
+        page.login_state = lambda: next(states)
+        with mock.patch("yonsei_bridge.bridge.time.sleep", return_value=None):
+            self.assertEqual(page.wait_for_login_state(), "connected")
+
+    def test_infra_login_page_is_not_misclassified_by_logout_header(self):
+        page = BrowserPage.__new__(BrowserPage)
+        page.snapshot = lambda: PageSnapshot(
+            url="https://infra.yonsei.ac.kr/sso/PmSSOService",
+            title="연세대학교 로그인",
+            text="로그아웃 로그인",
+            grids=[],
+            buttons=[],
+            inputs=[{"type": "password"}],
+            links=[],
+        )
+        self.assertEqual(page.login_state(), "login_required")
+
+    def test_blank_underwood_shell_is_session_expiry(self):
+        page = BrowserPage.__new__(BrowserPage)
+        page.snapshot = lambda: PageSnapshot(
+            url=(
+                "https://underwood1.yonsei.ac.kr/com/lgin/SsoCtr/"
+                "initExtPageWork.do?link=handbList"
+            ),
+            title="연세대학교",
+            text="",
+            grids=[],
+            buttons=[],
+            inputs=[],
+            links=[],
+        )
+        self.assertEqual(page.login_state(), "login_required")
+
+    def test_certificate_count_clears_non_targets_instead_of_submitting_zeroes(self):
+        class FakeConnection:
+            def __init__(self):
+                self.commands = []
+
+            def command(self, method, parameters):
+                self.commands.append((method, parameters))
+                return {}
+
+        page = BrowserPage.__new__(BrowserPage)
+        page.connection = FakeConnection()
+        expressions = []
+
+        def evaluate_until_true(expression):
+            expressions.append(expression)
+            return True
+
+        page._evaluate_until_true = evaluate_until_true
+        self.assertTrue(
+            page.set_certificate_count(
+                document_label="재학증명서",
+                language_label="국문",
+                copies=1,
+            )
+        )
+        self.assertEqual(
+            page.connection.commands,
+            [("Input.insertText", {"text": "1"})],
+        )
+        self.assertIn("setter.call(input, '')", expressions[0])
+        self.assertNotIn("setter.call(input, '0')", expressions[0])
+        self.assertIn("every(input => input.value === '')", expressions[1])
+
     def test_candidates_get_opaque_selection_ids(self):
         bridge = YonseiBridge.__new__(YonseiBridge)
         bridge.selections = {}
@@ -108,6 +307,250 @@ class YonseiBridgeTests(unittest.TestCase):
             bridge._selection_terms(selection_id, "shuttle"),
             ["신촌", "09:00"],
         )
+
+    def test_latest_selection_replaces_old_and_is_consumed_once(self):
+        bridge = YonseiBridge.__new__(YonseiBridge)
+        bridge.selections = {}
+        first = bridge._remember_rows(
+            "space",
+            [{"fields": {"공간": "A101"}, "text": "A101"}],
+        )[0]["selection_id"]
+        second = bridge._remember_rows(
+            "space",
+            [{"fields": {"공간": "B202"}, "text": "B202"}],
+        )[0]["selection_id"]
+        with self.assertRaisesRegex(BridgeError, "selection_not_found"):
+            bridge._selection(first, "space")
+        self.assertEqual(
+            bridge._selection(second, "space", consume=True)["text"],
+            "B202",
+        )
+        with self.assertRaisesRegex(BridgeError, "selection_not_found"):
+            bridge._selection(second, "space")
+
+    def test_shuttle_filter_state_is_verified_before_search(self):
+        class FakePage:
+            def __init__(self):
+                self.search_clicks = 0
+
+            def click_text(self, label, **_arguments):
+                if label == "예약":
+                    return True
+                if label in {"조회", "검색"}:
+                    self.search_clicks += 1
+                    return True
+                return False
+
+            def fill_label(self, _label, _value):
+                return True
+
+            def field_value_matches(self, label, _value):
+                return label != "예약일자"
+
+            def snapshot(self, **_arguments):
+                return page_snapshot()
+
+        bridge = YonseiBridge.__new__(YonseiBridge)
+        bridge.selections = {}
+        page = FakePage()
+        bridge._page = lambda: page
+        bridge._open_menu = lambda _route: page.snapshot()
+        result = bridge.shuttle(
+            origin="신촌캠퍼스",
+            destination="국제캠퍼스",
+            date="2026-08-03",
+        )
+        self.assertEqual(result["state"], "field_mapping_required")
+        self.assertEqual(result["unmatched_fields"], ["date"])
+        self.assertEqual(result["candidates"], [])
+        self.assertEqual(page.search_clicks, 0)
+
+    def test_shuttle_ambiguous_write_is_not_completed_or_retried(self):
+        class FakePage:
+            def __init__(self):
+                self.submitted = False
+                self.history = False
+                self.write_clicks = 0
+
+            def click_text(self, label, **_arguments):
+                if label in {"예약", "조회"}:
+                    return True
+                if label == "예약신청":
+                    self.submitted = True
+                    self.write_clicks += 1
+                    return True
+                if label == "내역/취소" and self.submitted:
+                    self.history = True
+                    return True
+                return False
+
+            def fill_label(self, _label, _value):
+                return True
+
+            def field_value_matches(self, _label, _value):
+                return True
+
+            def click_grid_row(self, _terms):
+                return True
+
+            def snapshot(self, **_arguments):
+                rows = (
+                    []
+                    if self.history
+                    else [["신촌캠퍼스", "국제캠퍼스", "09:00", "3"]]
+                )
+                return page_snapshot(
+                    headers=["출발", "도착", "시간", "잔여좌석"],
+                    rows=rows,
+                )
+
+        bridge = YonseiBridge.__new__(YonseiBridge)
+        bridge.selections = {}
+        page = FakePage()
+        bridge._page = lambda: page
+        bridge._open_menu = lambda _route: page.snapshot()
+        with mock.patch("yonsei_bridge.bridge.time.sleep", return_value=None):
+            searched = bridge.shuttle(
+                origin="신촌캠퍼스",
+                destination="국제캠퍼스",
+                date="2026-08-03",
+            )
+            selection_id = searched["candidates"][0]["selection_id"]
+            result = bridge.shuttle(
+                origin="신촌캠퍼스",
+                destination="국제캠퍼스",
+                date="2026-08-03",
+                action="reserve",
+                selection_id=selection_id,
+                reason="수업",
+                confirmed=True,
+            )
+            with self.assertRaisesRegex(BridgeError, "selection_not_found"):
+                bridge.shuttle(
+                    origin="신촌캠퍼스",
+                    destination="국제캠퍼스",
+                    date="2026-08-03",
+                    action="reserve",
+                    selection_id=selection_id,
+                    reason="수업",
+                    confirmed=True,
+                )
+        self.assertEqual(result["state"], "verification_required")
+        self.assertFalse(result["official_result_verified"])
+        self.assertFalse(result["retry_allowed"])
+        self.assertEqual(page.write_clicks, 1)
+        self.assertEqual(StudentRouter._status(result), "verification_required")
+
+    def test_space_status_filter_failure_returns_no_candidates(self):
+        class FakePage:
+            def navigate(self, _url, **_arguments):
+                return None
+
+            def login_state(self):
+                return "connected"
+
+            def fill_student_request(self, request, _mapping):
+                return {
+                    key: {"filled": key != "date", "matched_label": None}
+                    for key in request
+                }
+
+            def click_text(self, _label, **_arguments):
+                raise AssertionError("Search must not run after a filter failure")
+
+            def snapshot(self, **_arguments):
+                return page_snapshot(
+                    headers=["공간", "상태"],
+                    rows=[["A101", "예약가능"]],
+                )
+
+        bridge = YonseiBridge.__new__(YonseiBridge)
+        bridge.selections = {}
+        bridge.page = FakePage()
+        result = bridge.space_dorm(
+            service="space",
+            action="status",
+            request={"date": "2026-08-03", "headcount": 4},
+        )
+        self.assertEqual(result["state"], "field_mapping_required")
+        self.assertEqual(result["unmatched_fields"], ["date"])
+        self.assertEqual(result["rows"], [])
+
+    def test_space_confirmed_write_requires_recent_selection_and_consumes_it(self):
+        class FakePage:
+            def __init__(self):
+                self.history = False
+                self.write_clicks = 0
+
+            def navigate(self, _url, **_arguments):
+                self.history = False
+
+            def login_state(self):
+                return "connected"
+
+            def fill_student_request(self, request, _mapping):
+                return {
+                    key: {"filled": True, "matched_label": key}
+                    for key in request
+                    if key in {"date", "headcount", "purpose"}
+                }
+
+            def click_grid_row(self, _terms):
+                return True
+
+            def click_text(self, label, **_arguments):
+                if label in {"조회", "검색"}:
+                    return True
+                if label == "신청":
+                    self.write_clicks += 1
+                    return True
+                if label == "신청내역":
+                    self.history = True
+                    return True
+                return False
+
+            def snapshot(self, **_arguments):
+                return page_snapshot(
+                    headers=["공간", "건물", "상태"],
+                    rows=[["A101", "공학관", "예약가능"]],
+                )
+
+        bridge = YonseiBridge.__new__(YonseiBridge)
+        bridge.selections = {}
+        page = FakePage()
+        bridge.page = page
+        with self.assertRaisesRegex(BridgeError, "selection_not_found"):
+            bridge.space_dorm(
+                service="space",
+                action="apply",
+                request={"purpose": "스터디"},
+                confirmed=True,
+            )
+        with mock.patch("yonsei_bridge.bridge.time.sleep", return_value=None):
+            searched = bridge.space_dorm(
+                service="space",
+                action="status",
+                request={"date": "2026-08-03", "headcount": 4},
+            )
+            selection_id = searched["rows"][0]["selection_id"]
+            result = bridge.space_dorm(
+                service="space",
+                action="apply",
+                request={"purpose": "스터디"},
+                selection_id=selection_id,
+                confirmed=True,
+            )
+            with self.assertRaisesRegex(BridgeError, "selection_not_found"):
+                bridge.space_dorm(
+                    service="space",
+                    action="apply",
+                    request={"purpose": "스터디"},
+                    selection_id=selection_id,
+                    confirmed=True,
+                )
+        self.assertEqual(result["state"], "completed")
+        self.assertTrue(result["official_result_verified"])
+        self.assertEqual(page.write_clicks, 1)
 
     def test_space_request_uses_student_language_keys(self):
         page = BrowserPage.__new__(BrowserPage)
@@ -129,6 +572,51 @@ class YonseiBridgeTests(unittest.TestCase):
         self.assertEqual(set(result), {"date", "headcount", "purpose"})
         self.assertTrue(all(item["filled"] for item in result.values()))
         self.assertNotIn("aria-label", str(observed))
+
+    def test_learnus_reuses_official_portal_sso_once(self):
+        class FakePage:
+            def __init__(self):
+                self.connected = False
+                self.portal_clicks = 0
+
+            def navigate(self, _url, **_arguments):
+                return None
+
+            def wait_for_login_state(self, **_arguments):
+                return "connected" if self.connected else "login_required"
+
+            def click_text(self, label, **_arguments):
+                if label != "Portal Login":
+                    return False
+                self.portal_clicks += 1
+                self.connected = True
+                return True
+
+            def snapshot(self, **_arguments):
+                return PageSnapshot(
+                    url="https://ys.learnus.org/my/",
+                    title="LearnUs",
+                    text="My courses",
+                    grids=[],
+                    buttons=[],
+                    inputs=[],
+                    links=[
+                        {
+                            "label": "Course",
+                            "url": "https://ys.learnus.org/course/view.php?id=1",
+                        }
+                    ],
+                )
+
+        bridge = YonseiBridge.__new__(YonseiBridge)
+        page = FakePage()
+        bridge.page = page
+        with mock.patch("yonsei_bridge.bridge.time.sleep", return_value=None):
+            result = bridge.learnus_attendance(service="learnus")
+        self.assertEqual(result["state"], "connected")
+        self.assertTrue(result["portal_sso_attempted"])
+        self.assertEqual(page.portal_clicks, 1)
+        self.assertEqual(len(result["courses"]), 1)
 
     def test_router_returns_one_primary_result(self):
         class FakeBridge:
@@ -200,6 +688,38 @@ class YonseiBridgeTests(unittest.TestCase):
         )
         self.assertEqual(fake.arguments["keyword"], "자료구조")
 
+    def test_course_filter_failure_is_not_reported_ready(self):
+        class FakeBridge:
+            def mileage(self, **_arguments):
+                return {
+                    "state": "field_mapping_required",
+                    "catalog": {
+                        "state": "field_mapping_required",
+                        "requested_filters_applied": {
+                            "year": True,
+                            "semester": False,
+                        },
+                        "unmatched_filters": ["semester"],
+                        "rows": [],
+                    },
+                    "history": {"state": "not_queried", "rows": []},
+                    "current_registration": {"state": "not_queried", "rows": []},
+                }
+
+        result = StudentRouter(FakeBridge()).run(
+            intent="courses",
+            request={"year": "2026", "semester": "1학기"},
+        )
+        self.assertEqual(result["status"], "field_mapping_required")
+        self.assertEqual(
+            result["primary_result"]["requested_filters_applied"]["semester"],
+            False,
+        )
+        self.assertEqual(
+            result["primary_result"]["unmatched_filters"],
+            ["semester"],
+        )
+
     def test_errors_are_student_friendly(self):
         missing = friendly_error(ValueError("missing:origin,date"))
         self.assertEqual(missing["status"], "more_information_needed")
@@ -230,13 +750,33 @@ class YonseiBridgeTests(unittest.TestCase):
                 process.stdin.flush()
             initialized = json.loads(process.stdout.readline())
             listed = json.loads(process.stdout.readline())
-            self.assertEqual(initialized["result"]["serverInfo"]["version"], "0.5.0")
+            self.assertEqual(initialized["result"]["serverInfo"]["version"], "0.6.0")
             self.assertEqual(len(listed["result"]["tools"]), 2)
         finally:
             process.terminate()
             process.wait(timeout=5)
             process.stdin.close()
             process.stdout.close()
+
+    def test_cli_uses_selection_ids_and_student_language_requests(self):
+        shuttle = subprocess.run(
+            [sys.executable, str(BRIDGE_DIR / "cli.py"), "shuttle", "--help"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+        service = subprocess.run(
+            [sys.executable, str(BRIDGE_DIR / "cli.py"), "service", "--help"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+        self.assertIn("--selection-id", shuttle)
+        self.assertNotIn("--row-term", shuttle)
+        self.assertIn("--request", service)
+        self.assertIn("--selection-id", service)
+        self.assertNotIn("--field", service)
+        self.assertNotIn("--submit-button", service)
 
 
 if __name__ == "__main__":

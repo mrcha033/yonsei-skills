@@ -227,11 +227,12 @@ GET http://{URLPost}
   &RECEIVE_TYPE={RECEIVE_TYPE}
 ```
 
-Current URLPost is `printcomplete.jsp`. The vendor ignores its response and
-does not independently prove spool completion. The clean-room agent therefore
-does not call URLPost after PDF rendering. CUPS submission remains an explicit,
-digest-checked, one-attempt action, and completion acknowledgement is left
-unimplemented rather than risking false consumption.
+Current URLPost is `printcomplete.jsp`. With
+`--notify-print-completion`, the local agent calls that exact allowlisted
+endpoint once only after the PDF has been durably saved, re-read, and matched
+to its expected digest. The attempt is recorded before the request and is
+never retried after a timeout or non-success response. CUPS submission remains
+a separate explicit, digest-checked, one-attempt physical-print action.
 
 ## Evidence boundary
 

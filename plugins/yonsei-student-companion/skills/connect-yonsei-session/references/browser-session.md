@@ -2,14 +2,12 @@
 
 ## Preferred session
 
-- Prefer the student's already authenticated persistent Chrome, Edge, or
-  Chromium profile for reuse across tasks.
-- Reuse an already open official Yonsei tab before creating another tab.
-- Use the in-app browser only when it already contains the needed authenticated
-  state or persistent Chrome is unavailable.
-- A logged-in ordinary browser and a logged-out in-app browser are different
-  sessions. Continue in the authenticated ordinary browser instead of asking
-  the student to log in again.
+- Prefer the Yonsei-managed persistent Chrome, Edge, or Chromium profile used
+  by `yonsei_bridge_connect`.
+- Reuse an already open official Yonsei tab when the host explicitly exposes
+  it to the bridge; otherwise continue in the managed profile.
+- A logged-in ordinary browser, a managed browser, and an in-app browser are
+  different sessions unless the host explicitly connects them.
 - Do not copy cookies between browsers or create a local credential store.
 
 ## Connected

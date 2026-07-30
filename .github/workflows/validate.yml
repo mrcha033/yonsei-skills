@@ -31,5 +31,7 @@ jobs:
         run: python3 -B scripts/build_release_packages.py --version 0.0.0 --check
       - name: Run tests
         run: python3 -m unittest discover -s tests -v
+      - name: Run plugin-local tests
+        run: python3 -B scripts/run_plugin_tests.py
       - name: Compile Python
         run: python3 -m compileall -q packages scripts plugins tests

@@ -1,7 +1,7 @@
 {
   "name": "yonsei-academic-copilot",
-  "version": "0.4.0",
-  "description": "Underwood 학사정보·학사신청·교직이수를 정리하고, 공식 진행표와 학번·전공별 기준으로 졸업요건과 남은 학기를 계산합니다.",
+  "version": "0.4.1",
+  "description": "‘오늘의 연세·포털 연결’과 함께 Underwood 학사정보·학사신청·교직이수를 정리하고, 공식 진행표와 학번·전공별 기준으로 졸업요건과 남은 학기를 계산합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "연세 학사·졸업 도우미",
     "shortDescription": "학사신청·교직·졸업요건을 한눈에",
-    "longDescription": "기존 브라우저 로그인으로 Underwood의 학사정보, 학사신청, 교직이수, 공식 학점진행표를 읽습니다. 정확한 학번·전공 기준과 비교해 졸업까지 부족한 학점·과목·인증과 다음 학기 계획을 보여 주며, 학과별 특수 요건은 확인 필요로 남깁니다.",
+    "longDescription": "‘오늘의 연세·포털 연결’을 함께 설치하면 전용 관리 브라우저 로그인으로 Underwood의 학사정보, 학사신청, 교직이수, 공식 학점진행표를 읽습니다. 정확한 학번·전공 기준과 비교해 졸업까지 부족한 학점·과목·인증과 다음 학기 계획을 보여 주며, 학과별 특수 요건은 확인 필요로 남깁니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [

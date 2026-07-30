@@ -104,7 +104,19 @@ TOOLS = [
                         "roommate": {"type": "string"},
                         "issue": {"type": "string"},
                         "menu": {"type": "string"},
-                        "document_type": {"type": "string"},
+                        "document_type": {
+                            "type": "string",
+                            "enum": [
+                                "enrollment",
+                                "transcript",
+                                "graduation",
+                                "expected_graduation",
+                                "leave",
+                                "completion",
+                                "education_practicum",
+                                "teaching"
+                            ]
+                        },
                         "language": {"type": "string"},
                         "copies": {"type": "integer"},
                         "output_format": {"type": "string", "enum": ["pdf", "print"]}
@@ -176,7 +188,7 @@ def main() -> int:
                     {
                         "protocolVersion": message.get("params", {}).get("protocolVersion", "2025-06-18"),
                         "capabilities": {"tools": {"listChanged": False}},
-                        "serverInfo": {"name": "yonsei-bridge", "version": "0.5.0"},
+                        "serverInfo": {"name": "yonsei-bridge", "version": "0.6.0"},
                     },
                 )
             elif method == "ping":

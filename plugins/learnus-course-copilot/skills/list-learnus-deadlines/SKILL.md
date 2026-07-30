@@ -1,6 +1,6 @@
 ---
 name: list-learnus-deadlines
-description: Extract assignment deadlines that are visibly associated with assignment activities in an authorized LearnUs course snapshot. Use when the user asks what is due, wants a course deadline report, or needs dated assignments without unrelated page dates.
+description: Read an authorized live LearnUs course first and extract deadlines visibly associated with assignment activities; use a user-supplied screenshot, pasted page, export, or JSON only when the live page is unavailable or intentionally supplied. Use when the user asks what is due, wants a course deadline report, or needs dated assignments without unrelated page dates.
 ---
 
 # List LearnUs Deadlines

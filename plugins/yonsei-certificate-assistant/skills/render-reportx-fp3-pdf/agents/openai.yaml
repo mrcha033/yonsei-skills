@@ -1,4 +1,6 @@
 interface:
-  display_name: "ReportX 호환 PDF 렌더링"
-  short_description: "제목·본문 원본 글꼴을 유지해 FP3 PDF를 렌더링"
-  default_prompt: "Use $render-reportx-fp3-pdf to 준비된 ReportX FP3 문서를 호환 PDF로 렌더링해 줘."
+  display_name: "내부 ReportX PDF 렌더링"
+  short_description: "이미 준비된 FP3 결과의 호환 렌더링만 수행합니다"
+  default_prompt: "Use $render-reportx-fp3-pdf to 이미 준비된 ReportX FP3 결과가 있을 때만 내부 호환 PDF 렌더링을 실행해 줘."
+policy:
+  allow_implicit_invocation: false

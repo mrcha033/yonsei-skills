@@ -1,7 +1,7 @@
 {
   "name": "yonsei-certificate-assistant",
-  "version": "0.10.0",
-  "description": "Windows 공식 ReportX 또는 macOS·Linux 호환 PDF 경로로 증명서와 학생활동·실습 확인서를 찾고, 원본 연세 글꼴을 유지해 발급합니다.",
+  "version": "0.10.1",
+  "description": "‘오늘의 연세·포털 연결’과 함께 Windows·macOS·Linux에서 무료 인터넷즉시발급 결과를 로컬 PDF로 저장하고 증명서와 학생활동·실습 확인서의 연세 글꼴을 유지합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -24,7 +24,7 @@
   "interface": {
     "displayName": "연세 증명서 발급 도우미",
     "shortDescription": "운영체제에 맞춰 증명서 발급 진행",
-    "longDescription": "학생의 운영체제를 자동 확인해 Windows에서는 학교의 공식 ReportX 무료 출력 경로를, macOS와 Linux에서는 문서번호 1회 예약을 포함한 독립 호환 PDF 경로를 사용합니다. 재배포 허가를 받은 연세 제목체와 본문체를 번들해 각각 PDF에 임베드하고, 다른 글꼴이 섞이면 발급 결과를 거부합니다.",
+    "longDescription": "Windows·macOS·Linux 모두 학교의 인증된 인터넷즉시발급 화면과 문서번호 1회 예약을 포함한 로컬 PDF 프린터를 사용합니다. PDF를 안전하게 저장하고 해시를 다시 확인한 뒤 공식 완료 주소를 한 번만 통지합니다. 재배포 허가를 받은 연세 제목체와 본문체를 모두 검증하고 실제 서식이 참조한 글꼴만 PDF에 임베드하며, 다른 글꼴이 섞이면 발급 결과를 거부합니다. Windows 실물 인쇄를 명시한 경우에만 공식 ReportX를 사용합니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
@@ -33,8 +33,9 @@
       "FP3 호환 PDF 렌더링",
       "문서번호 1회 예약 보호",
       "명시적 프린터 제출",
-      "Windows/macOS/Linux 경로 자동 선택",
-      "원본 연세 제목체·본문체 개별 PDF 임베딩",
+      "Windows/macOS/Linux 무료 출력 PDF",
+      "내구 저장 후 공식 완료 1회 통지",
+      "서식이 사용한 연세 제목체·본문체만 PDF 임베딩",
       "학생활동·교육실습·생활관 문서 발급"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",

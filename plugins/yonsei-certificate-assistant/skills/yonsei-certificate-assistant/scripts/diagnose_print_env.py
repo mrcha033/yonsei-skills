@@ -21,7 +21,7 @@ REPORTX_PORTS = (65432, 65433)
 PLUGIN_INSTALLER = (
     "https://icert.yonsei.ac.kr/ys1.0/module/ICT_REPORTX_SETUP.exe"
 )
-ICERT_HOME = "https://icert.yonsei.ac.kr/"
+CERTIFICATE_ENTRY = "https://portal.yonsei.ac.kr/ui/index.html"
 
 
 def port_open(port: int, host: str = "127.0.0.1", timeout: float = 0.4) -> bool:
@@ -114,87 +114,45 @@ def recommended_path(
     physical: list[str],
     virtual: list[str],
 ) -> dict[str, Any]:
-    if system != "Windows":
-        label = "macOS" if system == "Darwin" else "Linux"
-        if system not in {"Darwin", "Linux"}:
-            return {
-                "id": "unsupported-platform",
-                "summary": (
-                    "This certificate workflow supports Windows, macOS, and Linux."
-                ),
-                "next_steps": [
-                    "Continue from a supported desktop operating system.",
-                ],
-            }
-        if reportx_listening:
-            return {
-                "id": "local-agent-up",
-                "summary": (
-                    f"A loopback ReportX listener is already running on {label}. The "
-                    "clean-room agent needs no DevTools bridge or page capture."
-                ),
-                "next_steps": [
-                    "Keep the agent foreground process running.",
-                    "Open portal → 인터넷증명서 → 인터넷즉시발급",
-                    "Choose 프린터 출력; the official iframe sends /SSO automatically.",
-                    "Run python3 scripts/icert_print.py wait-job, then inspect the exact status.",
-                ],
-            }
+    if system not in {"Windows", "Darwin", "Linux"}:
         return {
-            "id": "start-local-agent",
+            "id": "unsupported-platform",
+            "summary": "This certificate workflow supports Windows, macOS, and Linux.",
+            "next_steps": ["Continue from a supported desktop operating system."],
+        }
+    label = {"Windows": "Windows", "Darwin": "macOS", "Linux": "Linux"}[system]
+    if reportx_listening:
+        return {
+            "id": "loopback-listener-present",
             "summary": (
-                f"{label} uses the packaged clean-room listener for the normal "
-                "/SSO handoff and an unverified compatibility PDF."
+                f"A loopback ReportX listener is already using the print port on {label}. "
+                "For PDF output it must be the packaged local compatibility printer."
             ),
             "next_steps": [
-                "python3 scripts/icert_print.py prepare-assets",
+                "Run python3 scripts/icert_print.py doctor to verify the packaged agent token.",
                 (
-                    "python3 scripts/icert_print.py agent --allow-fetch "
-                    "--reserve-document-number"
+                    "If that check says agent DOWN, close the native ReportX tray/service "
+                    "before starting the local PDF printer; never run both on the same port."
                 ),
-                "python3 scripts/icert_print.py open",
-                "In icert choose 프린터 출력 only.",
-                "Run python3 scripts/icert_print.py wait-job.",
+                "Open portal → 인터넷증명서 → 인터넷즉시발급.",
+                "Choose 프린터 출력 once after arming the local agent.",
             ],
-        }
-    if not reportx_listening:
-        return {
-            "id": "install-reportx",
-            "summary": "Windows host detected, but ReportX is not listening on 65432/65433.",
-            "next_steps": [
-                f"Install or relaunch ICT ReportX: {PLUGIN_INSTALLER}",
-                "Or run the clean-room listener only for interoperability testing.",
-                "Re-open the browser on icert and allow the plugin prompt.",
-                "Re-run this diagnostic until a ReportX port is open.",
-            ],
-        }
-    if physical:
-        return {
-            "id": "physical-print",
-            "summary": "ReportX appears up and at least one non-virtual printer is visible.",
-            "next_steps": [
-                "In icert choose 프린터 출력 and select the physical printer.",
-                "If the site rejects the device, try another real printer or a campus kiosk.",
-            ],
-            "preferred_printers": physical[:5],
-        }
-    if virtual:
-        return {
-            "id": "virtual-pdf",
-            "summary": "ReportX appears up; only virtual/PDF-like printers were classified.",
-            "next_steps": [
-                "In icert choose 프린터 출력 and select the virtual PDF printer.",
-                "Save the PDF only to a path the user names; call it a print capture, not a paper original.",
-                "If rejected, install a certificate-oriented virtual printer or attach a physical printer.",
-            ],
-            "preferred_printers": virtual[:5],
         }
     return {
-        "id": "add-printer",
-        "summary": "ReportX appears up, but no printers were found.",
+        "id": "start-local-agent",
+        "summary": (
+            f"{label} uses the packaged local ReportX-compatible printer for the "
+            "official free-print /SSO handoff and PDF result."
+        ),
         "next_steps": [
-            "Add a physical printer for paper originals, or install a virtual PDF printer for file capture.",
-            "Confirm Windows sees the device before returning to icert.",
+            "python3 scripts/icert_print.py prepare-assets",
+            (
+                "python3 scripts/icert_print.py agent --allow-fetch "
+                "--reserve-document-number"
+            ),
+            "python3 scripts/icert_print.py open",
+            "In icert choose 프린터 출력 only after arming the agent.",
+            "Run python3 scripts/icert_print.py wait-job.",
         ],
     }
 
@@ -220,7 +178,8 @@ def diagnose() -> dict[str, Any]:
             "python": sys.version.split()[0],
         },
         "icert": {
-            "home": ICERT_HOME,
+            "entry": CERTIFICATE_ENTRY,
+            "entry_path": "인터넷증명서 → 인터넷즉시발급",
             "scope": "free-print-only",
             "excludes": ["전자증명서발급"],
             "plugin_installer": PLUGIN_INSTALLER,
@@ -229,7 +188,7 @@ def diagnose() -> dict[str, Any]:
             "ports": ports,
             "listening": reportx_listening,
             "native_supported_os": system == "Windows",
-            "compatibility_supported_os": system in {"Darwin", "Linux"},
+            "compatibility_supported_os": system in {"Windows", "Darwin", "Linux"},
         },
         "printers": {
             "all": printers,
@@ -239,7 +198,8 @@ def diagnose() -> dict[str, Any]:
         "recommendation": recommendation,
         "notes": [
             "Yonsei documents the official print path around the Windows ReportX component.",
-            "The clean-room macOS/Linux agent independently renders the returned prepared FP3 pages as an unverified compatibility PDF.",
+            "The local Windows/macOS/Linux compatibility agent independently renders the returned prepared FP3 pages as a PDF.",
+            "Native Windows ReportX remains available only for an explicitly requested physical printer.",
             "Document-number reservation requires explicit opt-in and is never automatically retried.",
             "이메일 전송 grants print rights, not a PDF attachment.",
             "A PDF container is not automatically an official electronic certificate or paper original.",

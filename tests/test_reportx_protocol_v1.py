@@ -35,6 +35,7 @@ from reportx_protocol_v1 import (  # noqa: E402
     aria_decrypt_block,
     aria_encrypt_block,
     build_document_number_action,
+    build_print_completion_action,
     parse_document_number_response,
     parse_reportx_ticket,
     reportx_aria_decrypt_block,
@@ -201,6 +202,33 @@ class ReportXProtocolV1Tests(unittest.TestCase):
                 "RECEIVE_TARGET": [""],
             },
             urllib.parse.parse_qs(parsed.query, keep_blank_values=True),
+        )
+
+    def test_print_completion_action_matches_vendor_fields(self) -> None:
+        action = build_print_completion_action(
+            self._reservation_ticket(),
+            document_number="A1B2C3D4E5F6G7H8",
+            system_ip="192.0.2.10",
+            printer_model="YonseiSkills PDF",
+        )
+        self.assertEqual("GET", action.method)
+        self.assertEqual("reportx-print-completion", action.request_id)
+        parsed = urllib.parse.urlsplit(action.url)
+        self.assertEqual("https", parsed.scheme)
+        self.assertEqual("icert.yonsei.ac.kr", parsed.hostname)
+        self.assertEqual(
+            "/ys1.0/jsp/report/printcomplete.jsp",
+            parsed.path,
+        )
+        self.assertEqual(
+            {
+                "TPID": ["T-SYNTH"],
+                "SYSTEM_IP": ["192.0.2.10"],
+                "P_MODEL": ["YonseiSkills PDF"],
+                "MIN_DOC_NO": ["A1B2C3D4E5F6G7H8"],
+                "RECEIVE_TYPE": ["WEB"],
+            },
+            urllib.parse.parse_qs(parsed.query),
         )
 
     def test_document_number_response_is_exactly_one_16_char_value(self) -> None:

@@ -28,7 +28,7 @@ cutoffs. Do not turn tie-break fields into a fabricated numerical score.
 
 Official starting points:
 
-- current public course catalogue:
+- current authenticated course catalogue:
   `https://underwood1.yonsei.ac.kr/com/lgin/SsoCtr/initExtPageWork.do?link=handbList&locale=ko`
 - Yonsei course registration portal:
   `https://portal.yonsei.ac.kr/`

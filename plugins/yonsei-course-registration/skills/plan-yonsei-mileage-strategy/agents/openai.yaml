@@ -1,4 +1,4 @@
 interface:
   display_name: "수강신청 마일리지 전략"
   short_description: "공식 편람·정원·개인 마일리지 이력으로 배분 전략 계산"
-  default_prompt: "Use $plan-yonsei-mileage-strategy to query the official Underwood handbook and allocate my Yonsei mileage using current availability and my past results."
+  default_prompt: "Use $plan-yonsei-mileage-strategy to 공식 Underwood 수강편람과 내 마일리지 이력을 확인해 현재 조건에 맞는 배분안을 계산해 줘."

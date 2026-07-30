@@ -1,7 +1,7 @@
 {
   "name": "learnus-course-copilot",
-  "version": "0.4.0",
-  "description": "기존 연세 브라우저 로그인을 이어 사용해 LearnUs 강의, 과제 마감일, 학습자료를 정리합니다. GUI 없는 메모리 전용 세션은 요청한 경우에만 사용합니다.",
+  "version": "0.4.1",
+  "description": "‘오늘의 연세·포털 연결’의 전용 브라우저 로그인을 이어 LearnUs 강의, 과제 마감일, 학습자료를 정리합니다. 메모리 전용 세션은 요청한 경우에만 사용합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "LearnUs 학습 도우미",
     "shortDescription": "브라우저 로그인으로 강의·과제·자료 정리",
-    "longDescription": "공식 LearnUs 화면에서 학생이 한 번 로그인하면 같은 브라우저 프로필을 이어 사용해 강의·과제·자료를 읽기 전용으로 정리합니다. 세션이 만료될 때만 공식 화면에서 다시 연결하며, 터미널 기반 메모리 전용 세션은 학생이 명시적으로 요청한 경우에만 선택합니다.",
+    "longDescription": "‘오늘의 연세·포털 연결’을 함께 설치하면 공식 LearnUs 화면에서 학생이 한 번 로그인한 전용 관리 브라우저 프로필을 이어 사용해 강의·과제·자료를 읽기 전용으로 정리합니다. 세션이 만료되면 학생이 공식 화면에서 다시 로그인하며, 터미널 기반 메모리 전용 세션은 학생이 명시적으로 요청한 경우에만 선택합니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [

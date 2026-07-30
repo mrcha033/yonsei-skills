@@ -1,6 +1,6 @@
 ---
 name: draft-yonsei-attendance-correction
-description: Create an unsent Korean attendance-correction draft and evidence checklist from a user-confirmed discrepancy supplied as a screenshot, pasted record, export, or JSON. Use when the user wants a reviewable request draft while official submission, status changes, attendance check-in, and external communication remain disabled.
+description: Create an unsent Korean attendance-correction draft and evidence checklist from a user-confirmed discrepancy found on the authorized live attendance page; use a screenshot, pasted record, export, or JSON only when the live page is unavailable or intentionally supplied. Use when the user wants a reviewable request draft while official submission, status changes, attendance check-in, and external communication remain disabled.
 ---
 
 # Draft Yonsei Attendance Correction

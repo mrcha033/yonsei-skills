@@ -1,4 +1,4 @@
 interface:
   display_name: "연세 수강편람 직접 조회"
   short_description: "Underwood 수강편람을 직접 조회해 시간표 자료로 정리합니다"
-  default_prompt: "Use $normalize-yonsei-courses to Underwood 수강편람에서 원하는 과목을 직접 찾아 시간표 계획용으로 정리해 줘."
+  default_prompt: "Use $normalize-yonsei-courses to 포털 로그인을 이어 Underwood 수강편람에서 원하는 과목을 직접 찾아 시간표 계획용으로 정리해 줘."

@@ -1,6 +1,6 @@
 ---
 name: summarize-yonsei-attendance
-description: Normalize a user-provided Yonsei electronic-attendance screenshot, pasted table, export, or JSON snapshot and summarize present, late, absent, early-leave, excused, and pending records overall and by course. Use for authorized attendance history without checking in or querying the live system.
+description: Read the authorized live Yonsei electronic-attendance page first and summarize present, late, absent, early-leave, excused, and pending records overall and by course; use a user-provided screenshot, pasted table, export, or JSON only when the live page is unavailable or intentionally supplied. Use for authorized attendance history without checking in or changing official records.
 ---
 
 # Summarize Yonsei Attendance

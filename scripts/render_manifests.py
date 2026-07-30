@@ -20,19 +20,19 @@ INSTALLATIONS = {
 
 SPECS = {
     "yonsei-student-companion": {
-        "version": "0.5.0",
+        "version": "0.5.1",
         "display": "오늘의 연세·포털 연결",
-        "description": "한 번 로그인한 공통 브라우저를 이어 쓰고 포털·Underwood·LearnUs·출결·셔틀·공간·증명서를 빠른 명령으로 처리합니다.",
+        "description": "한 번 로그인한 전용 관리 브라우저를 이어 쓰고 포털·Underwood·LearnUs·출결과 생활관·장학금·교환학생 업무를 자연어로 처리합니다.",
         "short": "한 번 로그인하고 학교생활을 한눈에",
-        "long": "학생이 이미 로그인한 일반 브라우저 프로필을 먼저 찾아 Portal에서 Underwood까지 공식 SSO로 이어갑니다. 오늘과 7일 안의 수업·마감·예약을 정리하고 생활관, 장학금, 교환학생의 현재 상태와 다음 절차를 자연어로 관리합니다.",
+        "long": "앱이 여는 연세 전용 관리 브라우저에서 학생이 직접 로그인하면 같은 프로필을 계속 재사용합니다. 지원되는 환경에서는 이미 열린 공식 탭에도 연결할 수 있습니다. 포털·Underwood·LearnUs·출결의 읽기 결과와 생활관·장학금·교환학생의 공식 화면 진행을 자연어로 돕습니다.",
         "keywords": ["yonsei", "portal", "session", "student", "daily", "dorm", "scholarship", "exchange"],
         "capabilities": [
             "Persistent browser-profile session reuse",
             "Current official portal service routing",
             "Read-only daily student briefing",
             "Dorm-life workflows",
-            "Scholarship opportunity and application tracking",
-            "Exchange journey tracking",
+            "Browser-guided scholarship tracking",
+            "Browser-guided exchange journey tracking",
             "Fast authenticated Portal and Underwood commands",
             "Direct official Underwood course-handbook search",
             "Cross-platform shuttle, space, dorm, and document actions",
@@ -42,17 +42,17 @@ SPECS = {
         "prompts": [
             "연세 포털에 한 번 로그인하고 계속 이어서 써 줘.",
             "도서관 좌석 예약 화면을 찾아 바로 열어 줘.",
-            "오늘 수업, LearnUs 마감, 출결, 예약을 한 번에 정리해 줘.",
+            "오늘 수업, LearnUs, 출결과 학사 진행 상황을 한 번에 정리해 줘.",
             "내가 지원할 수 있는 장학금과 생활관 마감을 정리해 줘.",
             "교환학생 준비에서 다음에 해야 할 일을 알려 줘.",
         ],
     },
     "learnus-course-copilot": {
-        "version": "0.4.0",
+        "version": "0.4.1",
         "display": "LearnUs 학습 도우미",
-        "description": "기존 연세 브라우저 로그인을 이어 사용해 LearnUs 강의, 과제 마감일, 학습자료를 정리합니다. GUI 없는 메모리 전용 세션은 요청한 경우에만 사용합니다.",
+        "description": "‘오늘의 연세·포털 연결’의 전용 브라우저 로그인을 이어 LearnUs 강의, 과제 마감일, 학습자료를 정리합니다. 메모리 전용 세션은 요청한 경우에만 사용합니다.",
         "short": "브라우저 로그인으로 강의·과제·자료 정리",
-        "long": "공식 LearnUs 화면에서 학생이 한 번 로그인하면 같은 브라우저 프로필을 이어 사용해 강의·과제·자료를 읽기 전용으로 정리합니다. 세션이 만료될 때만 공식 화면에서 다시 연결하며, 터미널 기반 메모리 전용 세션은 학생이 명시적으로 요청한 경우에만 선택합니다.",
+        "long": "‘오늘의 연세·포털 연결’을 함께 설치하면 공식 LearnUs 화면에서 학생이 한 번 로그인한 전용 관리 브라우저 프로필을 이어 사용해 강의·과제·자료를 읽기 전용으로 정리합니다. 세션이 만료되면 학생이 공식 화면에서 다시 로그인하며, 터미널 기반 메모리 전용 세션은 학생이 명시적으로 요청한 경우에만 선택합니다.",
         "keywords": ["learnus", "yonsei", "lms", "course"],
         "capabilities": [
             "Persistent browser-profile LearnUs session",
@@ -68,11 +68,11 @@ SPECS = {
         ],
     },
     "yonsei-certificate-assistant": {
-        "version": "0.10.0",
+        "version": "0.10.1",
         "display": "연세 증명서 발급 도우미",
-        "description": "Windows 공식 ReportX 또는 macOS·Linux 호환 PDF 경로로 증명서와 학생활동·실습 확인서를 찾고, 원본 연세 글꼴을 유지해 발급합니다.",
+        "description": "‘오늘의 연세·포털 연결’과 함께 Windows·macOS·Linux에서 무료 인터넷즉시발급 결과를 로컬 PDF로 저장하고 증명서와 학생활동·실습 확인서의 연세 글꼴을 유지합니다.",
         "short": "운영체제에 맞춰 증명서 발급 진행",
-        "long": "학생의 운영체제를 자동 확인해 Windows에서는 학교의 공식 ReportX 무료 출력 경로를, macOS와 Linux에서는 문서번호 1회 예약을 포함한 독립 호환 PDF 경로를 사용합니다. 재배포 허가를 받은 연세 제목체와 본문체를 번들해 각각 PDF에 임베드하고, 다른 글꼴이 섞이면 발급 결과를 거부합니다.",
+        "long": "Windows·macOS·Linux 모두 학교의 인증된 인터넷즉시발급 화면과 문서번호 1회 예약을 포함한 로컬 PDF 프린터를 사용합니다. PDF를 안전하게 저장하고 해시를 다시 확인한 뒤 공식 완료 주소를 한 번만 통지합니다. 재배포 허가를 받은 연세 제목체와 본문체를 모두 검증하고 실제 서식이 참조한 글꼴만 PDF에 임베드하며, 다른 글꼴이 섞이면 발급 결과를 거부합니다. Windows 실물 인쇄를 명시한 경우에만 공식 ReportX를 사용합니다.",
         "keywords": ["yonsei", "certificate", "icert", "print", "pdf", "windows", "macos", "linux", "reportx"],
         "capabilities": [
             "ReportX 인계 정보 진단",
@@ -80,8 +80,9 @@ SPECS = {
             "FP3 호환 PDF 렌더링",
             "문서번호 1회 예약 보호",
             "명시적 프린터 제출",
-            "Windows/macOS/Linux 경로 자동 선택",
-            "원본 연세 제목체·본문체 개별 PDF 임베딩",
+            "Windows/macOS/Linux 무료 출력 PDF",
+            "내구 저장 후 공식 완료 1회 통지",
+            "서식이 사용한 연세 제목체·본문체만 PDF 임베딩",
             "학생활동·교육실습·생활관 문서 발급",
         ],
         "prompts": [
@@ -92,7 +93,7 @@ SPECS = {
         ],
     },
     "yonsei-notice-monitor": {
-        "version": "0.2.0",
+        "version": "0.2.1",
         "display": "연세 공지·마감일 찾기",
         "description": "연세대학교와 신촌 IT 공식 공지를 검색하고, 신청·납부·행사 마감일과 지난 확인 이후 달라진 공지를 찾습니다.",
         "short": "공식 공지와 놓치기 쉬운 마감일 확인",
@@ -110,11 +111,11 @@ SPECS = {
         ],
     },
     "yonsei-academic-copilot": {
-        "version": "0.4.0",
+        "version": "0.4.1",
         "display": "연세 학사·졸업 도우미",
-        "description": "Underwood 학사정보·학사신청·교직이수를 정리하고, 공식 진행표와 학번·전공별 기준으로 졸업요건과 남은 학기를 계산합니다.",
+        "description": "‘오늘의 연세·포털 연결’과 함께 Underwood 학사정보·학사신청·교직이수를 정리하고, 공식 진행표와 학번·전공별 기준으로 졸업요건과 남은 학기를 계산합니다.",
         "short": "학사신청·교직·졸업요건을 한눈에",
-        "long": "기존 브라우저 로그인으로 Underwood의 학사정보, 학사신청, 교직이수, 공식 학점진행표를 읽습니다. 정확한 학번·전공 기준과 비교해 졸업까지 부족한 학점·과목·인증과 다음 학기 계획을 보여 주며, 학과별 특수 요건은 확인 필요로 남깁니다.",
+        "long": "‘오늘의 연세·포털 연결’을 함께 설치하면 전용 관리 브라우저 로그인으로 Underwood의 학사정보, 학사신청, 교직이수, 공식 학점진행표를 읽습니다. 정확한 학번·전공 기준과 비교해 졸업까지 부족한 학점·과목·인증과 다음 학기 계획을 보여 주며, 학과별 특수 요건은 확인 필요로 남깁니다.",
         "keywords": ["yonsei", "academic", "records", "student"],
         "capabilities": [
             "Supplied class snapshot normalization",
@@ -136,11 +137,11 @@ SPECS = {
         ],
     },
     "yonsei-course-registration": {
-        "version": "0.5.0",
+        "version": "0.5.1",
         "display": "연세 수강계획 도우미",
-        "description": "Underwood 수강편람을 직접 조회하고 시간표 충돌, 정원·신청자·개인 마일리지 이력·졸업 중요도를 반영해 수강신청 전략을 만듭니다.",
+        "description": "‘오늘의 연세·포털 연결’의 로그인을 이어 Underwood 수강편람을 직접 조회하고, 정원·개인 마일리지 이력·졸업 중요도를 반영해 수강신청 전략을 만듭니다.",
         "short": "시간표 조합과 마일리지 배분 전략",
-        "long": "로그인된 Underwood의 수업 → 수강편람을 직접 조회하고, 시간·캠퍼스 이동·공강·학점 조건을 검사해 시간표 후보를 순위화합니다. 개인 마일리지 이력과 현재 확인 가능한 정원·신청자, 동점자 기준, 필수 여부, 대체 과목을 함께 고려해 불확실성을 표시한 배분안을 계산합니다. 수강신청 화면이 기간 제한으로 닫혀도 수강편람 조회는 별도로 이어갑니다.",
+        "long": "‘오늘의 연세·포털 연결’의 전용 브라우저 로그인을 이어 Underwood 수강편람을 직접 조회하고, 시간·캠퍼스 이동·공강·학점 조건을 검사해 시간표 후보를 순위화합니다. 개인 마일리지 이력과 현재 확인 가능한 정원·신청자, 동점자 기준, 필수 여부, 대체 과목을 함께 고려합니다. 수강신청 화면이 기간 제한으로 닫혀도 인증된 수강편람 조회는 이어갑니다.",
         "keywords": ["yonsei", "courses", "registration", "schedule"],
         "capabilities": [
             "Course-row normalization",
@@ -160,11 +161,11 @@ SPECS = {
         ],
     },
     "yonsei-attendance-copilot": {
-        "version": "0.2.0",
+        "version": "0.2.1",
         "display": "연세 출결 확인 도우미",
-        "description": "전자출결 화면이나 붙여 넣은 표를 요약하고, 확인할 기록과 정정 문의 초안을 만듭니다. 출석 체크는 수행하지 않습니다.",
+        "description": "‘오늘의 연세·포털 연결’과 함께 전자출결을 읽고, 실패 시 첨부한 화면·표를 대신 요약해 확인할 기록과 정정 문의 초안을 만듭니다. 출석 체크는 수행하지 않습니다.",
         "short": "결석·지각 확인과 정정 문의 초안",
-        "long": "사용자가 첨부한 전자출결 화면, 표 또는 파일에서 과목별 출결을 정리하고 사용자가 지적한 불일치를 검토해 전송 전 문의 초안을 만듭니다.",
+        "long": "‘오늘의 연세·포털 연결’을 함께 설치하면 전용 관리 브라우저의 공식 전자출결 화면을 읽기 전용으로 확인합니다. 접속할 수 없을 때는 첨부한 화면·표·파일을 대체 입력으로 사용하며, 불일치를 검토해 전송 전 문의 초안을 만듭니다.",
         "keywords": ["yonsei", "attendance", "rollbook", "student"],
         "capabilities": [
             "Supplied attendance summaries",
@@ -172,17 +173,17 @@ SPECS = {
             "Unsent correction drafts",
         ],
         "prompts": [
-            "첨부한 전자출결 화면에서 결석과 지각을 과목별로 정리해 줘.",
+            "내 전자출결을 열어 결석과 지각을 과목별로 정리해 줘.",
             "이 출결 기록에서 내가 확인해야 할 항목을 찾아 줘.",
             "이 출결 오류에 대한 정정 문의를 작성하되 보내지는 마.",
         ],
     },
     "yonsei-shuttle-booking": {
-        "version": "0.6.1",
+        "version": "0.6.2",
         "display": "연세 셔틀 조회·예약",
-        "description": "Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 예약·대기·취소하며, 접속 문제는 같은 흐름 안에서 자동 복구합니다.",
+        "description": "‘오늘의 연세·포털 연결’과 함께 Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 확인 후 예약·대기·취소합니다.",
         "short": "신촌·국제캠퍼스 셔틀 조회와 예약",
-        "long": "Windows·macOS·Linux의 기존 연세 브라우저 로그인 세션으로 공식 셔틀 화면을 열어 조건에 맞는 편을 정리합니다. 화면이 열리지 않으면 로그인 만료, 학교 서비스 장애, 화면 변경을 내부에서 자동 점검하고 원래 요청을 이어갑니다. 정확한 차량과 시간을 다시 확인한 뒤 한 번만 예약·대기·취소하고 공식 내역에서 결과를 검증합니다.",
+        "long": "‘오늘의 연세·포털 연결’을 함께 설치하면 Windows·macOS·Linux의 전용 관리 브라우저 로그인으로 공식 셔틀 화면을 열어 조건에 맞는 편을 정리합니다. 화면이 열리지 않으면 로그인 만료, 학교 서비스 장애, 화면 변경을 내부 점검합니다. 정확한 차량과 시간을 다시 확인한 뒤 한 번만 예약·대기·취소하고 공식 내역에서 결과를 검증합니다.",
         "keywords": ["yonsei", "shuttle", "booking", "campus", "windows", "macos", "linux"],
         "capabilities": [
             "Automatic access recovery inside the booking workflow",
@@ -200,11 +201,11 @@ SPECS = {
         ],
     },
     "yonsei-space-reservation": {
-        "version": "0.4.0",
+        "version": "0.4.1",
         "display": "연세 공간 검색·신청",
-        "description": "Windows·macOS·Linux에서 조건에 맞는 공식 공간을 찾고, 검토한 대관 신청을 확인받아 제출합니다.",
+        "description": "‘오늘의 연세·포털 연결’과 함께 Windows·macOS·Linux에서 조건에 맞는 공식 공간을 찾고, 검토한 대관 신청을 확인받아 제출합니다.",
         "short": "공간 후보 확인부터 대관 신청까지",
-        "long": "Windows·macOS·Linux의 공식 공간대관 화면에서 조건에 맞는 방을 찾고 공개 규칙, 수용인원, 시간과 표시 요금을 확인합니다. 최종 내용과 연락처를 보여 준 뒤 한 번만 제출하고 신청 내역에서 접수 상태를 검증합니다.",
+        "long": "‘오늘의 연세·포털 연결’을 함께 설치하면 Windows·macOS·Linux의 전용 관리 브라우저로 공식 공간대관 화면을 엽니다. 공간 서비스가 별도 로그인을 요구하면 학생이 공식 화면에서 최초 한 번 직접 인증합니다. 최종 내용과 연락처를 보여 준 뒤 한 번만 제출하고 신청 내역에서 접수 상태를 검증합니다.",
         "keywords": ["yonsei", "space", "room", "reservation", "windows", "macos", "linux"],
         "capabilities": [
             "Supplied space snapshot filtering",
@@ -374,7 +375,7 @@ def main() -> int:
     claude_marketplace = {
         "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
         "name": "yonsei-skills",
-        "description": "Independently installable, outcome-tested Yonsei University skills.",
+        "description": "Yonsei University student-life and research workflow plugins.",
         "owner": {"name": "mrcha033"},
         "plugins": [
             {

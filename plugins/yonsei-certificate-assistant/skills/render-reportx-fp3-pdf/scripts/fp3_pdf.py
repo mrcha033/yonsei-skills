@@ -2927,13 +2927,23 @@ def _secure_atomic_write(path: Path, data: bytes) -> None:
     fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=parent)
     temporary_path = Path(temporary)
     try:
-        os.fchmod(fd, 0o600)
+        operation = getattr(os, "fchmod", None)
+        if operation is not None:
+            try:
+                operation(fd, 0o600)
+            except (NotImplementedError, OSError):
+                if os.name != "nt":
+                    raise
         with os.fdopen(fd, "wb") as handle:
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary_path, path)
-        os.chmod(path, 0o600)
+        try:
+            os.chmod(path, 0o600)
+        except (NotImplementedError, OSError):
+            if os.name != "nt":
+                raise
     except Exception:
         try:
             temporary_path.unlink()

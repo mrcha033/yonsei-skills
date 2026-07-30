@@ -55,7 +55,7 @@ class CrossPlatformStudentActionTests(unittest.TestCase):
                     )
                     self.assertFalse(result["student_cli_required"])
 
-    def test_certificate_selects_native_windows_path(self) -> None:
+    def test_certificate_selects_native_windows_path_for_physical_print(self) -> None:
         result = CERTIFICATE.run(
             {
                 "certificate_type": "재학증명서",
@@ -65,12 +65,15 @@ class CrossPlatformStudentActionTests(unittest.TestCase):
             },
             system="windows",
         )
-        self.assertEqual("official-windows-reportx", result["issuance_path"])
-        self.assertEqual("official-reportx-print-or-capture", result["result_scope"])
+        self.assertEqual(
+            "official-windows-reportx-physical-print",
+            result["issuance_path"],
+        )
+        self.assertEqual("free-print-physical-print", result["result_scope"])
         self.assertFalse(result["student_cli_required"])
 
-    def test_certificate_selects_local_macos_and_linux_path(self) -> None:
-        for system in ("macos", "linux"):
+    def test_certificate_pdf_uses_local_path_on_all_platforms(self) -> None:
+        for system in ("windows", "macos", "linux"):
             with self.subTest(system=system):
                 result = CERTIFICATE.run(
                     {
@@ -80,11 +83,11 @@ class CrossPlatformStudentActionTests(unittest.TestCase):
                     system=system,
                 )
                 self.assertEqual(
-                    "local-compatibility-reportx",
+                    "local-reportx-compatible-virtual-pdf-print",
                     result["issuance_path"],
                 )
                 self.assertEqual(
-                    "unverified-compatibility-pdf",
+                    "free-print-pdf-virtual-print",
                     result["result_scope"],
                 )
 

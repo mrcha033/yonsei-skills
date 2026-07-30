@@ -1,6 +1,6 @@
 ---
 name: search-yonsei-spaces
-description: Filter and rank a user-supplied Yonsei space screenshot, pasted table, export, or JSON by date, time containment, minimum capacity, building, and required equipment. Use for an official availability-screen snapshot; never claim the result is current availability.
+description: Read the authorized live Yonsei space page first, then filter and rank current options by date, time containment, minimum capacity, building, and required equipment; use a user-supplied screenshot, pasted table, export, or JSON only when the live page is unavailable or intentionally supplied. Use when a student asks which current spaces match their requirements before preparing a request.
 ---
 
 # Search Yonsei Spaces

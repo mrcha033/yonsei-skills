@@ -1,4 +1,4 @@
 interface:
   display_name: "연세 셔틀 옵션 찾기"
   short_description: "첨부한 셔틀 화면에서 날짜·방향·시간 조건으로 찾습니다"
-  default_prompt: "Use $list-yonsei-shuttle-options to 이 화면에서 내일 오전 신촌 출발 셔틀을 찾아 줘."
+  default_prompt: "Use $list-yonsei-shuttle-options to 공식 셔틀 화면에서 내일 오전 신촌 출발 편을 찾고, 열 수 없으면 첨부 자료를 정리해 줘."

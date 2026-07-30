@@ -1,6 +1,6 @@
 ---
 name: check-yonsei-space-rules
-description: Check a Yonsei space-booking proposal supplied in ordinary language, a screenshot, pasted form, export, or JSON against public lead-time, duration, booking-count, ten-minute interval, applicant eligibility, and restricted-period rules. Use before preparing a request; return unknown when required facts are absent.
+description: Read the current official Yonsei space rules first and check a booking proposal against public lead-time, duration, booking-count, ten-minute interval, applicant eligibility, and restricted-period rules; use a screenshot, pasted form, export, or JSON only when the live rule page is unavailable or intentionally supplied. Use before preparing a request; return unknown when required facts are absent.
 ---
 
 # Check Yonsei Space Rules

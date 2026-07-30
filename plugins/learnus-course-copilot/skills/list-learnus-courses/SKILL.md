@@ -1,6 +1,6 @@
 ---
 name: list-learnus-courses
-description: Extract the authorized user's visible LearnUs course index from a dashboard snapshot as a deduplicated structured list. Use when the user asks which LearnUs courses they have, wants course URLs or IDs, or needs a course selected for a later task.
+description: Read the authorized user's live LearnUs dashboard first and return the visible course index as a deduplicated structured list; use a user-supplied screenshot, pasted page, export, or JSON only when the live page is unavailable or intentionally supplied. Use when the user asks which LearnUs courses they have, wants course URLs or IDs, or needs a course selected for a later task.
 ---
 
 # List LearnUs Courses

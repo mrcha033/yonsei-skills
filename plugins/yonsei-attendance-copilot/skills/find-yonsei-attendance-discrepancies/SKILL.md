@@ -1,6 +1,6 @@
 ---
 name: find-yonsei-attendance-discrepancies
-description: Compare displayed and user-expected statuses from a supplied Yonsei attendance screenshot, pasted table, export, or JSON, identify records explicitly disputed by the user, and report which items have enough reason and evidence to draft a correction. Use without inferring presence or changing official records.
+description: Compare displayed and user-expected statuses from the authorized live Yonsei attendance page first, identify records explicitly disputed by the user, and report which items have enough reason and evidence to draft a correction; use a screenshot, pasted table, export, or JSON only when the live page is unavailable or intentionally supplied. Use without inferring presence or changing official records.
 ---
 
 # Find Yonsei Attendance Discrepancies

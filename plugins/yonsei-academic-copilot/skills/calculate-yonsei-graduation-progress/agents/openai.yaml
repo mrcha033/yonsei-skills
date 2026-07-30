@@ -1,4 +1,4 @@
 interface:
   display_name: "졸업요건 진행도 계산"
   short_description: "성적표와 공식 졸업요건을 비교해 부족한 항목 계산"
-  default_prompt: "Use $calculate-yonsei-graduation-progress to compare my transcript with my official Yonsei graduation requirements."
+  default_prompt: "Use $calculate-yonsei-graduation-progress to 내 성적표와 공식 연세 졸업요건을 비교해 부족한 항목을 계산해 줘."
