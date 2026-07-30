@@ -14,6 +14,7 @@ class CertificateIssuePlanTests(unittest.TestCase):
             [sys.executable, str(SCRIPT), "--platform", platform],
             input=json.dumps(payload, ensure_ascii=False),
             text=True,
+            encoding="utf-8",
             capture_output=True,
             check=False,
         )

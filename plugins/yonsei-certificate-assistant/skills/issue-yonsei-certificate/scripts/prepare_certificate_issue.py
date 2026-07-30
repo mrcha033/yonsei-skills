@@ -127,7 +127,16 @@ def run(payload: Any, *, system: str | None = None) -> dict[str, Any]:
     }
 
 
+def configure_utf8_stdio() -> None:
+    """Keep Korean JSON input and output lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 def main() -> int:
+    configure_utf8_stdio()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", default="-")
     parser.add_argument(

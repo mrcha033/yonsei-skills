@@ -1733,7 +1733,16 @@ def serve(host: str, port: int, state: AgentState) -> None:
         state.close()
 
 
+def configure_utf8_stdio() -> None:
+    """Keep Korean agent logs and diagnostics lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 def main() -> int:
+    configure_utf8_stdio()
     if hasattr(os, "umask"):
         os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)

@@ -45,12 +45,21 @@ def run(payload: Any) -> dict[str, Any]:
     }
 
 
+def configure_utf8_stdio() -> None:
+    """Keep Korean JSON input and output lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 def main() -> int:
+    configure_utf8_stdio()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", default="-")
     args = parser.parse_args()
     try:
-        payload = json.load(sys.stdin) if args.input == "-" else json.loads(Path(args.input).read_text())
+        payload = json.load(sys.stdin) if args.input == "-" else json.loads(Path(args.input).read_text(encoding="utf-8"))
         output, code = run(payload), 0
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         output, code = {"schema": "yonsei-student-document-error/v1", "error": str(exc)}, 2

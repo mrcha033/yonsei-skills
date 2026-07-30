@@ -134,6 +134,14 @@ TOOLS = [
 ]
 
 
+def configure_utf8_stdio() -> None:
+    """Keep Korean MCP requests and responses lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 class Server:
     def __init__(self, bridge: YonseiBridge | None = None) -> None:
         self.bridge = bridge or YonseiBridge()
@@ -171,6 +179,7 @@ def response(request_id: Any, result: Any = None, error: dict[str, Any] | None =
 
 
 def main() -> int:
+    configure_utf8_stdio()
     server = Server()
     for line in sys.stdin:
         try:

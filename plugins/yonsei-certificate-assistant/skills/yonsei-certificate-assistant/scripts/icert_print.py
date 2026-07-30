@@ -512,7 +512,16 @@ def cmd_print_job(args: argparse.Namespace) -> int:
     return 0 if result.get("ok") else 1
 
 
+def configure_utf8_stdio() -> None:
+    """Keep Korean certificate status and errors lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 def main() -> int:
+    configure_utf8_stdio()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dir", default=str(DEFAULT_DIR))
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)

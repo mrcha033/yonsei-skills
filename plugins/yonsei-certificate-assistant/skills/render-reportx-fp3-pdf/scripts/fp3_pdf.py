@@ -29,6 +29,7 @@ import os
 import re
 import stat
 import struct
+import sys
 import tempfile
 import zlib
 from dataclasses import dataclass, field, replace
@@ -3050,7 +3051,16 @@ def _parse_font_map(values: Sequence[str]) -> dict[str, Path]:
     return result
 
 
+def configure_utf8_stdio() -> None:
+    """Keep Korean renderer diagnostics lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 def main(argv: Sequence[str] | None = None) -> int:
+    configure_utf8_stdio()
     args = _parser().parse_args(argv)
     try:
         data = _read_bounded_regular(

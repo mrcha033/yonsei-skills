@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import platform
+import sys
 
 
 SERVICE_URL = (
@@ -43,7 +44,16 @@ def capabilities(system: str | None = None) -> dict[str, object]:
     }
 
 
+def configure_utf8_stdio() -> None:
+    """Keep Korean platform output lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 def main() -> int:
+    configure_utf8_stdio()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--platform", help="Override platform detection for checks.")
     args = parser.parse_args()

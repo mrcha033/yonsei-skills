@@ -734,6 +734,7 @@ class YonseiBridgeTests(unittest.TestCase):
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             text=True,
+            encoding="utf-8",
         )
         assert process.stdin is not None and process.stdout is not None
         try:
@@ -745,13 +746,28 @@ class YonseiBridgeTests(unittest.TestCase):
                     "params": {"protocolVersion": "2025-06-18"},
                 },
                 {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+                {
+                    "jsonrpc": "2.0",
+                    "id": 3,
+                    "method": "tools/call",
+                    "params": {
+                        "name": "yonsei_student",
+                        "arguments": {"intent": "셔틀"},
+                    },
+                },
             ):
-                process.stdin.write(json.dumps(request) + "\n")
+                process.stdin.write(json.dumps(request, ensure_ascii=False) + "\n")
                 process.stdin.flush()
             initialized = json.loads(process.stdout.readline())
             listed = json.loads(process.stdout.readline())
+            korean_error = json.loads(process.stdout.readline())
             self.assertEqual(initialized["result"]["serverInfo"]["version"], "0.6.0")
             self.assertEqual(len(listed["result"]["tools"]), 2)
+            self.assertTrue(korean_error["result"]["isError"])
+            self.assertIn(
+                "필요한 정보",
+                korean_error["result"]["structuredContent"]["message"],
+            )
         finally:
             process.terminate()
             process.wait(timeout=5)
