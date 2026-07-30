@@ -13,13 +13,35 @@
   },
   "plugins": [
     {
+      "plugin": "yonsei-student-companion",
+      "release": "beta-browser-session",
+      "installation": "AVAILABLE",
+      "outcomes": [
+        {
+          "skill": "connect-yonsei-session",
+          "primary_result": "reusable official Yonsei browser session or exact login handoff",
+          "state": "implemented"
+        },
+        {
+          "skill": "open-yonsei-service",
+          "primary_result": "verified current official portal destination",
+          "state": "implemented"
+        },
+        {
+          "skill": "summarize-yonsei-today",
+          "primary_result": "read-only daily briefing from accessible official student services",
+          "state": "implemented"
+        }
+      ]
+    },
+    {
       "plugin": "learnus-course-copilot",
-      "release": "beta-memory-session",
+      "release": "beta-browser-session",
       "installation": "AVAILABLE",
       "outcomes": [
         {
           "skill": "manage-learnus-session",
-          "primary_result": "authenticated memory-only LearnUs session status",
+          "primary_result": "reusable authenticated LearnUs browser session",
           "state": "implemented"
         },
         {

@@ -9,15 +9,12 @@ Return one result only: the visible material inventory. Do not download or redis
 
 ## Workflow
 
-1. Obtain the exact authorized course page with the sibling session client when no snapshot is supplied:
-
-   ```bash
-   python3 "$SKILL_DIR/../manage-learnus-session/scripts/learnus_headless.py" fetch \
-     --url "https://ys.learnus.org/course/view.php?id=<course-id>" \
-     --output "<fresh secure temporary path>"
-   ```
-
-2. Parse the snapshot:
+1. When a browser is available, reuse the student's authenticated LearnUs
+   profile, select the exact course from **My courses**, and read its visible
+   resource activities. If login appears, invoke `$manage-learnus-session`
+   once and resume in the same browser.
+2. When an HTML course snapshot is supplied, or the student explicitly chose
+   optional terminal mode, parse it with:
 
    ```bash
    python3 "$SKILL_DIR/scripts/list_materials.py" \
@@ -25,8 +22,10 @@ Return one result only: the visible material inventory. Do not download or redis
      --base-url "https://ys.learnus.org/course/view.php?id=<course-id>"
    ```
 
-3. Return label, material kind, redacted URL, and visible availability state. Preserve course order.
-4. If the result is `login_required`, invoke `$manage-learnus-session`. If it is `blocked`, stop.
+3. Return label, material kind, redacted URL, and visible availability state.
+   Preserve course order.
+4. If a supplied snapshot returns `login_required`, invoke
+   `$manage-learnus-session`. If it is `blocked`, stop.
 5. Delete temporary HTML after extraction.
 
 ## Boundaries

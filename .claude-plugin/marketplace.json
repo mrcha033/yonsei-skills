@@ -7,6 +7,26 @@
   },
   "plugins": [
     {
+      "name": "yonsei-student-companion",
+      "displayName": "오늘의 연세·포털 연결",
+      "source": "./plugins/yonsei-student-companion",
+      "description": "연세 포털에 한 번 로그인한 브라우저 세션을 이어 쓰고, 원하는 학생 서비스로 이동하거나 오늘의 수업·마감·예약을 한 번에 정리합니다.",
+      "version": "0.1.0",
+      "author": {
+        "name": "mrcha033"
+      },
+      "homepage": "https://github.com/mrcha033/yonsei-skills",
+      "repository": "https://github.com/mrcha033/yonsei-skills",
+      "category": "education",
+      "tags": [
+        "yonsei",
+        "portal",
+        "session",
+        "student",
+        "daily"
+      ]
+    },
+    {
       "name": "yonsei-notice-monitor",
       "displayName": "연세 공지·마감일 찾기",
       "source": "./plugins/yonsei-notice-monitor",
@@ -146,8 +166,8 @@
       "name": "learnus-course-copilot",
       "displayName": "LearnUs 학습 도우미",
       "source": "./plugins/learnus-course-copilot",
-      "description": "LearnUs 강의, 과제 마감일, 학습자료를 정리합니다. 비밀번호는 숨김 입력으로 받아 실행 중 메모리에만 유지합니다.",
-      "version": "0.3.0",
+      "description": "기존 연세 브라우저 로그인을 이어 사용해 LearnUs 강의, 과제 마감일, 학습자료를 정리합니다. GUI 없는 메모리 전용 세션은 요청한 경우에만 사용합니다.",
+      "version": "0.4.0",
       "author": {
         "name": "mrcha033"
       },

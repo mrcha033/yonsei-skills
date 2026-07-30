@@ -55,7 +55,7 @@ class ReleasePackageTests(unittest.TestCase):
                     name for name in archive.namelist()
                     if name.endswith("/SKILL.md") and "/workflows/" in name
                 ]
-                self.assertEqual(len(skill_files), 32)
+                self.assertEqual(len(skill_files), 35)
                 self.assertIn("yonsei-student-life/SKILL.md", archive.namelist())
             with zipfile.ZipFile(output / "yonsei-universal-plugin.zip") as archive:
                 manifest = json.loads(
@@ -67,7 +67,7 @@ class ReleasePackageTests(unittest.TestCase):
                     name for name in archive.namelist()
                     if name.endswith("/SKILL.md") and "/skills/" in name
                 ]
-                self.assertEqual(len(skill_files), 32)
+                self.assertEqual(len(skill_files), 35)
 
     def test_packages_are_deterministic_and_checksums_match(self):
         with tempfile.TemporaryDirectory() as first, tempfile.TemporaryDirectory() as second:

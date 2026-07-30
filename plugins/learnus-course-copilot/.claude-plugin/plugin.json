@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "learnus-course-copilot",
   "displayName": "LearnUs 학습 도우미",
-  "version": "0.3.0",
-  "description": "LearnUs 강의, 과제 마감일, 학습자료를 정리합니다. 비밀번호는 숨김 입력으로 받아 실행 중 메모리에만 유지합니다.",
+  "version": "0.4.0",
+  "description": "기존 연세 브라우저 로그인을 이어 사용해 LearnUs 강의, 과제 마감일, 학습자료를 정리합니다. GUI 없는 메모리 전용 세션은 요청한 경우에만 사용합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

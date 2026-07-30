@@ -9,15 +9,13 @@ Return one result only: the visible course index. Do not collect deadlines or ma
 
 ## Workflow
 
-1. If an HTML dashboard snapshot is not supplied, use the sibling session client:
-
-   ```bash
-   python3 "$SKILL_DIR/../manage-learnus-session/scripts/learnus_headless.py" fetch \
-     --url "https://ys.learnus.org/my/" \
-     --output "<fresh secure temporary path>"
-   ```
-
-2. Parse the snapshot:
+1. When a browser is available, reuse the student's authenticated LearnUs
+   profile and open `https://ys.learnus.org/my/`. If login appears, invoke
+   `$manage-learnus-session` once and resume in the same browser.
+2. Read the visible course cards from the authorized **My courses** dashboard.
+   Do not navigate into every course.
+3. When an HTML dashboard snapshot is supplied, or the student explicitly chose
+   optional terminal mode, parse it with:
 
    ```bash
    python3 "$SKILL_DIR/scripts/list_courses.py" \
@@ -25,9 +23,12 @@ Return one result only: the visible course index. Do not collect deadlines or ma
      --base-url "https://ys.learnus.org/my/"
    ```
 
-3. Return each course name, stable course ID when present, and redacted LearnUs URL. Preserve the dashboard order.
-4. If the result is `login_required`, invoke `$manage-learnus-session`. If it is `blocked`, report the access or maintenance boundary without treating it as authenticated.
-5. Delete temporary HTML after extracting the result.
+4. Return each course name, stable course ID when present, and redacted LearnUs
+   URL. Preserve the dashboard order.
+5. If a supplied snapshot returns `login_required`, invoke
+   `$manage-learnus-session`. If it is `blocked`, report the access or
+   maintenance boundary without treating it as authenticated.
+6. Delete temporary HTML after extracting the result.
 
 ## Boundaries
 

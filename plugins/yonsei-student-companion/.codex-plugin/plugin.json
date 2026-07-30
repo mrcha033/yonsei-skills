@@ -1,0 +1,38 @@
+{
+  "name": "yonsei-student-companion",
+  "version": "0.1.0",
+  "description": "연세 포털에 한 번 로그인한 브라우저 세션을 이어 쓰고, 원하는 학생 서비스로 이동하거나 오늘의 수업·마감·예약을 한 번에 정리합니다.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
+  "keywords": [
+    "yonsei",
+    "portal",
+    "session",
+    "student",
+    "daily"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "오늘의 연세·포털 연결",
+    "shortDescription": "한 번 로그인하고 오늘 할 일을 한눈에",
+    "longDescription": "학생이 공식 연세 로그인 화면에서 한 번 인증하면 같은 브라우저 프로필을 학사·LearnUs·출결·셔틀·공간·도서관 등에 이어 사용합니다. 원하는 포털 기능을 자연어로 열고, 접근 가능한 공식 화면에서 오늘과 7일 안의 할 일을 읽기 전용으로 정리합니다.",
+    "developerName": "mrcha033",
+    "category": "Education",
+    "capabilities": [
+      "Persistent browser-profile session reuse",
+      "Current official portal service routing",
+      "Read-only daily student briefing"
+    ],
+    "websiteURL": "https://github.com/mrcha033/yonsei-skills",
+    "defaultPrompt": [
+      "연세 포털에 한 번 로그인하고 계속 이어서 써 줘.",
+      "도서관 좌석 예약 화면을 찾아 바로 열어 줘.",
+      "오늘 수업, LearnUs 마감, 출결, 예약을 한 번에 정리해 줘."
+    ]
+  }
+}

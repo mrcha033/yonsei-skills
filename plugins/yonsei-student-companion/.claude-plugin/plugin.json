@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "yonsei-student-companion",
+  "displayName": "오늘의 연세·포털 연결",
+  "version": "0.1.0",
+  "description": "연세 포털에 한 번 로그인한 브라우저 세션을 이어 쓰고, 원하는 학생 서비스로 이동하거나 오늘의 수업·마감·예약을 한 번에 정리합니다.",
+  "author": {
+    "name": "mrcha033",
+    "url": "https://github.com/mrcha033"
+  },
+  "homepage": "https://github.com/mrcha033/yonsei-skills",
+  "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
+  "keywords": [
+    "yonsei",
+    "portal",
+    "session",
+    "student",
+    "daily"
+  ],
+  "skills": "./skills/"
+}

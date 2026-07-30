@@ -17,6 +17,10 @@ The authenticated portal may override the public map with role-specific link
 metadata. Therefore a copied `main.jsp#` or `href="#"` is a SPA placeholder,
 not evidence that services share one backend or require VPN.
 
+The current public link lookup returned 59 entries across common, Sinchon, and
+Mirae services. The student companion resolves through the live portal rather
+than treating copied placeholder anchors as destinations.
+
 | Service | Portal key | Publicly resolved entry |
 | --- | --- | --- |
 | Academic information | `LK001_A` | `https://underwood1.yonsei.ac.kr/passni/spLogin.jsp?locale=ko` |
@@ -42,7 +46,8 @@ the university documents a safe supported path.
 
 | Plugin | Verified evidence | Installable result scope | Still pending live acceptance | Disabled writes |
 | --- | --- | --- | --- | --- |
-| LearnUs | Headless SSO parser, memory-only session lifecycle, expiry and reauthentication tests | hidden-prompt session plus authorized course, deadline, and material reads | current SSO flow with a student's account after install | course writes, submissions, messages, grading |
+| Student companion | Official portal page, 59-entry live link catalogue, browser-visible login boundaries, public student-service front doors | persistent browser-profile login reuse, current portal routing, read-only daily briefing | current student account across each selected downstream service | all reservations, applications, attendance, issuance, payment, and messages |
+| LearnUs | Browser-visible Portal Login boundary plus headless SSO parser, memory-only optional session lifecycle, expiry and reauthentication tests | browser-first course, deadline, and material reads; optional hidden-prompt background session | current SSO flow with a student's account after install | course writes, submissions, messages, grading |
 | Academic | Official portal entry, 2026 university catalog, and department-specific requirement pages | supplied class, grade and enrollment audits plus sourced graduation progress and semester planning | official portal graduation-audit comparison for each program | profile, leave/return, registration, withdrawal, grade changes |
 | Attendance | SSO application `yscattend`; official student/chapel guidance | supplied attendance summary, discrepancy review, unsent correction draft | student record fields and correction-status workflow | check-in, presence attestation, record changes, correction submission |
 | Certificate | Official internet-certificate flow plus locally pinned ReportX runtime assets | certificate selection, one-time document-number reservation, compatibility PDF review, and optional confirmed physical print | authenticated issuance with a student's chosen certificate and printer | certificate-field alteration, uncertain retry, paid electronic-certificate payment |

@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT = ROOT / "dist"
 FIXED_TIME = (2026, 1, 1, 0, 0, 0)
 STUDENT_PLUGINS = (
+    "yonsei-student-companion",
     "yonsei-notice-monitor",
     "yonsei-course-registration",
     "yonsei-attendance-copilot",
@@ -108,8 +109,8 @@ def student_skills() -> list[Path]:
                 raise PackageError(f"Duplicate student skill name: {name}")
             names.add(name)
             result.append(skill_dir)
-    if len(result) != 32:
-        raise PackageError(f"Expected 32 student skills, found {len(result)}")
+    if len(result) != 35:
+        raise PackageError(f"Expected 35 student skills, found {len(result)}")
     return result
 
 
@@ -141,7 +142,7 @@ def wrapper_skill_markdown(skills: list[Path]) -> str:
     routes = "\n".join(rows)
     return f"""---
 name: yonsei-student-life
-description: Help Yonsei University students manage notices, courses, attendance, shuttle trips, space requests, academic records, graduation requirements, certificates, and LearnUs. Use when a student asks for any recurring Yonsei student-life workflow.
+description: Help Yonsei University students reuse one official browser login and manage a daily briefing, notices, courses, attendance, shuttle trips, space requests, academic records, graduation requirements, certificates, and LearnUs. Use when a student asks for any recurring Yonsei student-life workflow.
 ---
 
 # Yonsei Student Life
@@ -184,7 +185,7 @@ def build_codex_ui_pack(output: Path, version: str) -> None:
         add_bytes(
             archive,
             f"{root}/PACKAGE_INFO.txt",
-            f"Yonsei Student UI Pack {version}\nStudent plugins: 8\nStudent skills: 32\n".encode(),
+            f"Yonsei Student UI Pack {version}\nStudent plugins: 9\nStudent skills: 35\n".encode(),
         )
         for plugin_name in STUDENT_PLUGINS:
             add_tree(
@@ -213,7 +214,7 @@ def universal_manifest(version: str) -> dict:
     return {
         "name": "yonsei-student-life",
         "version": version,
-        "description": "Yonsei student-life workflows for notices, courses, graduation, shuttle, spaces, certificates, and LearnUs.",
+        "description": "Yonsei student-life workflows with reusable browser login, a daily briefing, notices, courses, graduation, shuttle, spaces, certificates, and LearnUs.",
         "author": {"name": "mrcha033", "url": "https://github.com/mrcha033"},
         "homepage": "https://github.com/mrcha033/yonsei-skills",
         "repository": "https://github.com/mrcha033/yonsei-skills",
@@ -222,12 +223,14 @@ def universal_manifest(version: str) -> dict:
         "skills": "./skills/",
         "interface": {
             "displayName": "연세 학생생활 도우미",
-            "shortDescription": "공지부터 수강·셔틀·졸업·LearnUs까지",
-            "longDescription": "연세대학교 학생이 반복해서 확인하는 공지, 수강계획, 출결, 셔틀, 공간대관, 학사·졸업, 증명서, LearnUs 업무를 자연어로 처리합니다.",
+            "shortDescription": "한 번 로그인하고 오늘 할 일부터 졸업까지",
+            "longDescription": "공식 연세 로그인 화면에서 한 번 인증한 브라우저 프로필을 이어 사용하고, 오늘의 수업·마감·출결·예약과 공지, 수강계획, 셔틀, 공간대관, 학사·졸업, 증명서, LearnUs 업무를 자연어로 처리합니다.",
             "developerName": "mrcha033",
             "category": "Education",
             "capabilities": [
                 "Official notice search",
+                "Reusable official browser session",
+                "Read-only daily student briefing",
                 "Course and graduation planning",
                 "Reviewed campus workflow assistance",
             ],
@@ -235,6 +238,7 @@ def universal_manifest(version: str) -> dict:
             "privacyPolicyURL": "https://github.com/mrcha033/yonsei-skills/blob/main/docs/privacy.md",
             "termsOfServiceURL": "https://github.com/mrcha033/yonsei-skills/blob/main/docs/terms.md",
             "defaultPrompt": [
+                "연세 포털에 한 번 로그인하고 오늘 할 일을 정리해 줘.",
                 "이번 주에 놓치면 안 되는 연세대 공지를 찾아 줘.",
                 "내 성적표와 전공 졸업요건을 비교해 줘.",
                 "정원과 지난 컷을 고려해 수강 마일리지를 나눠 줘.",

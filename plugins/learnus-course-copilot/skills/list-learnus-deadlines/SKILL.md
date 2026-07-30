@@ -9,15 +9,12 @@ Return one result only: assignment deadlines supported by visible course-page as
 
 ## Workflow
 
-1. Obtain the exact authorized course page with the sibling session client when no snapshot is supplied:
-
-   ```bash
-   python3 "$SKILL_DIR/../manage-learnus-session/scripts/learnus_headless.py" fetch \
-     --url "https://ys.learnus.org/course/view.php?id=<course-id>" \
-     --output "<fresh secure temporary path>"
-   ```
-
-2. Parse the snapshot:
+1. When a browser is available, reuse the student's authenticated LearnUs
+   profile, select the exact course from **My courses**, and read its visible
+   assignment activities. If login appears, invoke `$manage-learnus-session`
+   once and resume in the same browser.
+2. When an HTML course snapshot is supplied, or the student explicitly chose
+   optional terminal mode, parse it with:
 
    ```bash
    python3 "$SKILL_DIR/scripts/list_deadlines.py" \
@@ -25,9 +22,12 @@ Return one result only: assignment deadlines supported by visible course-page as
      --base-url "https://ys.learnus.org/course/view.php?id=<course-id>"
    ```
 
-3. Return assignment label, associated deadline, redacted URL, and association evidence. Preserve course order.
-4. Report assignments with ambiguous or missing dates separately; never promote a page-global date to a deadline.
-5. If the result is `login_required`, invoke `$manage-learnus-session`. If it is `blocked`, stop.
+3. Return assignment label, associated deadline, redacted URL, and association
+   evidence. Preserve course order.
+4. Report assignments with ambiguous or missing dates separately; never promote
+   a page-global date to a deadline.
+5. If a supplied snapshot returns `login_required`, invoke
+   `$manage-learnus-session`. If it is `blocked`, stop.
 6. Delete temporary HTML after extraction.
 
 ## Boundaries

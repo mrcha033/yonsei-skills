@@ -21,10 +21,11 @@
 > 사용자의 학교 브라우저를 직접 눌러야 하는 셔틀 예약·공간 신청·증명서
 > 발급은 Codex 데스크톱에서 진행하세요.
 
-## 먼저 써 볼 세 가지
+## 먼저 써 볼 네 가지
 
 | 플러그인 | 이런 때 사용하세요 | 현재 범위 |
 | --- | --- | --- |
+| `yonsei-student-companion` | 포털 로그인을 반복하고 싶지 않거나 오늘 할 일을 한 번에 보고 싶을 때 | 공식 화면에서 한 번 로그인한 브라우저 세션 재사용·자연어 바로가기·오늘의 학생 브리핑 |
 | `yonsei-notice-monitor` | 장학금, 등록금, 기숙사, IT 장애 공지를 놓치고 싶지 않을 때 | 공식 공개 공지 실시간 검색·마감일 추출·이전 확인과 비교 |
 | `yonsei-course-registration` | 시간표와 마일리지 배분을 함께 짜고 싶을 때 | 충돌 없는 시간표와 정원·신청자·지난 컷을 고려한 마일리지 전략 |
 | `yonsei-attendance-copilot` | 결석·지각 현황을 확인하거나 정정 문의를 준비할 때 | 첨부한 화면·표를 정리하고 문의 초안 작성, 출석 체크는 하지 않음 |
@@ -41,16 +42,17 @@
 
 ```bash
 codex plugin marketplace add mrcha033/yonsei-skills
-codex plugin add yonsei-notice-monitor@yonsei-skills
+codex plugin add yonsei-student-companion@yonsei-skills
 ```
 
 설치가 끝나면 새 작업을 열고 평소 말하듯 질문하세요.
 
-> 이번 주에 내가 놓치면 안 되는 연세대 공지를 찾아 줘.
+> 연세 포털에 한 번 로그인하고 오늘 할 일을 정리해 줘.
 
-시간표 도구도 쓰려면 다음 한 줄만 추가합니다.
+공지나 시간표 도구도 쓰려면 다음 플러그인을 추가합니다.
 
 ```bash
+codex plugin add yonsei-notice-monitor@yonsei-skills
 codex plugin add yonsei-course-registration@yonsei-skills
 ```
 
@@ -58,7 +60,7 @@ codex plugin add yonsei-course-registration@yonsei-skills
 
 ```bash
 claude plugin marketplace add mrcha033/yonsei-skills
-claude plugin install yonsei-notice-monitor@yonsei-skills
+claude plugin install yonsei-student-companion@yonsei-skills
 ```
 
 Claude Code 안에서는 `/plugin` 화면의 **Marketplaces** 탭에
@@ -82,9 +84,9 @@ ChatGPT Work와 Codex의 공개 Plugins 화면에 바로 나오려면 OpenAI의
 - 공지는 원하는 주제와 기간만 말하면 됩니다.
 - 시간표·학사·출결 정보는 화면 캡처를 첨부하거나 표를 그대로
   붙여 넣으면 됩니다.
-- 셔틀·공간·증명서는 학교 로그인 화면을 직접 열어 드립니다. 로그인은
-  학생이 공식 화면에서 하고, 실행 직전에는 정확한 대상을 다시 보여
-  드린 뒤 확인받습니다.
+- 포털·LearnUs·셔틀·공간·증명서는 같은 브라우저 프로필을 우선
+  재사용합니다. 학생은 공식 화면에서 한 번 로그인하고, 학교 세션이
+  만료될 때만 다시 연결합니다.
 - 플러그인이 읽을 수 있는 항목만 임시로 구조화하며, 결과에는 자료를
   확인한 시각과 빠진 항목을 함께 표시합니다.
 - 최신 상태가 중요한 좌석·출결·공간 정보는 첨부한 화면 시각 이후에도
@@ -106,6 +108,7 @@ ChatGPT Work와 Codex의 공개 Plugins 화면에 바로 나오려면 OpenAI의
 
 | 플러그인 | 설치 명령 | 할 수 있는 일 |
 | --- | --- | --- |
+| 포털·오늘의 연세 | `codex plugin add yonsei-student-companion@yonsei-skills` | 한 번 로그인한 브라우저 세션 재사용, 자연어 포털 바로가기, 오늘 수업·마감·출결·예약 요약 |
 | 공지·마감일 | `codex plugin add yonsei-notice-monitor@yonsei-skills` | 대학·IT 공식 공지 검색, 본문 날짜 추출, 이전 확인과 비교 |
 | 수강계획 | `codex plugin add yonsei-course-registration@yonsei-skills` | 시간표 후보, 충돌·이동시간, 정원·이전 컷 기반 마일리지 전략 |
 | 전자출결 | `codex plugin add yonsei-attendance-copilot@yonsei-skills` | 출결 요약, 확인할 기록 찾기, 정정 문의 초안 |
@@ -115,15 +118,15 @@ ChatGPT Work와 Codex의 공개 Plugins 화면에 바로 나오려면 OpenAI의
 | 증명서 | `codex plugin add yonsei-certificate-assistant@yonsei-skills` | 증명서 선택부터 문서번호 예약·호환 PDF 확인·선택적 인쇄 |
 | LearnUs | `codex plugin add learnus-course-copilot@yonsei-skills` | 강의·마감일·자료 정리, 실행 중 로그인 만료 자동 복구 |
 
-학생용 플러그인 8개에 32개 스킬이 들어 있습니다. 마켓플레이스에는
+학생용 플러그인 9개에 35개 스킬이 들어 있습니다. 마켓플레이스에는
 스킬이 아니라 플러그인 단위로 표시되며, 플러그인을 설치하면 포함된
-스킬이 함께 활성화됩니다. 이전에 언급된 37개와 현재 전체 44개의 구분은
+스킬이 함께 활성화됩니다. 이전에 언급된 37개와 현재 전체 47개의 구분은
 [`docs/skill-catalog.md`](docs/skill-catalog.md)에 정리했습니다.
 
-LearnUs는 지속형 학생 API 토큰 대신 숨김 비밀번호 입력으로 로컬
-백그라운드 세션을 시작합니다. 비밀번호와 쿠키는 파일에 저장하지 않고
-실행 중 메모리에만 유지하므로, 서비스를 끄거나 재부팅하면 다시
-로그인해야 합니다.
+LearnUs도 기본적으로 같은 브라우저 프로필을 이어 씁니다. 포털 로그인,
+외부 로그인, MFA가 필요하면 공식 화면을 그대로 열어 두고 학생이 한 번
+완료한 뒤 원래 작업을 계속합니다. 터미널 기반 메모리 전용 세션은
+학생이 백그라운드 실행을 명시적으로 요청한 경우에만 선택합니다.
 
 ## 연구·행정용 플러그인
 
@@ -135,9 +138,9 @@ LearnUs는 지속형 학생 API 토큰 대신 숨김 비밀번호 입력으로 �
 
 - 비밀번호, OTP, 세션 쿠키를 채팅에 붙여 넣지 마세요.
 - 공개 공지 도구는 로그인과 VPN이 필요 없습니다.
-- LearnUs 비밀번호는 채팅이나 명령 인자가 아니라 터미널의 숨김 입력창에
-  직접 입력합니다.
-- 셔틀·공간·증명서는 학교 공식 브라우저 화면에서 직접 로그인합니다.
+- 로그인은 포털·LearnUs 등 학교 공식 브라우저 화면에서 직접 합니다.
+  도구는 비밀번호나 쿠키를 복사하지 않고 같은 브라우저 프로필만
+  이어 씁니다.
 - 화면 캡처를 첨부하기 전 학번, 전화번호, 주소처럼 질문에 필요 없는
   정보는 가리는 것을 권장합니다.
 - 학사·출결·연구·행정 도구는 인식한 최소 필드만 결과에 남깁니다.
@@ -158,6 +161,9 @@ LearnUs는 지속형 학생 API 토큰 대신 숨김 비밀번호 입력으로 �
 
 서비스별 확인 근거와 남은 범위는
 [`docs/service-evidence-matrix.md`](docs/service-evidence-matrix.md)에 있습니다.
+포털에서 확인한 기능과 다음 우선순위는
+[`docs/portal-convenience-review.md`](docs/portal-convenience-review.md)에
+정리했습니다.
 
 ## 업데이트와 삭제
 

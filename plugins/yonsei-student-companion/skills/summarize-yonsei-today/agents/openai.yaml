@@ -1,0 +1,4 @@
+interface:
+  display_name: "오늘의 연세"
+  short_description: "오늘 수업·마감·출결·예약을 한 화면처럼 정리합니다"
+  default_prompt: "Use $summarize-yonsei-today to 오늘 내가 확인할 연세대 일정과 마감, 출결, 예약을 정리해 줘."

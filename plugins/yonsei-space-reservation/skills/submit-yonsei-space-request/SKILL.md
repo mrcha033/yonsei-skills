@@ -10,11 +10,13 @@ submission.
 
 ## Workflow
 
-1. Open `https://space.yonsei.ac.kr/` in a browser that can use the student's
-   session.
-2. If login is required, leave the official page open and ask the student to
-   sign in there. Never request the password in chat or inspect cookies, local
-   storage, or saved passwords.
+1. Reuse the student's persistent Yonsei browser profile and any already open
+   official portal tab. Do not start an isolated headless browser. Open
+   `https://space.yonsei.ac.kr/`.
+2. If login is required, leave the exact official page open and ask the student
+   once to sign in there. Resume this workflow in the same browser profile.
+   Never request the password in chat or inspect cookies, local storage, or
+   saved passwords.
 3. Collect date, start and end time, headcount, purpose, preferred building,
    required equipment, organizer, and contact information.
 4. Search the official page. Transcribe the exact selected room, displayed

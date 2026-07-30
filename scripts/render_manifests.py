@@ -19,15 +19,34 @@ INSTALLATIONS = {
 }
 
 SPECS = {
+    "yonsei-student-companion": {
+        "version": "0.1.0",
+        "display": "오늘의 연세·포털 연결",
+        "description": "연세 포털에 한 번 로그인한 브라우저 세션을 이어 쓰고, 원하는 학생 서비스로 이동하거나 오늘의 수업·마감·예약을 한 번에 정리합니다.",
+        "short": "한 번 로그인하고 오늘 할 일을 한눈에",
+        "long": "학생이 공식 연세 로그인 화면에서 한 번 인증하면 같은 브라우저 프로필을 학사·LearnUs·출결·셔틀·공간·도서관 등에 이어 사용합니다. 원하는 포털 기능을 자연어로 열고, 접근 가능한 공식 화면에서 오늘과 7일 안의 할 일을 읽기 전용으로 정리합니다.",
+        "keywords": ["yonsei", "portal", "session", "student", "daily"],
+        "capabilities": [
+            "Persistent browser-profile session reuse",
+            "Current official portal service routing",
+            "Read-only daily student briefing",
+        ],
+        "prompts": [
+            "연세 포털에 한 번 로그인하고 계속 이어서 써 줘.",
+            "도서관 좌석 예약 화면을 찾아 바로 열어 줘.",
+            "오늘 수업, LearnUs 마감, 출결, 예약을 한 번에 정리해 줘.",
+        ],
+    },
     "learnus-course-copilot": {
-        "version": "0.3.0",
+        "version": "0.4.0",
         "display": "LearnUs 학습 도우미",
-        "description": "LearnUs 강의, 과제 마감일, 학습자료를 정리합니다. 비밀번호는 숨김 입력으로 받아 실행 중 메모리에만 유지합니다.",
-        "short": "강의·과제·자료와 로그인 만료 복구",
-        "long": "한 번의 숨김 비밀번호 입력으로 GUI 없는 LearnUs 세션을 시작하고, 실행 중 로그인 만료를 자동 복구하며 강의·과제·자료를 읽기 전용으로 정리합니다. 재부팅하거나 서비스를 끄면 다시 입력해야 합니다.",
+        "description": "기존 연세 브라우저 로그인을 이어 사용해 LearnUs 강의, 과제 마감일, 학습자료를 정리합니다. GUI 없는 메모리 전용 세션은 요청한 경우에만 사용합니다.",
+        "short": "브라우저 로그인으로 강의·과제·자료 정리",
+        "long": "공식 LearnUs 화면에서 학생이 한 번 로그인하면 같은 브라우저 프로필을 이어 사용해 강의·과제·자료를 읽기 전용으로 정리합니다. 세션이 만료될 때만 공식 화면에서 다시 연결하며, 터미널 기반 메모리 전용 세션은 학생이 명시적으로 요청한 경우에만 선택합니다.",
         "keywords": ["learnus", "yonsei", "lms", "course"],
         "capabilities": [
-            "Memory-only LearnUs session management",
+            "Persistent browser-profile LearnUs session",
+            "Optional memory-only background session",
             "Authorized course listing",
             "Associated deadline reporting",
             "Material and video inventory",
@@ -253,6 +272,7 @@ SPECS = {
 }
 
 MARKETPLACE_ORDER = [
+    "yonsei-student-companion",
     "yonsei-notice-monitor",
     "yonsei-course-registration",
     "yonsei-attendance-copilot",

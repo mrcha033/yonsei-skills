@@ -33,9 +33,11 @@ is not the paid signed electronic-certificate product.
      agent --allow-fetch --reserve-document-number
    ```
 
-5. Open the official Yonsei internet-certificate page in the browser. If login
-   is required, ask the student to sign in on that page. Never request the
-   password in chat or inspect cookies, local storage, or saved passwords.
+5. Reuse the student's persistent Yonsei browser profile and open the official
+   internet-certificate page. If login is required, leave that exact page open,
+   ask the student once to sign in there, and resume in the same profile. Never
+   request the password in chat or inspect cookies, local storage, or saved
+   passwords.
 6. Select the exact certificate, language, copies, and purpose. Before clicking
    **프린터 출력**, confirm the certificate type, copies, free-print path, and
    that one verification number will be reserved.

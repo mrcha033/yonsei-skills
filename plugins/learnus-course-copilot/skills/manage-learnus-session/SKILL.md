@@ -1,51 +1,61 @@
 ---
 name: manage-learnus-session
-description: Start, inspect, refresh, and stop a GUI-less Yonsei LearnUs session using a hidden terminal password prompt and memory-only credentials. Use when LearnUs authentication is required, an existing headless session expired, or the user asks to forget the retained password.
+description: Connect to Yonsei LearnUs in the student's persistent browser profile, reuse the official portal login, and recover from session expiry without receiving credentials in chat. Use when LearnUs login is required, a browser session expired, or the student asks to stay signed in; use the optional terminal session only when the student explicitly requests background or GUI-less operation.
 ---
 
 # Manage LearnUs Session
 
-Keep authentication separate from course-data tasks. Never ask for a Yonsei password in chat or pass one in an argument, environment variable, file, log, or artifact.
+Default to the student's browser, not a terminal login.
 
-## Workflow
+## Browser-first workflow
 
-1. Inspect the local service:
+1. Reuse the persistent browser profile already used for Yonsei. Open:
 
-   ```bash
-   python3 "$SKILL_DIR/scripts/learnus_headless.py" status
-   ```
+   `https://ys.learnus.org/my/`
 
-2. If it is not running, ask the user to run this command in their interactive terminal:
+2. If the authorized **My courses** dashboard is visible, continue without
+   interrupting the student.
+3. If **Portal Login**, **External Login**, an ID/password form, MFA, or a
+   session-expired page appears, leave that exact official tab open and ask the
+   student once to complete login there.
+4. Resume in the same browser profile. Verify the visible **My courses**
+   dashboard and account menu before treating the session as connected.
+5. Reuse that tab or profile for course, deadline, and material reads. On
+   expiry, return to the official login screen and resume the last read-only
+   step.
 
-   ```bash
-   python3 "$SKILL_DIR/scripts/learnus_headless.py" start --username "<Yonsei ID>"
-   ```
+Never inspect or copy cookies, browser storage, saved passwords, OTPs, or
+session parameters.
 
-   The command must read the password through its hidden TTY prompt. Do not run `start` through a non-interactive wrapper.
+## Optional terminal mode
 
-3. Report whether the local service is running, whether a session was established, its `last-known-authenticated` state, and how many automatic reauthentications occurred. `status` deliberately performs no remote request, so never describe it as proof that the current cookie is still valid.
-4. To fetch an exact authorized LearnUs page for a sibling outcome skill:
+Use the bundled memory-only service only when the student explicitly asks for
+background or GUI-less operation:
 
-   ```bash
-   python3 "$SKILL_DIR/scripts/learnus_headless.py" fetch \
-     --url "https://ys.learnus.org/..." \
-     --output "<fresh secure temporary path>"
-   ```
+```bash
+python3 "$SKILL_DIR/scripts/learnus_headless.py" status
+python3 "$SKILL_DIR/scripts/learnus_headless.py" start --username "<Yonsei ID>"
+```
 
-5. Stop the service when requested or when retained credentials are no longer needed:
+The student must run `start` in their own interactive terminal and enter the
+password at its hidden prompt. Never run it through a non-interactive wrapper.
+The password remains only in that process and is lost when it stops.
 
-   ```bash
-   python3 "$SKILL_DIR/scripts/learnus_headless.py" stop
-   ```
+Stop it when requested:
+
+```bash
+python3 "$SKILL_DIR/scripts/learnus_headless.py" stop
+```
 
 ## Boundaries
 
-- Follow `references/headless-auth.md`.
-- Accept only HTTPS on port 443 for the fixed LearnUs and Yonsei SSO hosts.
-- Fetch only the read-only dashboard (`/my/`) and one numeric course view (`/course/view.php?id=...`); reject logout and action paths.
-- Do not follow an external redirect with cookies or credential context.
-- Fail closed on CAPTCHA, MFA, access-denied, maintenance, unexpected SSO pages, or repeated login responses.
-- Retain the password only inside the local process for automatic reauthentication.
-- Use browser authentication only when interactive verification is required; never copy browser cookies into this service.
+- Do not describe a saved browser profile as permanent authentication; school
+  sessions expire.
+- Do not enable or request a Moodle token that the student's account does not
+  expose.
+- Do not submit assignments, messages, grades, or course changes.
+- Stop on CAPTCHA, unexpected identity-provider pages, or repeated login
+  responses and leave the official page for the student.
 
-Run `python3 "$SKILL_DIR/scripts/learnus_headless.py" self-test` after changes.
+Run `python3 "$SKILL_DIR/scripts/learnus_headless.py" self-test` after terminal
+session code changes.

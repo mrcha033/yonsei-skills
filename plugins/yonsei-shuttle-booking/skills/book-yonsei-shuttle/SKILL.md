@@ -19,14 +19,15 @@ confirm the write, execute once, and verify the official result.
 
 ## Workflow
 
-1. Open the official shuttle entry in a browser that can use the student's
-   existing Yonsei session:
+1. Reuse the student's persistent Yonsei browser profile and any already open
+   official portal tab. Do not start an isolated headless browser. Open:
 
    `https://underwood1.yonsei.ac.kr/com/lgin/SsoCtr/initExtPageWork.do?link=shuttle`
 
-2. If login is required, leave the official page open and ask the student to
-   sign in there. Never ask for the password in chat or inspect browser
-   cookies, storage, or saved passwords.
+2. If login is required, leave the exact official page open and ask the student
+   once to sign in there. Resume this workflow in the same browser profile.
+   Never ask for the password in chat or inspect browser cookies, storage, or
+   saved passwords.
 3. Open **예약**, select the departure area and date, and read the live rows.
    Transcribe only the official fields listed in
    `references/official-browser-workflow.md`.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "연세 서비스 바로가기"
+  short_description: "원하는 포털 기능을 말하면 정확한 화면을 엽니다"
+  default_prompt: "Use $open-yonsei-service to 내가 원하는 연세 포털 기능을 찾아 바로 열어 줘."
