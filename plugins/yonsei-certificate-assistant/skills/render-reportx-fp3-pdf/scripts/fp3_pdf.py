@@ -303,6 +303,7 @@ _FONT_CANDIDATES = {
     "korean-fallback": (
         "/System/Library/Fonts/Supplemental/AppleGothic.ttf",
         "/System/Library/Fonts/AppleSDGothicNeo.ttc",
+        "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
         "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     ),
