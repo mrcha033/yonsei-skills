@@ -10,10 +10,9 @@ supplied snapshot.
 
 ## Preferred command path
 
-Call `yonsei_learnus_attendance` with `service: "attendance"`. Normalize its
-structured rows with the bundled summarizer. Use an attachment or pasted table
-only when the official page is unavailable. This is read-only and must never
-enter a code or perform check-in.
+Call `yonsei_student` with `intent: "attendance"`. Normalize attendance rows
+from `primary_result` with the bundled summarizer. Use an attachment only when
+the official page is unavailable. Never enter a code or perform check-in.
 
 ## Prepare the input
 

@@ -10,9 +10,9 @@ rules for their admission year, college, department, and teaching subject.
 
 ## Preferred command path
 
-Call `yonsei_graduation_teaching` with `include_teaching: true`. Use its
-teaching rows as calculator input. The command reads existing results and does
-not press the official self-diagnosis button.
+Call `yonsei_student` with `intent: "graduation"` and
+`request.include_teaching: true`. Use the teaching rows in `primary_result` as
+calculator input. It does not press the official self-diagnosis button.
 
 ## Workflow
 

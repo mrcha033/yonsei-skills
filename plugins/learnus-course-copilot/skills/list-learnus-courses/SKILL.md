@@ -9,9 +9,9 @@ Return one result only: the visible course index. Do not collect deadlines or ma
 
 ## Preferred command path
 
-Call `yonsei_learnus_attendance` with `service: "learnus"` and use its
-deduplicated course links. If login is required, call `yonsei_bridge_connect`
-once and resume after the visible login.
+Call `yonsei_student` with `intent: "learnus"` and use the courses in
+`primary_result`. If login is required, call `yonsei_bridge_connect` once and
+resume after the visible login.
 
 ## Workflow
 

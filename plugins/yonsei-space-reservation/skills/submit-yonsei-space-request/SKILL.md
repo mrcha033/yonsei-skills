@@ -10,11 +10,10 @@ submission.
 
 ## Preferred command path
 
-Call `yonsei_space_dorm` with `service: "space"` to read live rooms. After the
-student selects one, pass exact visible field labels in `fields` and the room
-identity in `row_terms`. First call with `confirmed: false` for review, then
-repeat with `confirmed: true` and the exact `submit_button`. Report only the
-official result returned after that single submission.
+Call `yonsei_student` with `intent: "space"`. Put date, start/end time,
+headcount, purpose, building, equipment, organizer, and contact in `request`;
+never pass screen labels. After selection, repeat with its `selection_id`,
+`action: "submit"`, and `confirmed: true`. Report only `primary_result`.
 
 ## Workflow
 

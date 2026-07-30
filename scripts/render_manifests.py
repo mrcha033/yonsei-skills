@@ -20,7 +20,7 @@ INSTALLATIONS = {
 
 SPECS = {
     "yonsei-student-companion": {
-        "version": "0.3.0",
+        "version": "0.4.0",
         "display": "오늘의 연세·포털 연결",
         "description": "한 번 로그인한 공통 브라우저를 이어 쓰고 포털·Underwood·LearnUs·출결·셔틀·공간·증명서를 빠른 명령으로 처리합니다.",
         "short": "한 번 로그인하고 학교생활을 한눈에",
@@ -35,6 +35,8 @@ SPECS = {
             "Exchange journey tracking",
             "Fast authenticated Portal and Underwood commands",
             "Cross-platform shuttle, space, dorm, and document actions",
+            "Single student-language router",
+            "Student-friendly recovery messages and primary results",
         ],
         "prompts": [
             "연세 포털에 한 번 로그인하고 계속 이어서 써 줘.",

@@ -9,10 +9,10 @@ Use the deterministic calculator instead of estimating requirements from memory.
 
 ## Preferred command path
 
-Call `yonsei_graduation_teaching`. Use its `calculator_input` as the official
-progress snapshot, then apply the exact admission-year and program rules with
-the bundled calculator. Never turn the bridge result alone into an official
-graduation decision.
+Call `yonsei_student` with `intent: "graduation"`. Use the rows in
+`primary_result` as the official progress snapshot, then apply the exact
+admission-year and program rules with the bundled calculator. Never turn the
+bridge result alone into an official graduation decision.
 
 ## Workflow
 

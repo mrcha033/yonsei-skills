@@ -11,14 +11,22 @@ from pathlib import Path
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from yonsei_bridge.bridge import BridgeError, YonseiBridge
+    from yonsei_bridge.router import INTENTS, StudentRouter
 else:
     from .bridge import BridgeError, YonseiBridge
+    from .router import INTENTS, StudentRouter
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("connect")
+    student = sub.add_parser("student", help="Run one student-language Yonsei request.")
+    student.add_argument("intent", choices=INTENTS)
+    student.add_argument("--action", default="status")
+    student.add_argument("--request", default="{}", help="JSON object with student-language details.")
+    student.add_argument("--selection-id")
+    student.add_argument("--confirmed", action="store_true")
     today = sub.add_parser("today")
     today.add_argument("--full", action="store_true")
     apps = sub.add_parser("applications")
@@ -53,9 +61,21 @@ def main() -> int:
     documents.add_argument("--confirmed", action="store_true")
     args = parser.parse_args()
     bridge = YonseiBridge()
+    router = StudentRouter(bridge)
     try:
         if args.command == "connect":
             result = bridge.status()
+        elif args.command == "student":
+            request = json.loads(args.request)
+            if not isinstance(request, dict):
+                raise BridgeError("--request must be a JSON object.")
+            result = router.run(
+                intent=args.intent,
+                action=args.action,
+                request=request,
+                selection_id=args.selection_id,
+                confirmed=args.confirmed,
+            )
         elif args.command == "today":
             result = bridge.today(full=args.full)
         elif args.command == "applications":
@@ -102,7 +122,7 @@ def main() -> int:
                 output_format=args.output_format,
                 confirmed=args.confirmed,
             )
-    except BridgeError as error:
+    except (BridgeError, json.JSONDecodeError) as error:
         print(json.dumps({"schema": "yonsei-bridge-error/v1", "error": str(error)}, ensure_ascii=False))
         return 2
     print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))

@@ -10,9 +10,9 @@ past results. Do not present historical cutoffs as guarantees.
 
 ## Preferred command path
 
-Call `yonsei_mileage_history` first. It returns both personal mileage history
-and the current registration rows. Feed those values into the bundled
-calculator; ask the student only for constraints or desired courses that are
+Call `yonsei_student` with `intent: "courses"`. Its `primary_result` contains
+personal mileage history and current registration rows. Feed those values into
+the bundled calculator; ask only for constraints or desired courses that are
 not visible.
 
 ## Workflow

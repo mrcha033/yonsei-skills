@@ -10,10 +10,10 @@ several portal menus.
 
 ## Preferred command path
 
-Call `yonsei_today` with `full: true`. If it returns `login_required`, call
-`yonsei_bridge_connect`, let the student finish the one visible official login,
-then call `yonsei_today` again. Use manual browser navigation only when the
-bridge reports an unsupported page.
+Call `yonsei_student` with `intent: "today"` and `request.full: true`. If it
+returns `login_required`, call `yonsei_bridge_connect`, let the student finish
+the one visible official login, then repeat the same request. Report
+`primary_result` first.
 
 ## Workflow
 

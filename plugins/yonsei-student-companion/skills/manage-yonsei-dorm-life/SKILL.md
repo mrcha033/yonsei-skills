@@ -10,10 +10,10 @@ authenticated browser session on Windows, macOS, or Linux.
 
 ## Preferred command path
 
-Call `yonsei_space_dorm` with `service: "dorm"` and the exact visible dorm
-category/menu. Status is read-only. For an application, booking, cancellation,
-or report, fill exact visible labels, review once with `confirmed: false`, then
-repeat with `confirmed: true` and the exact final button.
+Call `yonsei_student` with `intent: "dorm"` and put campus, dorm, date, reason,
+facility, roommate, or issue in `request`. Status is read-only. For an
+application, booking, cancellation, or report, review `primary_result`, then
+repeat with the selected ID and `confirmed: true`.
 
 ## Workflow
 

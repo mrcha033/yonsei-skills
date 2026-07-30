@@ -11,7 +11,7 @@
       "displayName": "오늘의 연세·포털 연결",
       "source": "./plugins/yonsei-student-companion",
       "description": "한 번 로그인한 공통 브라우저를 이어 쓰고 포털·Underwood·LearnUs·출결·셔틀·공간·증명서를 빠른 명령으로 처리합니다.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "mrcha033"
       },

@@ -9,10 +9,9 @@ Turn Underwood's many application menus into one deadline radar.
 
 ## Preferred command path
 
-Call `yonsei_academic_applications` with the visible Underwood category and,
-when known, the exact application name. Its structured rows and menu items are
-the live input for the radar. Use screenshots or manual clicking only as a
-fallback.
+Call `yonsei_student` with `intent: "applications"` and put the student-facing
+category and application name in `request`. Use its `primary_result` as the
+live radar input. Use screenshots only as a fallback.
 
 ## Workflow
 

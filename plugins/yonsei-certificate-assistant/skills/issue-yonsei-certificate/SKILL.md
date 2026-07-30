@@ -12,11 +12,10 @@ local compatibility-PDF path on macOS/Linux. Read
 
 ## Preferred command path
 
-Call `yonsei_documents` with the certificate type. For issuance, review the
-selection first, then call it with `action: "issue"` and `confirmed: true`.
-Windows continues through official ReportX; macOS/Linux starts the bundled
-loopback compatibility agent with the authorized title/body fonts and opens the
-official iCert page in the shared session.
+Call `yonsei_student` with `intent: "documents"` and put document type,
+language, copies, and output format in `request`. Review `primary_result`, then
+repeat with `action: "issue"` and `confirmed: true`. Windows uses official
+ReportX; macOS/Linux uses the bundled compatibility agent and authorized fonts.
 
 ## Workflow
 

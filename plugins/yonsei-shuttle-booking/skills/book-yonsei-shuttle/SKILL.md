@@ -10,11 +10,11 @@ confirm the write, execute once, and verify the official result.
 
 ## Preferred command path
 
-Call `yonsei_shuttle` with origin, destination, date and the preferred time
-window. Present the returned candidates. For reserve, waitlist, or cancel, call
-it again with the exact row terms, reason, and `confirmed: true` only after the
-student confirms the named trip. The command performs one write attempt and
-reopens the official history for verification.
+Call `yonsei_student` with `intent: "shuttle"` and put origin, destination,
+date, time window, and reason in `request`. Present candidates from
+`primary_result`. After the student confirms one, repeat with its opaque
+`selection_id`, the requested action, and `confirmed: true`. Never expose DOM
+labels or row-matching terms.
 
 ## Inputs
 

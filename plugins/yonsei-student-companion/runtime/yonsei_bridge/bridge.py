@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import platform
 import re
@@ -39,6 +40,39 @@ MENU_ROUTES = {
     "teaching": ("교직", "교직이수내역조회"),
     "teaching_diagnosis": ("교직", "교직자가진단"),
     "shuttle": ("셔틀버스", "셔틀버스예약"),
+}
+
+SPACE_REQUEST_FIELDS = {
+    "date": ("이용일자", "사용일자", "예약일자", "일자"),
+    "start_time": ("시작시간", "사용시작", "이용시작"),
+    "end_time": ("종료시간", "사용종료", "이용종료"),
+    "headcount": ("사용인원", "이용인원", "신청인원", "인원"),
+    "purpose": ("사용목적", "이용목적", "신청사유", "목적"),
+    "building": ("건물", "건물명"),
+    "equipment": ("필요장비", "기자재", "장비"),
+    "organizer": ("주최자", "신청자", "단체명"),
+    "contact": ("연락처", "휴대전화", "전화번호"),
+}
+
+DORM_REQUEST_FIELDS = {
+    "campus": ("캠퍼스",),
+    "dorm": ("기숙사", "생활관"),
+    "date": ("신청일자", "이용일자", "외박일자", "일자"),
+    "start_time": ("시작시간", "출발시간"),
+    "end_time": ("종료시간", "귀관시간"),
+    "reason": ("신청사유", "외박사유", "사유"),
+    "facility": ("시설", "장소"),
+    "roommate": ("룸메이트", "동거인"),
+    "issue": ("고장내용", "신고내용", "내용"),
+}
+
+DOCUMENT_LABELS = {
+    "enrollment": "재학증명서",
+    "transcript": "성적증명서",
+    "graduation": "졸업증명서",
+    "expected_graduation": "졸업예정증명서",
+    "leave": "휴학증명서",
+    "completion": "수료증명서",
 }
 
 
@@ -260,6 +294,22 @@ class BrowserPage:
             if value not in (None, "")
         }
 
+    def fill_student_request(
+        self,
+        request: dict[str, Any],
+        mapping: dict[str, tuple[str, ...]],
+    ) -> dict[str, dict[str, Any]]:
+        result: dict[str, dict[str, Any]] = {}
+        for key, value in request.items():
+            if value in (None, "") or key not in mapping:
+                continue
+            matched = next(
+                (label for label in mapping[key] if self.fill_label(label, str(value))),
+                None,
+            )
+            result[key] = {"filled": matched is not None, "matched_label": matched}
+        return result
+
     def snapshot(self, *, text_after: str | None = None) -> PageSnapshot:
         payloads = self._evaluate_frames(
             """
@@ -399,6 +449,39 @@ class YonseiBridge:
         self.runtime = runtime or ChromeRuntime()
         self.connection: CdpConnection | None = None
         self.page: BrowserPage | None = None
+        self.selections: dict[str, dict[str, Any]] = {}
+
+    def _remember_rows(
+        self,
+        kind: str,
+        rows: list[dict[str, Any]],
+        *,
+        context: str = "",
+    ) -> list[dict[str, Any]]:
+        remembered: list[dict[str, Any]] = []
+        for row in rows:
+            raw = f"{kind}|{context}|{row.get('text', '')}"
+            selection_id = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
+            terms = [
+                str(value)
+                for value in row.get("fields", {}).values()
+                if str(value).strip()
+            ]
+            self.selections[selection_id] = {
+                "kind": kind,
+                "terms": terms,
+                "text": row.get("text", ""),
+            }
+            remembered.append({**row, "selection_id": selection_id})
+        return remembered
+
+    def _selection_terms(self, selection_id: str | None, kind: str) -> list[str] | None:
+        if not selection_id:
+            return None
+        selected = self.selections.get(selection_id)
+        if not selected or selected.get("kind") != kind:
+            raise BridgeError("selection_not_found")
+        return list(selected.get("terms", []))
 
     @staticmethod
     def _rows(snapshot: PageSnapshot) -> list[dict[str, Any]]:
@@ -665,6 +748,7 @@ class YonseiBridge:
         depart_after: str | None = None,
         depart_before: str | None = None,
         action: str = "search",
+        selection_id: str | None = None,
         row_terms: list[str] | None = None,
         reason: str | None = None,
         confirmed: bool = False,
@@ -702,6 +786,7 @@ class YonseiBridge:
         if depart_before:
             rows = [row for row in rows if not re.search(r"\b\d{1,2}:\d{2}\b", row["text"])
                     or re.search(r"\b\d{1,2}:\d{2}\b", row["text"]).group() <= depart_before]
+        rows = self._remember_rows("shuttle", rows, context=f"{date}|{origin}|{destination or ''}")
         if action == "search":
             return {
                 "schema": "yonsei-shuttle-command/v1",
@@ -721,7 +806,8 @@ class YonseiBridge:
                 "candidates": rows,
                 "reservation_performed": False,
             }
-        if not row_terms or not page.click_grid_row(row_terms):
+        selected_terms = self._selection_terms(selection_id, "shuttle") or row_terms
+        if not selected_terms or not page.click_grid_row(selected_terms):
             raise BridgeError("The exact shuttle row could not be matched.")
         if action in {"reserve", "waitlist"}:
             if not reason:
@@ -754,6 +840,8 @@ class YonseiBridge:
         action: str = "status",
         category: str = "기숙사",
         menu: str | None = None,
+        request: dict[str, Any] | None = None,
+        selection_id: str | None = None,
         fields: dict[str, Any] | None = None,
         row_terms: list[str] | None = None,
         submit_button: str | None = None,
@@ -775,24 +863,67 @@ class YonseiBridge:
             snapshot = page.snapshot(text_after=menu)
         else:
             raise BridgeError("service must be space or dorm.")
+        request = request or {}
+        mapping = SPACE_REQUEST_FIELDS if service == "space" else DORM_REQUEST_FIELDS
         if action == "status":
+            search_keys = {
+                "date",
+                "start_time",
+                "end_time",
+                "headcount",
+                "building",
+                "equipment",
+                "campus",
+                "dorm",
+                "facility",
+            }
+            search_request = {
+                key: value for key, value in request.items() if key in search_keys
+            }
+            student_filled = page.fill_student_request(search_request, mapping)
+            for label in ("조회", "검색"):
+                if page.click_text(label):
+                    time.sleep(1.5)
+                    break
+            snapshot = page.snapshot(text_after=menu)
+            rows = self._remember_rows(service, self._rows(snapshot))
             return {
                 "schema": "yonsei-space-dorm-command/v1",
                 "service": service,
                 "snapshot": snapshot.as_dict(),
-                "rows": self._rows(snapshot),
+                "rows": rows,
+                "accepted_input": {
+                    key: value.get("filled", False)
+                    for key, value in student_filled.items()
+                },
                 "action_performed": False,
             }
-        filled = page.fill_fields(fields or {})
-        if row_terms and not page.click_grid_row(row_terms):
+        selected_terms = self._selection_terms(selection_id, service) or row_terms
+        if not selected_terms:
+            selected_terms = [
+                str(request[key])
+                for key in ("space_name", "building", "dorm", "facility")
+                if request.get(key)
+            ]
+        if selected_terms and not page.click_grid_row(selected_terms):
             raise BridgeError("The exact reviewed space or dorm row could not be matched.")
-        if fields and not all(filled.values()):
+        if selected_terms:
+            time.sleep(0.5)
+        student_filled = page.fill_student_request(request, mapping)
+        advanced_filled = page.fill_fields(fields or {})
+        failed_student_fields = [
+            key for key, value in student_filled.items() if not value.get("filled")
+        ]
+        failed_advanced_fields = [
+            key for key, value in advanced_filled.items() if not value
+        ]
+        if failed_student_fields or failed_advanced_fields:
             return {
                 "schema": "yonsei-space-dorm-command/v1",
                 "service": service,
                 "action": action,
                 "state": "field_mapping_required",
-                "filled": filled,
+                "unmatched_fields": failed_student_fields + failed_advanced_fields,
                 "snapshot": page.snapshot(text_after=menu).as_dict(),
                 "action_performed": False,
             }
@@ -803,7 +934,11 @@ class YonseiBridge:
                 "service": service,
                 "action": action,
                 "state": "confirmation_required",
-                "filled": filled,
+                "review": {
+                    key: value
+                    for key, value in request.items()
+                    if value not in (None, "")
+                },
                 "snapshot": prepared.as_dict(),
                 "action_performed": False,
             }
@@ -834,6 +969,9 @@ class YonseiBridge:
         document_type: str,
         action: str = "open",
         output_format: str = "pdf",
+        language: str | None = None,
+        copies: int | None = None,
+        purpose: str | None = None,
         confirmed: bool = False,
     ) -> dict[str, Any]:
         page = self._page()
@@ -863,12 +1001,35 @@ class YonseiBridge:
             }
         else:
             page.navigate(PORTAL, wait=2.5)
+        visible_document = DOCUMENT_LABELS.get(document_type)
+        if visible_document:
+            page.click_text(visible_document, exact=False)
+        if language:
+            normalized_language = {
+                "ko": "국문",
+                "korean": "국문",
+                "en": "영문",
+                "english": "영문",
+            }.get(language.casefold(), language)
+            if not page.fill_label("언어", normalized_language):
+                page.click_text(normalized_language, exact=False)
+        if copies is not None:
+            page.fill_label("매수", str(copies))
+        if purpose:
+            page.fill_label("용도", purpose)
         snapshot = page.snapshot()
         if action == "issue" and not confirmed:
             return {
                 "schema": "yonsei-document-command/v1",
                 "document_type": document_type,
                 "state": "confirmation_required",
+                "review": {
+                    "document_type": document_type,
+                    "language": language,
+                    "copies": copies,
+                    "purpose": purpose,
+                    "output_format": output_format,
+                },
                 "snapshot": snapshot.as_dict(),
                 "issuance_performed": False,
                 "font_verification_required": True,
@@ -888,6 +1049,13 @@ class YonseiBridge:
             "schema": "yonsei-document-command/v1",
             "document_type": document_type,
             "state": state,
+            "review": {
+                "document_type": document_type,
+                "language": language,
+                "copies": copies,
+                "purpose": purpose,
+                "output_format": output_format,
+            },
             "snapshot": snapshot.as_dict(),
             "runtime": runtime,
             "output_format": output_format,
