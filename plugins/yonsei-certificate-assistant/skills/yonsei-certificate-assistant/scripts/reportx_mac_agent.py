@@ -117,13 +117,17 @@ YONSEI_BODY_FONT_NAMES = (
     "연세본문체",
     "연세본문",
 )
+BUNDLED_FONT_SHA256 = {
+    "YonseiB": "d38160cc6767e3f35f81b15c2fd9ca1c7fc11a20fcb9fa7f603c8c1b5d2f4d82",
+    "YonseiL": "b85573c700a42b1045f4563bb9d08bb21d22b03403db922d41f26e4d5e55cbf9",
+}
 
 
 def build_yonsei_font_map(
     title_font: Path | None,
     body_font: Path | None,
 ) -> dict[str, Path]:
-    """Validate the two member-supplied Yonsei faces and map FP3 names."""
+    """Validate the two redistribution-authorized Yonsei faces and map FP3 names."""
 
     if title_font is None and body_font is None:
         return {}
@@ -135,16 +139,41 @@ def build_yonsei_font_map(
         raise ValueError("title font must have PostScript name YonseiB")
     if body.postscript_name.casefold() != "yonseil":
         raise ValueError("body font must have PostScript name YonseiL")
+    if title.sha256 != BUNDLED_FONT_SHA256["YonseiB"]:
+        raise ValueError("YonseiB font hash is not the released authorized copy")
+    if body.sha256 != BUNDLED_FONT_SHA256["YonseiL"]:
+        raise ValueError("YonseiL font hash is not the released authorized copy")
     coverage_probe = "연세대학교 성적증명서 ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789"
     if not title.supports(coverage_probe) or not body.supports(coverage_probe):
         raise ValueError("Yonsei font lacks required Korean, Latin, or digit glyphs")
-    return {
+    mapping = {
         name.casefold(): title.path
         for name in YONSEI_TITLE_FONT_NAMES
     } | {
         name.casefold(): body.path
         for name in YONSEI_BODY_FONT_NAMES
     }
+    mapping["*:bold"] = title.path
+    mapping["*:regular"] = body.path
+    mapping["*"] = body.path
+    return mapping
+
+
+def validate_rendered_font_set(
+    font_files: tuple[tuple[str, str], ...],
+    font_map: dict[str, Path],
+) -> None:
+    """Require every live PDF font to be one of the two authorized faces."""
+
+    if not font_files:
+        raise FP3RenderError("rendered certificate has no embedded font")
+    allowed = {
+        TrueTypeFont(path).sha256
+        for path in set(font_map.values())
+    }
+    used = {digest for _, digest in font_files}
+    if not used.issubset(allowed):
+        raise FP3RenderError("rendered certificate contains an unexpected font")
 
 
 def utc_now() -> str:
@@ -856,6 +885,11 @@ def process_job(job: Job, state: AgentState) -> None:
                         bundle.additional,
                         font_map=state.font_map or None,
                     )
+                    if state.require_original_fonts:
+                        validate_rendered_font_set(
+                            rendered.font_files,
+                            state.font_map,
+                        )
                 except (TypeError, FP3RenderError) as error:
                     job.status = "server_report_decoded_unrendered"
                     job.note(
@@ -1076,6 +1110,11 @@ def process_job(job: Job, state: AgentState) -> None:
                                 bindings.official_empty_pictures
                             ),
                         )
+                        if state.require_original_fonts:
+                            validate_rendered_font_set(
+                                rendered.font_files,
+                                state.font_map,
+                            )
                     except (TypeError, FP3RenderError) as error:
                         job.status = "server_report_decoded_unrendered"
                         job.note(
@@ -1576,12 +1615,12 @@ def main() -> int:
     parser.add_argument(
         "--title-font",
         type=Path,
-        help="Member-supplied official Yonsei title TrueType font.",
+        help="Redistribution-authorized Yonsei title TrueType font.",
     )
     parser.add_argument(
         "--body-font",
         type=Path,
-        help="Member-supplied official Yonsei body TrueType font.",
+        help="Redistribution-authorized Yonsei body TrueType font.",
     )
     parser.add_argument(
         "--allow-fetch",

@@ -29,6 +29,9 @@ SCRIPTS = (
     / "scripts"
 )
 AGENT = SCRIPTS / "reportx_mac_agent.py"
+FONT_DIR = SCRIPTS.parent / "assets" / "fonts"
+TITLE_FONT = FONT_DIR / "연세제목.TTF"
+BODY_FONT = FONT_DIR / "연세본문.TTF"
 sys.path.insert(0, str(SCRIPTS))
 
 import reportx_mac_agent as agent  # noqa: E402
@@ -418,6 +421,54 @@ class ReportXMacAgentWorkerTests(unittest.TestCase):
             agent.build_yonsei_font_map(
                 Path("/missing/title.ttf"),
                 None,
+            )
+
+    def test_bundled_yonsei_fonts_are_selected_and_hash_pinned(self) -> None:
+        mapping = agent.build_yonsei_font_map(TITLE_FONT, BODY_FONT)
+        self.assertEqual(TITLE_FONT.resolve(), mapping["*:bold"])
+        self.assertEqual(BODY_FONT.resolve(), mapping["*:regular"])
+        self.assertEqual(
+            agent.BUNDLED_FONT_SHA256["YonseiB"],
+            hashlib.sha256(TITLE_FONT.read_bytes()).hexdigest(),
+        )
+        self.assertEqual(
+            agent.BUNDLED_FONT_SHA256["YonseiL"],
+            hashlib.sha256(BODY_FONT.read_bytes()).hexdigest(),
+        )
+        self.assertEqual(TITLE_FONT.resolve(), cli.find_local_yonsei_font("title"))
+        self.assertEqual(BODY_FONT.resolve(), cli.find_local_yonsei_font("body"))
+
+    def test_generic_fp3_uses_only_bundled_yonsei_fonts(self) -> None:
+        mapping = agent.build_yonsei_font_map(TITLE_FONT, BODY_FONT)
+        source = """\
+<preparedreport>
+  <previewpages><page0><title u="연세대학교"/><body u="성적증명서"/></page0></previewpages>
+  <sourcepages>
+    <TfrxReportPage Name="Page" PaperWidth="210" PaperHeight="297">
+      <TfrxMemoView Name="Title" Left="10" Top="10" Width="100"
+        Height="20" Font.Name="Arial" Font.Style="1"/>
+      <TfrxMemoView Name="Body" Left="10" Top="40" Width="100"
+        Height="20" Font.Name="바탕체"/>
+    </TfrxReportPage>
+  </sourcepages>
+  <dictionary>
+    <title name="Page0.Title"/><body name="Page0.Body"/>
+  </dictionary>
+</preparedreport>
+""".encode("utf-8")
+        rendered = agent.render_fp3_pdf(source, font_map=mapping)
+        agent.validate_rendered_font_set(rendered.font_files, mapping)
+        self.assertEqual(
+            set(agent.BUNDLED_FONT_SHA256.values()),
+            {digest for _, digest in rendered.font_files},
+        )
+
+    def test_rendered_font_validation_rejects_other_fonts(self) -> None:
+        mapping = agent.build_yonsei_font_map(TITLE_FONT, BODY_FONT)
+        with self.assertRaises(agent.FP3RenderError):
+            agent.validate_rendered_font_set(
+                (("Other.ttf", "0" * 64),),
+                mapping,
             )
 
     def test_job_manifest_reports_embedded_font_hashes_without_paths(self) -> None:

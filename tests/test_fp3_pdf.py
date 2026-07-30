@@ -498,6 +498,19 @@ class FP3PDFTests(unittest.TestCase):
             list(registry._paths_for("연세본문체", False)),
         )
 
+    def test_wildcard_font_map_routes_bold_and_regular_faces(self) -> None:
+        title = Path("/authorized/연세제목.TTF")
+        body = Path("/authorized/연세본문.TTF")
+        registry = fp3_pdf.FontRegistry(
+            font_map={
+                "*:bold": title,
+                "*:regular": body,
+                "*": body,
+            }
+        )
+        self.assertEqual([title], list(registry._paths_for("Arial", True)))
+        self.assertEqual([body], list(registry._paths_for("바탕체", False)))
+
     def test_font_map_cli_rejects_duplicate_or_malformed_names(self) -> None:
         parsed = fp3_pdf._parse_font_map(
             ["YonseiB=/fonts/title.ttf", "YonseiL=/fonts/body.ttf"]

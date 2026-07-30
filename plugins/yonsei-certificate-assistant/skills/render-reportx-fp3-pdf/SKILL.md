@@ -43,8 +43,7 @@ strict named bindings for `__LOGO1__`, `__SERIAL__`, and a source-fingerprinted
 empty `__SEAL1__`. An unresolved zero-indexed placeholder fails closed.
 
 For an exact institutional face, map every FP3 `Font.Name` to the matching
-member-authorized local TrueType file. Do not collapse title and body into one
-fallback:
+authorized TrueType file. Do not collapse title and body into one fallback:
 
 ```bash
 python3 "$SKILL_DIR/scripts/fp3_pdf.py" render PRIMARY.fp3 \
@@ -56,11 +55,12 @@ python3 "$SKILL_DIR/scripts/fp3_pdf.py" render PRIMARY.fp3 \
   --output OUTPUT.pdf
 ```
 
-The renderer validates TrueType embedding permissions, character coverage, and
-records every embedded font hash in the result. The certificate workflow must
-stop before a document-number reservation if both official Yonsei faces are
-not available. Generic AppleGothic/Nanum fallback remains available only for
-non-certificate FP3 inspection and must not be presented as original typography.
+The renderer validates TrueType embedding permissions and character coverage,
+then records every embedded font hash in the result. The certificate workflow
+uses its bundled authorized Yonsei faces for all text and rejects the result if
+another font appears. Generic AppleGothic/Nanum fallback remains available only
+for non-certificate FP3 inspection and must not be presented as original
+typography.
 
 The output and JSON manifest are written with private permissions. The status
 is `rendered_pdf_unverified`: this means the prepared pages were rendered, not

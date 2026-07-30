@@ -86,15 +86,15 @@ python3 "$SKILL_DIR/scripts/icert_print.py" prepare-assets
 python3 "$SKILL_DIR/scripts/icert_print.py" agent
 
 # Full PDF path. The second flag explicitly permits one URLCheck reservation.
-# The command automatically finds official 연세제목/연세본문 TTF files in the
-# student's Downloads or installed-font folder.
+# The command automatically uses the bundled redistribution-authorized
+# 연세제목/연세본문 TTF files.
 python3 "$SKILL_DIR/scripts/icert_print.py" agent \
   --allow-fetch --reserve-document-number
 ```
 
-If automatic discovery does not find both files, let the student select the
-two official member-only downloads and pass `--title-font` and `--body-font`.
-Never download or bundle a third-party repost.
+If either bundled file is missing or its pinned hash differs, stop before a
+live request. `--title-font` and `--body-font` remain development overrides but
+must match the released authorized hashes.
 
 In another terminal:
 
@@ -169,9 +169,9 @@ unrendered `.reportx` response is not printable through this command.
   rejected response bodies are not persisted in manifests.
 - Runtime assets require pinned installer, executable, BMP dimensions, format,
   and hashes. Version drift fails closed.
-- Live certificate rendering requires locally authorized `YonseiB` and
-  `YonseiL` TrueType faces. Map title/body names separately, embed the selected
-  bytes in the PDF, and expose their hashes without publishing the TTF files.
+- Live certificate rendering requires the bundled authorized `YonseiB` and
+  `YonseiL` TrueType faces. Map title/body roles separately, embed only those
+  bytes in the PDF, expose their hashes, and reject any other PDF font.
 - URLCheck supports one copy only. A durable ticket-hash guard is written
   before the request; timeout, malformed output, or restart cannot trigger an
   automatic retry.

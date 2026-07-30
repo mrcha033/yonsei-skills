@@ -39,7 +39,6 @@ DEFAULT_PORT = 65432
 DEFAULT_DIR = Path.home() / ".cache" / "yonsei-certificate-assistant"
 PORTAL = "https://portal.yonsei.ac.kr/ui/index.html"
 ICERT = "https://icert.yonsei.ac.kr/"
-FONT_GUIDE = "https://www.yonsei.ac.kr/sc/337/subview.do"
 SCRIPT_DIR = Path(__file__).resolve().parent
 AGENT_SCRIPT = SCRIPT_DIR / "reportx_mac_agent.py"
 DIAGNOSE = SCRIPT_DIR / "diagnose_print_env.py"
@@ -163,6 +162,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
 
 def local_font_roots() -> tuple[Path, ...]:
     roots = [
+        SCRIPT_DIR.parent / "assets" / "fonts",
         Path.home() / "Downloads",
         Path.home() / "Library" / "Fonts",
         Path("/Library/Fonts"),
@@ -223,11 +223,9 @@ def cmd_agent(args: argparse.Namespace) -> int:
     if args.allow_fetch and (
         title_font is None or body_font is None
     ):
-        open_url(FONT_GUIDE)
         print(
-            "연세 제목체와 본문체가 모두 필요합니다. 교내 구성원용 공식 "
-            "연세체 안내를 열었습니다. 학교 계정으로 두 글꼴을 내려받은 "
-            "뒤 파일을 선택해 주세요.",
+            "번들된 연세 제목체 또는 본문체가 누락되었습니다. 플러그인을 "
+            "다시 설치해 주세요. 다른 글꼴로 발급하지 않습니다.",
             file=sys.stderr,
         )
         return 2
@@ -244,7 +242,7 @@ def cmd_agent(args: argparse.Namespace) -> int:
             "fonts:",
             title_font.name,
             body_font.name,
-            "(embedded from local authorized copies)",
+            "(embedded from authorized bundled copies)",
             flush=True,
         )
     print("exec:", " ".join(command), flush=True)

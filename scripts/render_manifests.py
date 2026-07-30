@@ -58,11 +58,11 @@ SPECS = {
         ],
     },
     "yonsei-certificate-assistant": {
-        "version": "0.8.0",
+        "version": "0.9.0",
         "display": "연세 증명서 발급 도우미",
         "description": "Windows 공식 ReportX 또는 macOS·Linux 호환 PDF 경로를 선택하고, 원본 연세 제목체·본문체를 각각 유지해 증명서 발급을 진행합니다.",
         "short": "운영체제에 맞춰 증명서 발급 진행",
-        "long": "학생의 운영체제를 자동 확인해 Windows에서는 학교의 공식 ReportX 무료 출력 경로를, macOS와 Linux에서는 문서번호 1회 예약을 포함한 독립 호환 PDF 경로를 사용합니다. 교내 구성원용 연세 제목체와 본문체를 자동 탐색해 각각 PDF에 임베드하며, 두 글꼴이 없으면 대체 출력하지 않고 발급 전에 안내합니다.",
+        "long": "학생의 운영체제를 자동 확인해 Windows에서는 학교의 공식 ReportX 무료 출력 경로를, macOS와 Linux에서는 문서번호 1회 예약을 포함한 독립 호환 PDF 경로를 사용합니다. 재배포 허가를 받은 연세 제목체와 본문체를 번들해 각각 PDF에 임베드하고, 다른 글꼴이 섞이면 발급 결과를 거부합니다.",
         "keywords": ["yonsei", "certificate", "icert", "print", "pdf", "windows", "macos", "linux", "reportx"],
         "capabilities": [
             "ReportX 인계 정보 진단",

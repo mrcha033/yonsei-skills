@@ -1,0 +1,17 @@
+Yonsei University font notice
+
+This directory contains the Yonsei title and body fonts used to preserve the
+original appearance of issued certificate PDFs:
+
+- 연세제목.TTF (PostScript name: YonseiB)
+- 연세본문.TTF (PostScript name: YonseiL)
+
+The project publisher reports having received permission from a Yonsei
+University professor to redistribute these font files for this student tool.
+The fonts retain their original copyright and are not covered by this
+repository's MIT License. Do not treat the MIT License as a separate license
+to extract, modify, or redistribute the font files outside that permission.
+
+Released copies are pinned by SHA-256 in the certificate assistant. If a font
+is missing or changed, certificate rendering stops instead of substituting a
+different font.

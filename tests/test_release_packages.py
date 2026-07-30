@@ -9,6 +9,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "build_release_packages.py"
+FONT_HASHES = {
+    "연세제목.TTF": "d38160cc6767e3f35f81b15c2fd9ca1c7fc11a20fcb9fa7f603c8c1b5d2f4d82",
+    "연세본문.TTF": "b85573c700a42b1045f4563bb9d08bb21d22b03403db922d41f26e4d5e55cbf9",
+}
 SPEC = importlib.util.spec_from_file_location("build_release_packages", SCRIPT)
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
@@ -68,6 +72,36 @@ class ReleasePackageTests(unittest.TestCase):
                     if name.endswith("/SKILL.md") and "/skills/" in name
                 ]
                 self.assertEqual(len(skill_files), 35)
+
+    def test_student_packages_include_authorized_yonsei_fonts(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)
+            self.build(output)
+            for archive_name in (
+                "yonsei-codex-ui-pack.zip",
+                "yonsei-student-life.skill",
+                "yonsei-universal-plugin.zip",
+            ):
+                with self.subTest(archive=archive_name):
+                    with zipfile.ZipFile(output / archive_name) as archive:
+                        for filename, expected_hash in FONT_HASHES.items():
+                            matches = [
+                                name for name in archive.namelist()
+                                if name.endswith(f"/assets/fonts/{filename}")
+                            ]
+                            self.assertEqual(1, len(matches))
+                            self.assertEqual(
+                                expected_hash,
+                                hashlib.sha256(
+                                    archive.read(matches[0])
+                                ).hexdigest(),
+                            )
+                        self.assertTrue(
+                            any(
+                                name.endswith("/assets/fonts/NOTICE.txt")
+                                for name in archive.namelist()
+                            )
+                        )
 
     def test_packages_are_deterministic_and_checksums_match(self):
         with tempfile.TemporaryDirectory() as first, tempfile.TemporaryDirectory() as second:

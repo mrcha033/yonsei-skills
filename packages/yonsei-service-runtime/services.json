@@ -28,7 +28,7 @@
         "Issuance center host is https://icert.yonsei.ac.kr/ (WebMinwon ReportX free print).",
         "Start from portal 인터넷증명서 → 인터넷즉시발급; VERIFY URL is original-check only.",
         "Official print hands an encrypted dzreportx ticket to a Windows-only listener on 127.0.0.1:65432.",
-        "The macOS/Linux compatibility agent decodes the current encrypted ticket, materializes the pinned ReportX runtime profile, and independently renders the returned FP3 prepared report to PDF with separately mapped member-supplied Yonsei title and body fonts.",
+        "The macOS/Linux compatibility agent decodes the current encrypted ticket, materializes the pinned ReportX runtime profile, and independently renders the returned FP3 prepared report to PDF with separately mapped authorized bundled Yonsei title and body fonts.",
         "Document-number reservation is an explicit one-shot mutation guarded against automatic retry; PDF rendering never calls printcomplete.",
         "A compatibility PDF is unverified and is not automatically an official electronic certificate or paper original.",
         "Out of scope for this skill: paid 전자증명서발급 electronic PDF product."

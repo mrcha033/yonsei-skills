@@ -1414,14 +1414,23 @@ class FontRegistry:
         return face
 
     def _paths_for(self, name: str, bold: bool) -> Iterator[Path]:
-        mapped = self.font_map.get(name.strip().casefold())
+        normalized = name.strip().casefold()
+        mapped = self.font_map.get(
+            f"{normalized}:bold" if bold else f"{normalized}:regular"
+        )
+        if mapped is None:
+            mapped = self.font_map.get(normalized)
+        if mapped is None:
+            mapped = self.font_map.get("*:bold" if bold else "*:regular")
+        if mapped is None:
+            mapped = self.font_map.get("*")
         if mapped is not None:
             yield mapped
             return
         if self.explicit_font is not None:
             yield self.explicit_font
             return
-        lowered = name.strip().lower()
+        lowered = normalized
         if lowered in _KOREAN_SERIF_NAMES:
             key = "korean-serif"
         elif lowered in _KOREAN_SANS_NAMES:
