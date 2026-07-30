@@ -8,6 +8,12 @@ description: Track Yonsei teaching-credential eligibility, required courses, apt
 Combine the student's authorized Underwood state with the current official
 rules for their admission year, college, department, and teaching subject.
 
+## Preferred command path
+
+Call `yonsei_graduation_teaching` with `include_teaching: true`. Use its
+teaching rows as calculator input. The command reads existing results and does
+not press the official self-diagnosis button.
+
 ## Workflow
 
 1. Follow `$connect-yonsei-session` and read the visible teaching-credential

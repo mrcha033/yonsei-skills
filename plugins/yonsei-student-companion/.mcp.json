@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "yonsei-bridge": {
+      "title": "Yonsei Bridge",
+      "description": "Fast authenticated commands for Yonsei Portal, Underwood, LearnUs, attendance, shuttle, spaces, dorms, and documents.",
+      "command": "python3",
+      "args": [
+        "./runtime/yonsei_bridge/mcp_server.py"
+      ],
+      "cwd": ".",
+      "tool_timeout_sec": 120
+    }
+  }
+}

@@ -8,6 +8,14 @@ description: Search, reserve, inspect, waitlist, and cancel Yonsei shuttle trips
 Follow the KTX-style sequence: search, shortlist, identify one exact trip,
 confirm the write, execute once, and verify the official result.
 
+## Preferred command path
+
+Call `yonsei_shuttle` with origin, destination, date and the preferred time
+window. Present the returned candidates. For reserve, waitlist, or cancel, call
+it again with the exact row terms, reason, and `confirmed: true` only after the
+student confirms the named trip. The command performs one write attempt and
+reopens the official history for verification.
+
 ## Inputs
 
 - origin and destination campus

@@ -8,6 +8,13 @@ description: Read a student's authorized Underwood mileage history and combine i
 Calculate a recommendation from the student's actual registration screen and
 past results. Do not present historical cutoffs as guarantees.
 
+## Preferred command path
+
+Call `yonsei_mileage_history` first. It returns both personal mileage history
+and the current registration rows. Feed those values into the bundled
+calculator; ask the student only for constraints or desired courses that are
+not visible.
+
 ## Workflow
 
 1. Follow `$connect-yonsei-session` and open the student's authorized Underwood

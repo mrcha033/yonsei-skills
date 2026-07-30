@@ -7,6 +7,12 @@ description: Extract the authorized user's visible LearnUs course index from a d
 
 Return one result only: the visible course index. Do not collect deadlines or materials.
 
+## Preferred command path
+
+Call `yonsei_learnus_attendance` with `service: "learnus"` and use its
+deduplicated course links. If login is required, call `yonsei_bridge_connect`
+once and resume after the visible login.
+
 ## Workflow
 
 1. When a browser is available, reuse the student's authenticated LearnUs

@@ -158,6 +158,10 @@ browser or local-device actions only when the current host provides those
 capabilities. Otherwise stop after the reviewed shortlist or draft and tell the
 student to continue in Codex desktop. Never request a password, OTP, or session
 cookie in chat.
+
+When the `yonsei_bridge_*` tools are available, use them before manual browser
+navigation. One visible official login is reused across Portal, Underwood,
+LearnUs, attendance, shuttle, spaces, dorms, and documents.
 """
 
 
@@ -221,6 +225,7 @@ def universal_manifest(version: str) -> dict:
         "license": "MIT",
         "keywords": ["yonsei", "student", "courses", "campus"],
         "skills": "./skills/",
+        "mcpServers": "./.mcp.json",
         "interface": {
             "displayName": "연세 학생생활 도우미",
             "shortDescription": "한 번 로그인하고 오늘 할 일부터 졸업까지",
@@ -260,6 +265,16 @@ def build_universal_plugin(output: Path, version: str, skills: list[Path]) -> No
             archive,
             f"{root}/.codex-plugin/plugin.json",
             (json.dumps(universal_manifest(version), ensure_ascii=False, indent=2) + "\n").encode(),
+        )
+        add_bytes(
+            archive,
+            f"{root}/.mcp.json",
+            (ROOT / "plugins" / "yonsei-student-companion" / ".mcp.json").read_bytes(),
+        )
+        add_tree(
+            archive,
+            ROOT / "plugins" / "yonsei-student-companion" / "runtime",
+            f"{root}/runtime",
         )
         add_bytes(archive, f"{root}/assets/logo.svg", logo_svg())
         for skill_dir in skills:

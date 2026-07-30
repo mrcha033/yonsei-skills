@@ -5,7 +5,15 @@ description: Normalize a user-provided Yonsei electronic-attendance screenshot, 
 
 # Summarize Yonsei Attendance
 
-Return one attendance summary from one supplied snapshot.
+Return one attendance summary from the student's authorized live page or one
+supplied snapshot.
+
+## Preferred command path
+
+Call `yonsei_learnus_attendance` with `service: "attendance"`. Normalize its
+structured rows with the bundled summarizer. Use an attachment or pasted table
+only when the official page is unavailable. This is read-only and must never
+enter a code or perform check-in.
 
 ## Prepare the input
 
@@ -26,7 +34,8 @@ Report the snapshot timestamp, computed date range, totals, and per-course break
 
 ## Boundaries
 
-- Process only user-supplied attachments, pasted data, or JSON; do not query the live attendance system.
+- Read only the student's authenticated official attendance page or process
+  user-supplied attachments, pasted data, or JSON.
 - Reject credential or session fields and preserve only recognized attendance fields.
 - Never enter an attendance code, attest presence, use Bluetooth or location data, spoof a device, or perform a check-in.
 - Do not submit or apply an attendance correction.

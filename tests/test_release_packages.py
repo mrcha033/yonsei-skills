@@ -67,6 +67,12 @@ class ReleasePackageTests(unittest.TestCase):
                 )
                 self.assertEqual(manifest["name"], "yonsei-student-life")
                 self.assertEqual(manifest["version"], "9.8.7")
+                self.assertEqual(manifest["mcpServers"], "./.mcp.json")
+                self.assertIn("yonsei-student-life/.mcp.json", archive.namelist())
+                self.assertIn(
+                    "yonsei-student-life/runtime/yonsei_bridge/mcp_server.py",
+                    archive.namelist(),
+                )
                 skill_files = [
                     name for name in archive.namelist()
                     if name.endswith("/SKILL.md") and "/skills/" in name

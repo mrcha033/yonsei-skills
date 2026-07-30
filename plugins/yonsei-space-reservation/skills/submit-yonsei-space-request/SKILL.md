@@ -8,6 +8,14 @@ description: Search and submit a Yonsei space reservation request on Windows, ma
 Use the official browser form and separate preparation from the final
 submission.
 
+## Preferred command path
+
+Call `yonsei_space_dorm` with `service: "space"` to read live rooms. After the
+student selects one, pass exact visible field labels in `fields` and the room
+identity in `row_terms`. First call with `confirmed: false` for review, then
+repeat with `confirmed: true` and the exact `submit_button`. Report only the
+official result returned after that single submission.
+
 ## Workflow
 
 1. Run `scripts/platform_support.py` internally and follow

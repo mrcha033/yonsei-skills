@@ -1,7 +1,7 @@
 # OpenAI public directory submission
 
-`yonsei-universal-plugin.zip` is the skills-only bundle prepared for the OpenAI
-plugin submission portal. Public listing still requires a verified developer
+`yonsei-universal-plugin.zip` is the combined skills and local Yonsei Bridge
+bundle prepared for the OpenAI plugin submission portal. Public listing still requires a verified developer
 identity and **Apps Management: Write** permission in the publisher's OpenAI
 Platform organization.
 
@@ -13,7 +13,7 @@ Platform organization.
 - Support: `https://github.com/mrcha033/yonsei-skills/issues`
 - Privacy: `https://github.com/mrcha033/yonsei-skills/blob/main/docs/privacy.md`
 - Terms: `https://github.com/mrcha033/yonsei-skills/blob/main/docs/terms.md`
-- Submission type: Skills only
+- Submission type: Skills with a bundled local MCP server
 
 Short description:
 
@@ -51,7 +51,8 @@ Long description:
 ## Portal steps
 
 1. Open `https://platform.openai.com/plugins`.
-2. Choose **Create plugin → Skills only**.
+2. Choose **Create plugin** and select the option that accepts skills with an
+   MCP server.
 3. Upload `yonsei-universal-plugin.zip` from the latest GitHub release.
 4. Add the listing text, logo, five positive cases, three negative cases, and
    public URLs above.

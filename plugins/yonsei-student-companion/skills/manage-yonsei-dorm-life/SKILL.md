@@ -8,6 +8,13 @@ description: Manage Yonsei dorm applications, payment and room status, roommate 
 Handle a dorm request from natural language while preserving the student's
 authenticated browser session on Windows, macOS, or Linux.
 
+## Preferred command path
+
+Call `yonsei_space_dorm` with `service: "dorm"` and the exact visible dorm
+category/menu. Status is read-only. For an application, booking, cancellation,
+or report, fill exact visible labels, review once with `confirmed: false`, then
+repeat with `confirmed: true` and the exact final button.
+
 ## Workflow
 
 1. Follow `$connect-yonsei-session`, identify the student's campus and dorm,

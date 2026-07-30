@@ -20,9 +20,9 @@ INSTALLATIONS = {
 
 SPECS = {
     "yonsei-student-companion": {
-        "version": "0.2.0",
+        "version": "0.3.0",
         "display": "오늘의 연세·포털 연결",
-        "description": "기존 브라우저의 연세 로그인을 이어 쓰고 오늘의 수업·마감·예약과 생활관·장학금·교환학생 절차를 한곳에서 관리합니다.",
+        "description": "한 번 로그인한 공통 브라우저를 이어 쓰고 포털·Underwood·LearnUs·출결·셔틀·공간·증명서를 빠른 명령으로 처리합니다.",
         "short": "한 번 로그인하고 학교생활을 한눈에",
         "long": "학생이 이미 로그인한 일반 브라우저 프로필을 먼저 찾아 Portal에서 Underwood까지 공식 SSO로 이어갑니다. 오늘과 7일 안의 수업·마감·예약을 정리하고 생활관, 장학금, 교환학생의 현재 상태와 다음 절차를 자연어로 관리합니다.",
         "keywords": ["yonsei", "portal", "session", "student", "daily", "dorm", "scholarship", "exchange"],
@@ -33,6 +33,8 @@ SPECS = {
             "Dorm-life workflows",
             "Scholarship opportunity and application tracking",
             "Exchange journey tracking",
+            "Fast authenticated Portal and Underwood commands",
+            "Cross-platform shuttle, space, dorm, and document actions",
         ],
         "prompts": [
             "연세 포털에 한 번 로그인하고 계속 이어서 써 줘.",
@@ -310,7 +312,7 @@ def write_json(path: Path, payload: dict) -> None:
 
 
 def codex_manifest(name: str, spec: dict, version: str | None = None) -> dict:
-    return {
+    manifest = {
         "name": name,
         "version": version or spec["version"],
         "description": spec["description"],
@@ -331,6 +333,9 @@ def codex_manifest(name: str, spec: dict, version: str | None = None) -> dict:
             "defaultPrompt": spec["prompts"],
         },
     }
+    if name == "yonsei-student-companion":
+        manifest["mcpServers"] = "./.mcp.json"
+    return manifest
 
 
 def claude_manifest(name: str, spec: dict) -> dict:

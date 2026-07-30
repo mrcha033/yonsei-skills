@@ -7,6 +7,13 @@ description: Track active Yonsei Underwood academic applications, eligibility, d
 
 Turn Underwood's many application menus into one deadline radar.
 
+## Preferred command path
+
+Call `yonsei_academic_applications` with the visible Underwood category and,
+when known, the exact application name. Its structured rows and menu items are
+the live input for the radar. Use screenshots or manual clicking only as a
+fallback.
+
 ## Workflow
 
 1. Follow `$connect-yonsei-session` and reuse the authenticated ordinary browser

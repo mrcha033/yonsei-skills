@@ -10,6 +10,14 @@ certificate content. Use the official native free-print path on Windows and the
 local compatibility-PDF path on macOS/Linux. Read
 `references/cross-platform.md` before acting.
 
+## Preferred command path
+
+Call `yonsei_documents` with the certificate type. For issuance, review the
+selection first, then call it with `action: "issue"` and `confirmed: true`.
+Windows continues through official ReportX; macOS/Linux starts the bundled
+loopback compatibility agent with the authorized title/body fonts and opens the
+official iCert page in the shared session.
+
 ## Workflow
 
 1. Collect certificate type, language, copies, purpose, and whether the desired
