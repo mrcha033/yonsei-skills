@@ -1,4 +1,4 @@
 interface:
-  display_name: "연세 증명서 Mac 도우미"
-  short_description: "Mac에서 인터넷증명서 ReportX 출력 문제를 진단합니다"
-  default_prompt: "Use $yonsei-certificate-assistant to Mac에서 연세 증명서 프린터 출력이 안 되는 문제를 해결해 줘."
+  display_name: "연세 증명서 출력 도우미"
+  short_description: "Windows·Mac·Linux ReportX 경로를 자동으로 진단"
+  default_prompt: "Use $yonsei-certificate-assistant to diagnose and continue my Yonsei certificate print on this computer."

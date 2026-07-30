@@ -1,7 +1,7 @@
 {
   "name": "yonsei-shuttle-booking",
-  "version": "0.3.0",
-  "description": "방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고, 선택한 편을 확인받아 예약·대기·취소합니다.",
+  "version": "0.4.0",
+  "description": "Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 예약·대기·취소합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -13,20 +13,24 @@
     "yonsei",
     "shuttle",
     "booking",
-    "campus"
+    "campus",
+    "windows",
+    "macos",
+    "linux"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "연세 셔틀 조회·예약",
     "shortDescription": "신촌·국제캠퍼스 셔틀 조회와 예약",
-    "longDescription": "기존 연세 로그인 세션으로 공식 셔틀 화면을 열어 조건에 맞는 편을 정리합니다. 정확한 차량과 시간을 다시 확인한 뒤 한 번만 예약·대기·취소하고 공식 내역에서 결과를 검증합니다.",
+    "longDescription": "Windows·macOS·Linux의 기존 연세 브라우저 로그인 세션으로 공식 셔틀 화면을 열어 조건에 맞는 편을 정리합니다. 정확한 차량과 시간을 다시 확인한 뒤 한 번만 예약·대기·취소하고 공식 내역에서 결과를 검증합니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
       "Official shuttle client diagnostics",
       "Supplied trip option filtering",
       "Conservative seat and waitlist status",
-      "Confirmed official reservation and cancellation workflow"
+      "Confirmed official reservation and cancellation workflow",
+      "Cross-platform persistent browser workflow"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [

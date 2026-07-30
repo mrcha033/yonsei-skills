@@ -1,4 +1,4 @@
 interface:
   display_name: "연세 셔틀 조회·예약"
-  short_description: "방향과 시간 조건으로 셔틀을 찾고 확인 후 예약 진행"
+  short_description: "Windows·Mac·Linux에서 셔틀 조회와 예약 진행"
   default_prompt: "Use $book-yonsei-shuttle to find and reserve a Yonsei shuttle from my direction and time preferences."

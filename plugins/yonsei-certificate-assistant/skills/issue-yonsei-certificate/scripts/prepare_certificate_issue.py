@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import sys
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,14 @@ from typing import Any
 
 ALLOWED_LANGUAGES = {"ko", "en"}
 ALLOWED_RESULTS = {"reviewed_pdf", "physical_print"}
+PLATFORM_ALIASES = {
+    "darwin": "macos",
+    "mac": "macos",
+    "macos": "macos",
+    "linux": "linux",
+    "windows": "windows",
+    "win32": "windows",
+}
 
 
 class InputError(ValueError):
@@ -27,7 +36,12 @@ def text(value: Any, path: str) -> str:
     return value.strip()
 
 
-def run(payload: Any) -> dict[str, Any]:
+def normalize_platform(value: str | None = None) -> str:
+    detected = value or platform.system()
+    return PLATFORM_ALIASES.get(detected.strip().casefold(), "unsupported")
+
+
+def run(payload: Any, *, system: str | None = None) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise InputError("invalid-input", "Input must be an object.")
     certificate_type = text(payload.get("certificate_type"), "$.certificate_type")
@@ -67,9 +81,27 @@ def run(payload: Any) -> dict[str, Any]:
             "Certificate identity and content fields must come only from the official issuance response.",
             f"$.{supplied_forbidden[0]}",
         )
+    host_platform = normalize_platform(system)
+    if host_platform == "unsupported":
+        raise InputError(
+            "unsupported-platform",
+            "Certificate issuance supports Windows, macOS, and Linux.",
+            "$.platform",
+        )
+    if host_platform == "windows":
+        issuance_path = "official-windows-reportx"
+        next_step = "doctor-official-reportx-then-open-browser"
+        result_scope = "official-reportx-print-or-capture"
+    else:
+        issuance_path = "local-compatibility-reportx"
+        next_step = "doctor-and-prepare-official-assets"
+        result_scope = "unverified-compatibility-pdf"
+
     return {
         "schema": "yonsei-certificate-issue-plan/v1",
         "ready": True,
+        "platform": host_platform,
+        "issuance_path": issuance_path,
         "certificate_type": certificate_type,
         "language": language,
         "copies": copies,
@@ -80,17 +112,24 @@ def run(payload: Any) -> dict[str, Any]:
         "document_number_reservation": "one-shot-after-confirmation",
         "certificate_content_source": "official-authorized-report-only",
         "paid_electronic_certificate": False,
-        "next_step": "doctor-and-prepare-official-assets",
+        "result_scope": result_scope,
+        "student_cli_required": False,
+        "next_step": next_step,
     }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", default="-")
+    parser.add_argument(
+        "--platform",
+        choices=("windows", "macos", "linux"),
+        help="Override platform detection for packaging checks.",
+    )
     args = parser.parse_args()
     try:
         payload = json.load(sys.stdin) if args.input == "-" else json.loads(Path(args.input).read_text(encoding="utf-8"))
-        output = run(payload)
+        output = run(payload, system=args.platform)
         code = 0
     except (OSError, json.JSONDecodeError, InputError) as exc:
         output = {

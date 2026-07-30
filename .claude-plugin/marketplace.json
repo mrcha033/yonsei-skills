@@ -87,8 +87,8 @@
       "name": "yonsei-shuttle-booking",
       "displayName": "연세 셔틀 조회·예약",
       "source": "./plugins/yonsei-shuttle-booking",
-      "description": "방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고, 선택한 편을 확인받아 예약·대기·취소합니다.",
-      "version": "0.3.0",
+      "description": "Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 예약·대기·취소합니다.",
+      "version": "0.4.0",
       "author": {
         "name": "mrcha033"
       },
@@ -99,15 +99,18 @@
         "yonsei",
         "shuttle",
         "booking",
-        "campus"
+        "campus",
+        "windows",
+        "macos",
+        "linux"
       ]
     },
     {
       "name": "yonsei-space-reservation",
       "displayName": "연세 공간 검색·신청",
       "source": "./plugins/yonsei-space-reservation",
-      "description": "시간·인원·목적·장비 조건으로 공식 공간을 찾고, 검토한 대관 신청을 확인받아 제출합니다.",
-      "version": "0.3.0",
+      "description": "Windows·macOS·Linux에서 조건에 맞는 공식 공간을 찾고, 검토한 대관 신청을 확인받아 제출합니다.",
+      "version": "0.4.0",
       "author": {
         "name": "mrcha033"
       },
@@ -118,7 +121,10 @@
         "yonsei",
         "space",
         "room",
-        "reservation"
+        "reservation",
+        "windows",
+        "macos",
+        "linux"
       ]
     },
     {
@@ -144,8 +150,8 @@
       "name": "yonsei-certificate-assistant",
       "displayName": "연세 증명서 발급 도우미",
       "source": "./plugins/yonsei-certificate-assistant",
-      "description": "macOS에서 증명서 선택부터 ReportX 인계, 문서번호 1회 예약, 호환 PDF 확인과 선택적 인쇄까지 진행합니다.",
-      "version": "0.6.0",
+      "description": "Windows에서는 공식 ReportX, macOS·Linux에서는 호환 PDF 경로를 자동 선택해 증명서 발급을 진행합니다.",
+      "version": "0.7.0",
       "author": {
         "name": "mrcha033"
       },
@@ -158,7 +164,9 @@
         "icert",
         "print",
         "pdf",
+        "windows",
         "macos",
+        "linux",
         "reportx"
       ]
     },

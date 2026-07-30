@@ -1,6 +1,6 @@
 ---
 name: book-yonsei-shuttle
-description: Search, reserve, inspect, waitlist, and cancel Yonsei shuttle trips through the official authenticated shuttle page using origin, destination, date, and time preferences. Use when a student asks to book a Sinchon–International Campus shuttle or manage an existing shuttle reservation.
+description: Search, reserve, inspect, waitlist, and cancel Yonsei shuttle trips on Windows, macOS, or Linux through the official authenticated shuttle page using origin, destination, date, and time preferences. Use when a student asks to book a Sinchon–International Campus shuttle or manage an existing shuttle reservation.
 ---
 
 # Book Yonsei Shuttle
@@ -19,7 +19,9 @@ confirm the write, execute once, and verify the official result.
 
 ## Workflow
 
-1. Reuse the student's persistent Yonsei browser profile and any already open
+1. Run `scripts/platform_support.py` internally and follow
+   `references/cross-platform.md`. Reuse the student's persistent Yonsei browser
+   profile and any already open
    official portal tab. Do not start an isolated headless browser. Open:
 
    `https://underwood1.yonsei.ac.kr/com/lgin/SsoCtr/initExtPageWork.do?link=shuttle`

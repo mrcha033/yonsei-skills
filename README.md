@@ -17,6 +17,10 @@
 화면을 보면서 따라 하는 자세한 설명은
 [`docs/download-and-install.md`](docs/download-and-install.md)에 있습니다.
 
+셔틀·공간은 Windows, macOS, Linux에서 같은 공식 브라우저 흐름을
+사용합니다. 증명서는 Windows의 공식 ReportX 출력과 macOS/Linux의
+호환 PDF 경로를 자동으로 구분합니다.
+
 > Claude 웹에서는 공지·수강·졸업·LearnUs 정리를 사용할 수 있습니다.
 > 사용자의 학교 브라우저를 직접 눌러야 하는 셔틀 예약·공간 신청·증명서
 > 발급은 Codex 데스크톱에서 진행하세요.
@@ -115,7 +119,7 @@ ChatGPT Work와 Codex의 공개 Plugins 화면에 바로 나오려면 OpenAI의
 | 셔틀 | `codex plugin add yonsei-shuttle-booking@yonsei-skills` | 방향·시간별 후보, 잔여석, 확인 후 예약·대기·취소 |
 | 공간대관 | `codex plugin add yonsei-space-reservation@yonsei-skills` | 공간 검색, 규칙·요금 확인, 확인 후 신청 및 접수 확인 |
 | 학사·졸업 | `codex plugin add yonsei-academic-copilot@yonsei-skills` | 강의·성적·학적 정리, 학번·전공별 졸업요건과 남은 학기 계산 |
-| 증명서 | `codex plugin add yonsei-certificate-assistant@yonsei-skills` | 증명서 선택부터 문서번호 예약·호환 PDF 확인·선택적 인쇄 |
+| 증명서 | `codex plugin add yonsei-certificate-assistant@yonsei-skills` | Windows 공식 ReportX 또는 macOS/Linux 호환 PDF로 발급 진행 |
 | LearnUs | `codex plugin add learnus-course-copilot@yonsei-skills` | 강의·마감일·자료 정리, 실행 중 로그인 만료 자동 복구 |
 
 학생용 플러그인 9개에 35개 스킬이 들어 있습니다. 마켓플레이스에는
@@ -154,8 +158,9 @@ LearnUs도 기본적으로 같은 브라우저 프로필을 이어 씁니다. �
   분석합니다. 학교의 공식 졸업사정이나 수강 성공을 보장하지 않습니다.
 - 셔틀과 공간은 제출 직전에 공식 화면에서 조건을 다시 확인합니다.
 - 공간 신청은 접수일 뿐 승인이나 결제가 아닙니다.
-- 증명서 도구가 만드는 파일은 정상 발급 응답의 macOS 호환 렌더링
-  PDF이며, 전자서명된 공식 전자증명서라는 뜻이 아닙니다.
+- Windows 무료 출력은 학교의 공식 ReportX를 사용합니다. macOS/Linux에서
+  도구가 만드는 파일은 정상 발급 응답의 호환 렌더링 PDF이며,
+  전자서명된 공식 전자증명서라는 뜻이 아닙니다.
 - ERP 로그인 과정에서는 HTTPS에서 HTTP로 내려가는 레거시 경로가
   관측되어 라이브 로그인 기능을 제공하지 않습니다.
 

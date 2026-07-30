@@ -1,11 +1,11 @@
 ---
 name: yonsei-certificate-assistant
-description: Clean-room macOS interoperability for Yonsei icert free-print ReportX handoffs. Decodes dzreportx tickets, retrieves and decrypts the ticket-authorized prepared report, materializes the proven ReportX runtime logo and verification-number placeholders, and renders a local compatibility PDF. Use for 인터넷즉시발급 on macOS, localhost :65432 failures, ReportX ticket diagnosis, or an FP3/PDF result. Do not use for paid 전자증명서, forged or modified certificates, automatic printing, password collection, or claims that a compatibility PDF is an officially verified original.
+description: Cross-platform Yonsei icert support that diagnoses the official Windows ReportX path or runs clean-room macOS/Linux free-print interoperability to decode dzreportx tickets and render a local compatibility PDF. Use for 인터넷즉시발급, localhost 65432 failures, ReportX ticket diagnosis, or an FP3/PDF result. Do not use for paid 전자증명서, forged or modified certificates, automatic printing, password collection, or claims that a compatibility PDF is an officially verified original.
 ---
 
 # Yonsei Certificate Assistant
 
-Use this skill for the free-print path:
+Use this skill for the free-print path on Windows, macOS, or Linux:
 
 `인터넷증명서 → 인터넷즉시발급 → 프린터 출력`
 
@@ -101,8 +101,9 @@ python3 "$SKILL_DIR/scripts/icert_print.py" wait-job
 python3 "$SKILL_DIR/scripts/icert_print.py" status
 ```
 
-No DevTools bridge, cookie export, Windows process, VM, or extra Windows
-machine is part of the installed workflow.
+The macOS/Linux compatibility path needs no DevTools bridge, cookie export,
+Windows process, VM, or extra Windows machine. On Windows, prefer the official
+native ReportX component.
 
 Private state is under:
 
@@ -170,7 +171,7 @@ unrendered `.reportx` response is not printable through this command.
   from the status/job control response. Preserve only the artifact digest needed
   for an explicit print recheck.
 - Network is opt-in, HTTPS-only, exact-host, size-bounded, and redirect-free.
-- The HTTP client explicitly disables environment and macOS proxy settings.
+- The HTTP client explicitly disables environment proxy settings.
 - Worker concurrency, submission rate, manifest count, and output bytes are
   bounded; duplicate active ticket hashes share one job.
 - A physical print attempt is atomically reserved before CUPS. Timeout or a

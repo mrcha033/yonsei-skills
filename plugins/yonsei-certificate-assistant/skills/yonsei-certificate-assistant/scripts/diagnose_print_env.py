@@ -115,11 +115,22 @@ def recommended_path(
     virtual: list[str],
 ) -> dict[str, Any]:
     if system != "Windows":
+        label = "macOS" if system == "Darwin" else "Linux"
+        if system not in {"Darwin", "Linux"}:
+            return {
+                "id": "unsupported-platform",
+                "summary": (
+                    "This certificate workflow supports Windows, macOS, and Linux."
+                ),
+                "next_steps": [
+                    "Continue from a supported desktop operating system.",
+                ],
+            }
         if reportx_listening:
             return {
-                "id": "mac-agent-up",
+                "id": "local-agent-up",
                 "summary": (
-                    "A loopback ReportX listener is already running. The "
+                    f"A loopback ReportX listener is already running on {label}. The "
                     "clean-room agent needs no DevTools bridge or page capture."
                 ),
                 "next_steps": [
@@ -130,10 +141,10 @@ def recommended_path(
                 ],
             }
         return {
-            "id": "start-mac-agent",
+            "id": "start-local-agent",
             "summary": (
-                "macOS has no documented official ReportX build. The packaged "
-                "clean-room listener can decode a normal /SSO handoff."
+                f"{label} uses the packaged clean-room listener for the normal "
+                "/SSO handoff and an unverified compatibility PDF."
             ),
             "next_steps": [
                 "python3 scripts/icert_print.py prepare-assets",
@@ -218,6 +229,7 @@ def diagnose() -> dict[str, Any]:
             "ports": ports,
             "listening": reportx_listening,
             "native_supported_os": system == "Windows",
+            "compatibility_supported_os": system in {"Darwin", "Linux"},
         },
         "printers": {
             "all": printers,
@@ -226,8 +238,8 @@ def diagnose() -> dict[str, Any]:
         },
         "recommendation": recommendation,
         "notes": [
-            "Yonsei documents the official print path around the Windows ReportX component, not a macOS build.",
-            "The clean-room macOS agent independently renders the returned prepared FP3 pages as an unverified compatibility PDF.",
+            "Yonsei documents the official print path around the Windows ReportX component.",
+            "The clean-room macOS/Linux agent independently renders the returned prepared FP3 pages as an unverified compatibility PDF.",
             "Document-number reservation requires explicit opt-in and is never automatically retried.",
             "이메일 전송 grants print rights, not a PDF attachment.",
             "A PDF container is not automatically an official electronic certificate or paper original.",

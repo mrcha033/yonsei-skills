@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-certificate-assistant",
   "displayName": "연세 증명서 발급 도우미",
-  "version": "0.6.0",
-  "description": "macOS에서 증명서 선택부터 ReportX 인계, 문서번호 1회 예약, 호환 PDF 확인과 선택적 인쇄까지 진행합니다.",
+  "version": "0.7.0",
+  "description": "Windows에서는 공식 ReportX, macOS·Linux에서는 호환 PDF 경로를 자동 선택해 증명서 발급을 진행합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -17,7 +17,9 @@
     "icert",
     "print",
     "pdf",
+    "windows",
     "macos",
+    "linux",
     "reportx"
   ],
   "skills": "./skills/"

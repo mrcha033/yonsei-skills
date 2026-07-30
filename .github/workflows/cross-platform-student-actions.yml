@@ -1,0 +1,32 @@
+name: Cross-platform student actions
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  student-actions:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+          - macos-latest
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Check shuttle, space, and certificate paths
+        run: python -m unittest discover -s tests -p "test_cross_platform_student_actions.py" -v
+      - name: Compile student action scripts
+        run: >-
+          python -m compileall -q
+          plugins/yonsei-shuttle-booking
+          plugins/yonsei-space-reservation
+          plugins/yonsei-certificate-assistant

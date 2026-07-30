@@ -9,9 +9,9 @@ SCRIPT = Path(__file__).resolve().parents[1] / "plugins" / "yonsei-certificate-a
 
 
 class CertificateIssuePlanTests(unittest.TestCase):
-    def run_script(self, payload):
+    def run_script(self, payload, platform="macos"):
         return subprocess.run(
-            [sys.executable, str(SCRIPT)],
+            [sys.executable, str(SCRIPT), "--platform", platform],
             input=json.dumps(payload, ensure_ascii=False),
             text=True,
             capture_output=True,
@@ -31,8 +31,27 @@ class CertificateIssuePlanTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
         self.assertTrue(output["ready"])
+        self.assertEqual(output["platform"], "macos")
+        self.assertEqual(output["issuance_path"], "local-compatibility-reportx")
         self.assertEqual(output["document_number_reservation"], "one-shot-after-confirmation")
         self.assertFalse(output["paid_electronic_certificate"])
+
+    def test_windows_uses_official_native_reportx(self):
+        result = self.run_script(
+            {
+                "certificate_type": "재학증명서",
+                "language": "ko",
+                "copies": 1,
+                "purpose": "제출",
+                "desired_result": "physical_print",
+                "printer": "Campus Printer",
+            },
+            platform="windows",
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["issuance_path"], "official-windows-reportx")
+        self.assertEqual(output["result_scope"], "official-reportx-print-or-capture")
 
     def test_rejects_user_supplied_certificate_identity(self):
         result = self.run_script(

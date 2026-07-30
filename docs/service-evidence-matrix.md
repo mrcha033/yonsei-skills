@@ -50,9 +50,9 @@ the university documents a safe supported path.
 | LearnUs | Browser-visible Portal Login boundary plus headless SSO parser, memory-only optional session lifecycle, expiry and reauthentication tests | browser-first course, deadline, and material reads; optional hidden-prompt background session | current SSO flow with a student's account after install | course writes, submissions, messages, grading |
 | Academic | Official portal entry, 2026 university catalog, and department-specific requirement pages | supplied class, grade and enrollment audits plus sourced graduation progress and semester planning | official portal graduation-audit comparison for each program | profile, leave/return, registration, withdrawal, grade changes |
 | Attendance | SSO application `yscattend`; official student/chapel guidance | supplied attendance summary, discrepancy review, unsent correction draft | student record fields and correction-status workflow | check-in, presence attestation, record changes, correction submission |
-| Certificate | Official internet-certificate flow plus locally pinned ReportX runtime assets | certificate selection, one-time document-number reservation, compatibility PDF review, and optional confirmed physical print | authenticated issuance with a student's chosen certificate and printer | certificate-field alteration, uncertain retry, paid electronic-certificate payment |
-| Shuttle | Public program `P004023`; official search, reservation, waitlist, history, cancellation operations and row fields | live-browser search, stable trip selection, confirmed reservation/waitlist/cancel, official-history verification | authenticated end-to-end run with an eligible student and real trip | quota bypass, repeated uncertain write, aggressive polling |
-| Space | Public user guides, login roles, application and approval stages | live-browser room search, rule checks, reviewed request, confirmed submission, official-history verification | authenticated end-to-end request against a real available room | payment, approval, permit issuance, repeated uncertain write |
+| Certificate | Official internet-certificate flow plus locally pinned ReportX runtime assets | Windows native ReportX routing; macOS/Linux one-time document-number reservation, compatibility PDF review, and optional confirmed CUPS print | authenticated issuance on each OS with a student's chosen certificate and printer | certificate-field alteration, uncertain retry, paid electronic-certificate payment |
+| Shuttle | Public program `P004023`; official search, reservation, waitlist, history, cancellation operations and row fields | Windows/macOS/Linux live-browser search, stable trip selection, confirmed reservation/waitlist/cancel, official-history verification | authenticated end-to-end run on each OS with an eligible student and real trip | quota bypass, repeated uncertain write, aggressive polling |
+| Space | Public user guides, login roles, application and approval stages | Windows/macOS/Linux live-browser room search, rule checks, reviewed request, confirmed submission, official-history verification | authenticated end-to-end request on each OS against a real available room | payment, approval, permit issuance, repeated uncertain write |
 | YRI | Official manual, Excel export, KRI and approval workflow | authorized export listing, missing/duplicate review, unsaved field diff | current user achievements and modification-request status | register, change, delete, verify, request modification |
 | RMS | Current Research Office workflow guidance | supplied project summary, budget arithmetic, participant-period checks | current project, budget, document, participant, and approval state | upload, expense, contract, travel, approve, sign |
 | ERP | Official service categories, task-path examples, and observed legacy SSO downgrade | supplied request, approval, and payment-status review | safe HTTPS-only authentication path, role-specific SAP menus, personal payroll and live workflow state | submit, approve, pay, change personal or administrative data |
@@ -64,6 +64,11 @@ student-account write was performed during this anonymous review. Reservation,
 application, and document-number writes require the student's authenticated
 official screen, action-time confirmation, a single attempt, and result
 verification.
+
+Cross-platform CI runs the platform selectors and compiles the shuttle, space,
+and certificate implementations on Windows, macOS, and Ubuntu. This confirms
+packaging and local runtime compatibility; the live authenticated rows above
+remain the user-visible acceptance step.
 
 ## Service-specific primary sources
 

@@ -1,6 +1,6 @@
 ---
 name: submit-yonsei-space-request
-description: Search and submit a Yonsei space reservation request through the official authenticated space system using date, time, headcount, purpose, building, and equipment preferences. Use after the student asks to actually apply for a classroom or campus space, not merely draft the request.
+description: Search and submit a Yonsei space reservation request on Windows, macOS, or Linux through the official authenticated space system using date, time, headcount, purpose, building, and equipment preferences. Use after the student asks to actually apply for a classroom or campus space, not merely draft the request.
 ---
 
 # Submit Yonsei Space Request
@@ -10,7 +10,9 @@ submission.
 
 ## Workflow
 
-1. Reuse the student's persistent Yonsei browser profile and any already open
+1. Run `scripts/platform_support.py` internally and follow
+   `references/cross-platform.md`. Reuse the student's persistent Yonsei browser
+   profile and any already open
    official portal tab. Do not start an isolated headless browser. Open
    `https://space.yonsei.ac.kr/`.
 2. If login is required, leave the exact official page open and ask the student

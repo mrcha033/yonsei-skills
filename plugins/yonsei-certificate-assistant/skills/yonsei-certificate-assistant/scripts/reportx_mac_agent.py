@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Loopback ReportX compatibility agent for macOS.
+"""Loopback ReportX compatibility agent for macOS and Linux.
 
 The agent accepts the official ``dzreportx:`` handoff on 127.0.0.1, decodes
 the ticket with a bundled clean-room decoder, and optionally obtains the exact
@@ -75,7 +75,7 @@ from reportx_runtime_profile import (
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 65432
 DEFAULT_DIR = Path.home() / ".cache" / "yonsei-certificate-assistant"
-USER_AGENT = "yonsei-reportx-mac-agent/0.5"
+USER_AGENT = "yonsei-reportx-local-agent/0.6"
 MAX_REQUEST_BODY = 64 * 1024
 MAX_RESPONSE_BODY = 32 * 1024 * 1024
 MAX_PENDING_JOBS = 4
@@ -1260,7 +1260,7 @@ def _protocol_submission_authorized(
 
 
 class ReportXHandler(BaseHTTPRequestHandler):
-    server_version = "YonseiReportXMac/0.4"
+    server_version = "YonseiReportXLocal/0.6"
 
     def log_message(self, fmt: str, *args: Any) -> None:
         # Do not log self.path: /SSO contains the complete encrypted ticket.

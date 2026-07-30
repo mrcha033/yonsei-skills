@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Operate the clean-room macOS ReportX compatibility agent.
+"""Operate the clean-room macOS/Linux ReportX compatibility agent.
 
 Examples:
   python3 icert_print.py doctor
@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import platform
 import shutil
 import stat
 import subprocess
@@ -24,6 +25,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+import webbrowser
 from pathlib import Path
 
 from reportx_runtime_profile import (
@@ -262,11 +264,27 @@ def cmd_arm(args: argparse.Namespace) -> int:
     return 0 if payload.get("armed") else 1
 
 
+def open_url(url: str) -> bool:
+    system = platform.system()
+    command: list[str] | None = None
+    if system == "Darwin" and shutil.which("open"):
+        command = ["open", url]
+    elif system == "Linux" and shutil.which("xdg-open"):
+        command = ["xdg-open", url]
+    if command is not None:
+        return subprocess.run(command, check=False).returncode == 0
+    if system == "Windows" and hasattr(os, "startfile"):
+        try:
+            os.startfile(url)  # type: ignore[attr-defined]
+            return True
+        except OSError:
+            pass
+    return bool(webbrowser.open(url, new=2))
+
+
 def cmd_open(_: argparse.Namespace) -> int:
     for url in (PORTAL, ICERT):
-        if sys.platform == "darwin" and shutil.which("open"):
-            subprocess.run(["open", url], check=False)
-        else:
+        if not open_url(url):
             print(url)
     print(
         "\n다음 순서:\n"
