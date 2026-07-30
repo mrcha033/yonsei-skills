@@ -1,6 +1,6 @@
 ---
 name: book-yonsei-shuttle
-description: Search, reserve, inspect, waitlist, and cancel Yonsei shuttle trips on Windows, macOS, or Linux through the official authenticated shuttle page using origin, destination, date, and time preferences. Use when a student asks to book a Sinchon–International Campus shuttle or manage an existing shuttle reservation.
+description: Search, reserve, inspect, waitlist, and cancel Yonsei shuttle trips on Windows, macOS, or Linux through the official authenticated shuttle page using origin, destination, date, and time preferences, with internal access recovery. Use when a student asks to book a Sinchon–International Campus shuttle, manage an existing reservation, or continue either task after the official page fails to open.
 ---
 
 # Book Yonsei Shuttle

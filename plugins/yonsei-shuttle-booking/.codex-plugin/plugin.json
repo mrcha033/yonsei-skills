@@ -1,6 +1,6 @@
 {
   "name": "yonsei-shuttle-booking",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 예약·대기·취소하며, 접속 문제는 같은 흐름 안에서 자동 복구합니다.",
   "author": {
     "name": "mrcha033",

@@ -178,7 +178,7 @@ SPECS = {
         ],
     },
     "yonsei-shuttle-booking": {
-        "version": "0.6.0",
+        "version": "0.6.1",
         "display": "연세 셔틀 조회·예약",
         "description": "Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 예약·대기·취소하며, 접속 문제는 같은 흐름 안에서 자동 복구합니다.",
         "short": "신촌·국제캠퍼스 셔틀 조회와 예약",
