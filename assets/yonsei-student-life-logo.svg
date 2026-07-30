@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Yonsei Student Life</title>
+  <desc id="desc">A navy rounded square with a white Y and light blue path.</desc>
+  <rect width="512" height="512" rx="112" fill="#183B66"/>
+  <path d="M128 126h78l50 89 50-89h78l-94 155v105h-68V281z" fill="#fff"/>
+  <path d="M104 392c70-58 142-42 198-70 42-21 68-61 106-119" fill="none" stroke="#75C7F0" stroke-width="28" stroke-linecap="round"/>
+</svg>

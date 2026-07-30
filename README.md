@@ -4,6 +4,23 @@
 
 > 연세대학교 공식 서비스가 아닙니다. 학교 계정 권한을 늘리거나 수강신청·출석·예약 제한을 우회하지 않습니다.
 
+## 터미널 없이 설치
+
+명령어를 입력하지 않아도 됩니다.
+
+| 사용하는 앱 | 받을 파일 | 설치 방법 |
+| --- | --- | --- |
+| Codex 데스크톱 | [Codex용 ZIP](https://github.com/mrcha033/yonsei-skills/releases/latest/download/yonsei-codex-ui-pack.zip) | 압축을 풀고 `yonsei-skills` 폴더를 Codex에서 연 뒤 **Plugins**에서 `+` 선택 |
+| Claude 웹·데스크톱 | [Claude용 ZIP](https://github.com/mrcha033/yonsei-skills/releases/latest/download/yonsei-student-life.zip) | **Customize → Skills → + → Create skill → Upload a skill**에서 ZIP 업로드 |
+| `.skill` 업로드 지원 앱 | [학생생활 통합 .skill](https://github.com/mrcha033/yonsei-skills/releases/latest/download/yonsei-student-life.skill) | Skills의 업로드 화면에서 파일 선택 |
+
+화면을 보면서 따라 하는 자세한 설명은
+[`docs/download-and-install.md`](docs/download-and-install.md)에 있습니다.
+
+> Claude 웹에서는 공지·수강·졸업·LearnUs 정리를 사용할 수 있습니다.
+> 사용자의 학교 브라우저를 직접 눌러야 하는 셔틀 예약·공간 신청·증명서
+> 발급은 Codex 데스크톱에서 진행하세요.
+
 ## 먼저 써 볼 세 가지
 
 | 플러그인 | 이런 때 사용하세요 | 현재 범위 |
@@ -16,7 +33,7 @@
 `yonsei-space-reservation`, 성적표나 학사 화면을 정리하려면
 `yonsei-academic-copilot`을 추가로 설치할 수 있습니다.
 
-## 3분 설치
+## 터미널 설치가 편한 경우
 
 ### Codex
 
@@ -51,10 +68,12 @@ Claude Code 안에서는 `/plugin` 화면의 **Marketplaces** 탭에
 
 ### ChatGPT 사용자
 
-이 저장소는 Codex와 Claude Code 마켓플레이스 형식으로 배포됩니다.
-ChatGPT 웹·데스크톱에서 조직용 플러그인을 가져오는 기능은 요금제와
-워크스페이스 설정에 따라 다르므로, 플러그인 디렉터리에 이 마켓플레이스를
-직접 가져올 수 없는 계정에서는 Codex에서 사용하는 것이 가장 간단합니다.
+ChatGPT Work와 Codex의 공개 Plugins 화면에 바로 나오려면 OpenAI의
+공개 플러그인 심사를 통과해야 합니다. 심사용 통합 ZIP과 제출 자료는
+자동으로 만들지만, 공개 전까지는 위의 Codex용 ZIP 또는 Claude용 ZIP을
+사용하세요. 현재 상태는
+[`docs/openai-directory-submission.md`](docs/openai-directory-submission.md)에
+정리했습니다.
 
 ## 코딩이나 JSON을 알아야 하나요?
 
