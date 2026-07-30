@@ -1,0 +1,4 @@
+interface:
+  display_name: "연세 교환학생 여정 도우미"
+  short_description: "교환학생 지원부터 출국·귀국보고까지 단계별 관리"
+  default_prompt: "Use $manage-yonsei-exchange-journey to track my Yonsei exchange journey and next deadline."

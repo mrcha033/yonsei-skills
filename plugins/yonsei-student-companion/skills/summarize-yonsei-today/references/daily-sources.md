@@ -12,6 +12,10 @@ session. Read the smallest relevant view.
 | Daily when booked | 공간대관시스템 | active request, room, time, approval state |
 | Weekly | 도서관 | loans due within seven days, active reservations, seat or room state |
 | Weekly | 공식 공지 | concrete application, payment, or event deadlines |
+| Daily in active periods | Underwood 학사신청 | application name, open/close time, current state, missing action |
+| Daily in active periods | Underwood 장학·등록금 | scholarship or payment deadline, application/payment state |
+| Daily in active periods | Underwood 생활관 | application, payment, room, overnight, move-out, or repair state |
+| Weekly | Underwood 교환·교직 | current stage, next required document, dated deadline |
 
 ## Optional campus sources
 

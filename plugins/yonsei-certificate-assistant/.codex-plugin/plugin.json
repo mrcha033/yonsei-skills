@@ -1,7 +1,7 @@
 {
   "name": "yonsei-certificate-assistant",
-  "version": "0.9.0",
-  "description": "Windows 공식 ReportX 또는 macOS·Linux 호환 PDF 경로를 선택하고, 원본 연세 제목체·본문체를 각각 유지해 증명서 발급을 진행합니다.",
+  "version": "0.10.0",
+  "description": "Windows 공식 ReportX 또는 macOS·Linux 호환 PDF 경로로 증명서와 학생활동·실습 확인서를 찾고, 원본 연세 글꼴을 유지해 발급합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -34,13 +34,15 @@
       "문서번호 1회 예약 보호",
       "명시적 프린터 제출",
       "Windows/macOS/Linux 경로 자동 선택",
-      "원본 연세 제목체·본문체 개별 PDF 임베딩"
+      "원본 연세 제목체·본문체 개별 PDF 임베딩",
+      "학생활동·교육실습·생활관 문서 발급"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
       "재학증명서를 국문 PDF로 발급하는 과정을 끝까지 진행해 줘.",
       "이 컴퓨터에서 연세 증명서를 발급해 줘.",
-      "이 ReportX 발급 건을 진단하고 호환 PDF 범위를 설명해 줘."
+      "이 ReportX 발급 건을 진단하고 호환 PDF 범위를 설명해 줘.",
+      "교육실습 확인서를 찾아 PDF 발급까지 진행해 줘."
     ]
   }
 }

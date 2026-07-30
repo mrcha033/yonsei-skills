@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-academic-copilot",
   "displayName": "연세 학사·졸업 도우미",
-  "version": "0.3.0",
-  "description": "학사정보와 성적표를 정리하고, 학번·전공별 공식 기준으로 졸업 진행도와 남은 학기 계획을 계산합니다.",
+  "version": "0.4.0",
+  "description": "Underwood 학사정보·학사신청·교직이수를 정리하고, 공식 진행표와 학번·전공별 기준으로 졸업요건과 남은 학기를 계산합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

@@ -47,9 +47,75 @@ def probability(bid: int, cutoff: float, scale: float) -> float:
     return 1.0 / (1.0 + math.exp(exponent))
 
 
+def history_result(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    normalized = str(value or "").strip().casefold()
+    if normalized in {"success", "successful", "enrolled", "accepted", "y", "성공", "수강", "배정"}:
+        return True
+    if normalized in {"failed", "failure", "rejected", "n", "실패", "탈락", "미배정"}:
+        return False
+    return None
+
+
+def matching_history(
+    raw_history: list[Any],
+    course: dict[str, Any],
+    path: str,
+) -> list[dict[str, Any]]:
+    matches: list[dict[str, Any]] = []
+    for index, raw in enumerate(raw_history):
+        item_path = f"{path}[{index}]"
+        if not isinstance(raw, dict):
+            raise InputError("invalid-history-row", "Each history row must be an object.", item_path)
+        row_course_id = str(raw.get("course_id", "")).strip()
+        row_course_code = str(raw.get("course_code", "")).strip()
+        same_course = bool(row_course_id and row_course_id == course["course_id"])
+        same_code = bool(
+            row_course_code
+            and course["course_code"]
+            and row_course_code.casefold() == str(course["course_code"]).strip().casefold()
+        )
+        if not (same_course or same_code):
+            continue
+        mileage = optional_integer(raw.get("mileage"), f"{item_path}.mileage")
+        if mileage is None:
+            continue
+        matches.append(
+            {
+                "term": raw.get("term"),
+                "course_id": row_course_id or None,
+                "course_code": row_course_code or None,
+                "section": raw.get("section"),
+                "mileage": mileage,
+                "successful": history_result(raw.get("successful", raw.get("status"))),
+                "applied_course_count": optional_integer(
+                    raw.get("applied_course_count"),
+                    f"{item_path}.applied_course_count",
+                ),
+                "first_time": raw.get("first_time"),
+                "major_status": raw.get("major_status"),
+                "year": raw.get("year"),
+                "earned_credit_ratio": raw.get("earned_credit_ratio"),
+                "total_earned_credit_ratio": raw.get("total_earned_credit_ratio"),
+                "graduation_context": raw.get("graduation_context"),
+            }
+        )
+    return matches
+
+
 def inferred_cutoff(course: dict[str, Any]) -> tuple[float, str]:
     if course["past_cutoff"] is not None:
         return float(course["past_cutoff"]), "past-cutoff"
+    history = course["personal_history"]
+    successes = [row["mileage"] for row in history if row["successful"] is True]
+    failures = [row["mileage"] for row in history if row["successful"] is False]
+    if successes and failures and max(failures) < min(successes):
+        return (max(failures) + min(successes)) / 2, "personal-history-band"
+    if successes:
+        return float(min(successes)), "personal-success-observation"
+    if failures:
+        return float(min(course["mileage_cap"], max(failures) + 1)), "personal-failure-lower-bound"
     capacity = course["capacity"]
     applicants = course["applicants"]
     cap = course["mileage_cap"]
@@ -67,6 +133,13 @@ def run(payload: Any) -> dict[str, Any]:
     raw_courses = payload.get("courses")
     if not isinstance(raw_courses, list) or not raw_courses:
         raise InputError("invalid-courses", "courses must be a non-empty array.", "$.courses")
+    top_level_history = payload.get("underwood_history", [])
+    if not isinstance(top_level_history, list):
+        raise InputError(
+            "invalid-history",
+            "underwood_history must be an array.",
+            "$.underwood_history",
+        )
 
     courses: list[dict[str, Any]] = []
     seen: set[str] = set()
@@ -96,6 +169,18 @@ def run(payload: Any) -> dict[str, Any]:
             "alternatives": sorted({item.strip() for item in alternatives_raw if item.strip()}),
             "history_as_of": raw.get("history_as_of"),
         }
+        local_history = raw.get("personal_history", [])
+        if not isinstance(local_history, list):
+            raise InputError(
+                "invalid-history",
+                "personal_history must be an array.",
+                f"{path}.personal_history",
+            )
+        course["personal_history"] = matching_history(
+            [*top_level_history, *local_history],
+            course,
+            "$.underwood_history",
+        )
         cutoff, evidence = inferred_cutoff(course)
         course["estimated_cutoff"] = cutoff
         course["evidence"] = evidence
@@ -154,6 +239,25 @@ def run(payload: Any) -> dict[str, Any]:
                 "required_for_graduation": course["required_for_graduation"],
                 "alternatives": course["alternatives"],
                 "history_as_of": course["history_as_of"],
+                "personal_history_count": len(course["personal_history"]),
+                "personal_history": course["personal_history"],
+                "tie_break_context": [
+                    {
+                        key: row[key]
+                        for key in (
+                            "term",
+                            "applied_course_count",
+                            "first_time",
+                            "major_status",
+                            "year",
+                            "earned_credit_ratio",
+                            "total_earned_credit_ratio",
+                            "graduation_context",
+                        )
+                        if row.get(key) not in (None, "")
+                    }
+                    for row in course["personal_history"]
+                ],
             }
         )
     recommendations.sort(
@@ -164,7 +268,7 @@ def run(payload: Any) -> dict[str, Any]:
         )
     )
     return {
-        "schema": "yonsei-mileage-strategy/v1",
+        "schema": "yonsei-mileage-strategy/v2",
         "total_mileage": total,
         "allocated_mileage": best_spent,
         "unallocated_mileage": total - best_spent,
@@ -172,7 +276,8 @@ def run(payload: Any) -> dict[str, Any]:
         "guaranteed": False,
         "assumptions": [
             "Past cutoffs and current demand are planning signals, not admission guarantees.",
-            "Major, year, and other quotas plus same-mileage tie breakers are not modeled unless reflected in supplied evidence.",
+            "Underwood mileage history is personal evidence, not a population cutoff.",
+            "Major, year, earned-credit, first-time, and other same-mileage tie breakers are shown as context but are not converted into a guaranteed score.",
             "Recalculate after capacity, applicant counts, or the student's course set changes.",
         ],
         "registration_performed": False,

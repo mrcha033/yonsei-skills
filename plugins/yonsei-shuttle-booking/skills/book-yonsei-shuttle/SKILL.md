@@ -33,6 +33,8 @@ confirm the write, execute once, and verify the official result.
 3. Open **예약**, select the departure area and date, and read the live rows.
    Transcribe only the official fields listed in
    `references/official-browser-workflow.md`.
+   Also read the active outbound and return trips for that date so the
+   one-round-trip-per-day rule can be checked.
 4. Run:
 
    ```bash
@@ -58,6 +60,8 @@ reservation list or that the official page reports cancellation.
 
 ## Boundaries
 
+- Apply the displayed rules: one round trip per day, and cancellation or
+  rebooking only until 20 minutes before departure.
 - Never bypass NetFunnel, quotas, reservation dates, role rules, or seat rules.
 - Do not poll aggressively.
 - Do not treat a prepared selector or button click as success; verify the

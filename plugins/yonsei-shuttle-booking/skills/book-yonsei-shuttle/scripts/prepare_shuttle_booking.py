@@ -115,6 +115,14 @@ def run(payload: Any) -> dict[str, Any]:
     if after and before and after > before:
         raise InputError("invalid-window", "depart_after cannot exceed depart_before.", "$.query")
     allow_waitlist = bool(query.get("allow_waitlist", False))
+    reason = str(query.get("reason", "")).strip()
+    active_trips = query.get("active_trips_on_date", 0)
+    if isinstance(active_trips, bool) or not isinstance(active_trips, int) or active_trips < 0:
+        raise InputError(
+            "invalid-active-trips",
+            "active_trips_on_date must be a non-negative integer.",
+            "$.query.active_trips_on_date",
+        )
 
     candidates: list[dict[str, Any]] = []
     for index, raw in enumerate(rows):
@@ -187,12 +195,32 @@ def run(payload: Any) -> dict[str, Any]:
             "depart_before": before,
             "preferred_time": preferred,
             "allow_waitlist": allow_waitlist,
+            "reason": reason or None,
+            "active_trips_on_date": active_trips,
         },
         "candidate_count": len(candidates),
         "candidates": candidates[:5],
         "source_scope": "authenticated-official-browser-rows",
         "reservation_performed": False,
-        "next_step": "recheck-selector-then-confirm",
+        "ready_for_confirmation": bool(candidates) and bool(reason) and active_trips < 2,
+        "missing_for_booking": [
+            item
+            for item, missing in (
+                ("reservation_reason", not reason),
+                ("daily_round_trip_limit_review", active_trips >= 2),
+            )
+            if missing
+        ],
+        "official_rules": {
+            "daily_limit": "one round trip per day",
+            "change_or_cancel_until": "20 minutes before departure",
+            "waitlist_requires_official_availability": True,
+        },
+        "next_step": (
+            "recheck-selector-then-confirm"
+            if candidates and reason and active_trips < 2
+            else "complete-or-review-booking-input"
+        ),
     }
 
 

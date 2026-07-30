@@ -31,6 +31,21 @@
           "skill": "summarize-yonsei-today",
           "primary_result": "read-only daily briefing from accessible official student services",
           "state": "implemented"
+        },
+        {
+          "skill": "manage-yonsei-dorm-life",
+          "primary_result": "verified dorm status or confirmed official dorm action",
+          "state": "implemented"
+        },
+        {
+          "skill": "manage-yonsei-scholarships",
+          "primary_result": "ranked eligible scholarships or verified selected application",
+          "state": "implemented"
+        },
+        {
+          "skill": "manage-yonsei-exchange-journey",
+          "primary_result": "current exchange stage, next deadline, and verified requested action",
+          "state": "implemented"
         }
       ]
     },
@@ -79,6 +94,11 @@
         {
           "skill": "issue-yonsei-certificate",
           "primary_result": "reviewed end-to-end free-print PDF result after explicit confirmation",
+          "state": "implemented"
+        },
+        {
+          "skill": "issue-yonsei-student-activity-documents",
+          "primary_result": "verified official student-activity document after explicit confirmation",
           "state": "implemented"
         }
       ]
@@ -133,6 +153,16 @@
         {
           "skill": "plan-yonsei-graduation-path",
           "primary_result": "semester plan for supplied remaining requirements and offerings",
+          "state": "implemented"
+        },
+        {
+          "skill": "track-yonsei-academic-applications",
+          "primary_result": "active academic-application radar and next action",
+          "state": "implemented"
+        },
+        {
+          "skill": "manage-yonsei-teaching-credential",
+          "primary_result": "advisory teaching-credential progress and next official action",
           "state": "implemented"
         }
       ]

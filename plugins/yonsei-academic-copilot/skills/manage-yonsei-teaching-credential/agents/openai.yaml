@@ -1,0 +1,4 @@
+interface:
+  display_name: "연세 교직이수 도우미"
+  short_description: "교직이수 요건·실습·자격 신청의 다음 절차를 정리"
+  default_prompt: "Use $manage-yonsei-teaching-credential to check my Yonsei teaching credential progress and next actions."

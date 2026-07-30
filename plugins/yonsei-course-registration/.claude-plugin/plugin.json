@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-course-registration",
   "displayName": "연세 수강계획 도우미",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "시간표 충돌을 확인하고 정원·신청자·지난 마일리지 컷·졸업 중요도를 반영해 수강신청 전략을 만듭니다.",
   "author": {
     "name": "mrcha033",

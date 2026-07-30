@@ -29,7 +29,7 @@ def main() -> int:
     payload = json.loads(args.input.read_text(encoding="utf-8"))
     items = payload["items"] if isinstance(payload, dict) else payload
     seen: set[tuple[str, str]] = set()
-    sections = {"지금": [], "오늘": [], "7일 안": [], "확인 필요": []}
+    sections = {"지금": [], "오늘": [], "7일 안": [], "진행 중": [], "확인 필요": []}
     for item in items:
         title = str(item.get("title", "")).strip()
         due_value = str(item.get("due_at", "")).strip()
@@ -39,7 +39,10 @@ def main() -> int:
         if key in seen:
             continue
         seen.add(key)
-        if item.get("needs_review") or not due_value:
+        if item.get("active") is True and not due_value and not item.get("needs_review"):
+            section = "진행 중"
+            sort_time = now
+        elif item.get("needs_review") or not due_value:
             section = "확인 필요"
             sort_time = now + timedelta(days=3650)
         else:
@@ -58,6 +61,8 @@ def main() -> int:
             "source": str(item.get("source", "")).strip(),
             "due_at": due_value or None,
             "status": str(item.get("status", "")).strip() or None,
+            "category": str(item.get("category", "")).strip() or None,
+            "active": bool(item.get("active", False)),
         }
         sections[section].append((sort_time, normalized))
     result = {

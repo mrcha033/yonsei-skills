@@ -112,19 +112,19 @@ ChatGPT Work와 Codex의 공개 Plugins 화면에 바로 나오려면 OpenAI의
 
 | 플러그인 | 설치 명령 | 할 수 있는 일 |
 | --- | --- | --- |
-| 포털·오늘의 연세 | `codex plugin add yonsei-student-companion@yonsei-skills` | 한 번 로그인한 브라우저 세션 재사용, 자연어 포털 바로가기, 오늘 수업·마감·출결·예약 요약 |
+| 포털·오늘의 연세 | `codex plugin add yonsei-student-companion@yonsei-skills` | 기존 브라우저 로그인 재사용, 오늘 요약, 생활관·장학금·교환학생 관리 |
 | 공지·마감일 | `codex plugin add yonsei-notice-monitor@yonsei-skills` | 대학·IT 공식 공지 검색, 본문 날짜 추출, 이전 확인과 비교 |
-| 수강계획 | `codex plugin add yonsei-course-registration@yonsei-skills` | 시간표 후보, 충돌·이동시간, 정원·이전 컷 기반 마일리지 전략 |
+| 수강계획 | `codex plugin add yonsei-course-registration@yonsei-skills` | 시간표 후보, 충돌·이동시간, Underwood 개인 이력·정원 기반 마일리지 전략 |
 | 전자출결 | `codex plugin add yonsei-attendance-copilot@yonsei-skills` | 출결 요약, 확인할 기록 찾기, 정정 문의 초안 |
 | 셔틀 | `codex plugin add yonsei-shuttle-booking@yonsei-skills` | 방향·시간별 후보, 잔여석, 확인 후 예약·대기·취소 |
 | 공간대관 | `codex plugin add yonsei-space-reservation@yonsei-skills` | 공간 검색, 규칙·요금 확인, 확인 후 신청 및 접수 확인 |
-| 학사·졸업 | `codex plugin add yonsei-academic-copilot@yonsei-skills` | 강의·성적·학적 정리, 학번·전공별 졸업요건과 남은 학기 계산 |
-| 증명서 | `codex plugin add yonsei-certificate-assistant@yonsei-skills` | Windows 공식 ReportX 또는 macOS/Linux 호환 PDF로 발급 진행 |
+| 학사·졸업 | `codex plugin add yonsei-academic-copilot@yonsei-skills` | 학사신청·교직이수, 공식 진행표 기반 졸업요건과 남은 학기 계산 |
+| 증명서 | `codex plugin add yonsei-certificate-assistant@yonsei-skills` | 증명서·학생활동·교육실습 문서를 Windows 공식 ReportX 또는 macOS/Linux 호환 PDF로 발급 |
 | LearnUs | `codex plugin add learnus-course-copilot@yonsei-skills` | 강의·마감일·자료 정리, 실행 중 로그인 만료 자동 복구 |
 
-학생용 플러그인 9개에 35개 스킬이 들어 있습니다. 마켓플레이스에는
+학생용 플러그인 9개에 41개 스킬이 들어 있습니다. 마켓플레이스에는
 스킬이 아니라 플러그인 단위로 표시되며, 플러그인을 설치하면 포함된
-스킬이 함께 활성화됩니다. 이전에 언급된 37개와 현재 전체 47개의 구분은
+스킬이 함께 활성화됩니다. 이전에 언급된 37개와 현재 전체 53개의 구분은
 [`docs/skill-catalog.md`](docs/skill-catalog.md)에 정리했습니다.
 
 LearnUs도 기본적으로 같은 브라우저 프로필을 이어 씁니다. 포털 로그인,

@@ -10,8 +10,8 @@
       "name": "yonsei-student-companion",
       "displayName": "오늘의 연세·포털 연결",
       "source": "./plugins/yonsei-student-companion",
-      "description": "연세 포털에 한 번 로그인한 브라우저 세션을 이어 쓰고, 원하는 학생 서비스로 이동하거나 오늘의 수업·마감·예약을 한 번에 정리합니다.",
-      "version": "0.1.0",
+      "description": "기존 브라우저의 연세 로그인을 이어 쓰고 오늘의 수업·마감·예약과 생활관·장학금·교환학생 절차를 한곳에서 관리합니다.",
+      "version": "0.2.0",
       "author": {
         "name": "mrcha033"
       },
@@ -23,7 +23,10 @@
         "portal",
         "session",
         "student",
-        "daily"
+        "daily",
+        "dorm",
+        "scholarship",
+        "exchange"
       ]
     },
     {
@@ -50,7 +53,7 @@
       "displayName": "연세 수강계획 도우미",
       "source": "./plugins/yonsei-course-registration",
       "description": "시간표 충돌을 확인하고 정원·신청자·지난 마일리지 컷·졸업 중요도를 반영해 수강신청 전략을 만듭니다.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "mrcha033"
       },
@@ -88,7 +91,7 @@
       "displayName": "연세 셔틀 조회·예약",
       "source": "./plugins/yonsei-shuttle-booking",
       "description": "Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 예약·대기·취소합니다.",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "author": {
         "name": "mrcha033"
       },
@@ -131,8 +134,8 @@
       "name": "yonsei-academic-copilot",
       "displayName": "연세 학사·졸업 도우미",
       "source": "./plugins/yonsei-academic-copilot",
-      "description": "학사정보와 성적표를 정리하고, 학번·전공별 공식 기준으로 졸업 진행도와 남은 학기 계획을 계산합니다.",
-      "version": "0.3.0",
+      "description": "Underwood 학사정보·학사신청·교직이수를 정리하고, 공식 진행표와 학번·전공별 기준으로 졸업요건과 남은 학기를 계산합니다.",
+      "version": "0.4.0",
       "author": {
         "name": "mrcha033"
       },
@@ -150,8 +153,8 @@
       "name": "yonsei-certificate-assistant",
       "displayName": "연세 증명서 발급 도우미",
       "source": "./plugins/yonsei-certificate-assistant",
-      "description": "Windows 공식 ReportX 또는 macOS·Linux 호환 PDF 경로를 선택하고, 원본 연세 제목체·본문체를 각각 유지해 증명서 발급을 진행합니다.",
-      "version": "0.9.0",
+      "description": "Windows 공식 ReportX 또는 macOS·Linux 호환 PDF 경로로 증명서와 학생활동·실습 확인서를 찾고, 원본 연세 글꼴을 유지해 발급합니다.",
+      "version": "0.10.0",
       "author": {
         "name": "mrcha033"
       },

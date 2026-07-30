@@ -20,21 +20,26 @@ INSTALLATIONS = {
 
 SPECS = {
     "yonsei-student-companion": {
-        "version": "0.1.0",
+        "version": "0.2.0",
         "display": "오늘의 연세·포털 연결",
-        "description": "연세 포털에 한 번 로그인한 브라우저 세션을 이어 쓰고, 원하는 학생 서비스로 이동하거나 오늘의 수업·마감·예약을 한 번에 정리합니다.",
-        "short": "한 번 로그인하고 오늘 할 일을 한눈에",
-        "long": "학생이 공식 연세 로그인 화면에서 한 번 인증하면 같은 브라우저 프로필을 학사·LearnUs·출결·셔틀·공간·도서관 등에 이어 사용합니다. 원하는 포털 기능을 자연어로 열고, 접근 가능한 공식 화면에서 오늘과 7일 안의 할 일을 읽기 전용으로 정리합니다.",
-        "keywords": ["yonsei", "portal", "session", "student", "daily"],
+        "description": "기존 브라우저의 연세 로그인을 이어 쓰고 오늘의 수업·마감·예약과 생활관·장학금·교환학생 절차를 한곳에서 관리합니다.",
+        "short": "한 번 로그인하고 학교생활을 한눈에",
+        "long": "학생이 이미 로그인한 일반 브라우저 프로필을 먼저 찾아 Portal에서 Underwood까지 공식 SSO로 이어갑니다. 오늘과 7일 안의 수업·마감·예약을 정리하고 생활관, 장학금, 교환학생의 현재 상태와 다음 절차를 자연어로 관리합니다.",
+        "keywords": ["yonsei", "portal", "session", "student", "daily", "dorm", "scholarship", "exchange"],
         "capabilities": [
             "Persistent browser-profile session reuse",
             "Current official portal service routing",
             "Read-only daily student briefing",
+            "Dorm-life workflows",
+            "Scholarship opportunity and application tracking",
+            "Exchange journey tracking",
         ],
         "prompts": [
             "연세 포털에 한 번 로그인하고 계속 이어서 써 줘.",
             "도서관 좌석 예약 화면을 찾아 바로 열어 줘.",
             "오늘 수업, LearnUs 마감, 출결, 예약을 한 번에 정리해 줘.",
+            "내가 지원할 수 있는 장학금과 생활관 마감을 정리해 줘.",
+            "교환학생 준비에서 다음에 해야 할 일을 알려 줘.",
         ],
     },
     "learnus-course-copilot": {
@@ -58,9 +63,9 @@ SPECS = {
         ],
     },
     "yonsei-certificate-assistant": {
-        "version": "0.9.0",
+        "version": "0.10.0",
         "display": "연세 증명서 발급 도우미",
-        "description": "Windows 공식 ReportX 또는 macOS·Linux 호환 PDF 경로를 선택하고, 원본 연세 제목체·본문체를 각각 유지해 증명서 발급을 진행합니다.",
+        "description": "Windows 공식 ReportX 또는 macOS·Linux 호환 PDF 경로로 증명서와 학생활동·실습 확인서를 찾고, 원본 연세 글꼴을 유지해 발급합니다.",
         "short": "운영체제에 맞춰 증명서 발급 진행",
         "long": "학생의 운영체제를 자동 확인해 Windows에서는 학교의 공식 ReportX 무료 출력 경로를, macOS와 Linux에서는 문서번호 1회 예약을 포함한 독립 호환 PDF 경로를 사용합니다. 재배포 허가를 받은 연세 제목체와 본문체를 번들해 각각 PDF에 임베드하고, 다른 글꼴이 섞이면 발급 결과를 거부합니다.",
         "keywords": ["yonsei", "certificate", "icert", "print", "pdf", "windows", "macos", "linux", "reportx"],
@@ -72,11 +77,13 @@ SPECS = {
             "명시적 프린터 제출",
             "Windows/macOS/Linux 경로 자동 선택",
             "원본 연세 제목체·본문체 개별 PDF 임베딩",
+            "학생활동·교육실습·생활관 문서 발급",
         ],
         "prompts": [
             "재학증명서를 국문 PDF로 발급하는 과정을 끝까지 진행해 줘.",
             "이 컴퓨터에서 연세 증명서를 발급해 줘.",
             "이 ReportX 발급 건을 진단하고 호환 PDF 범위를 설명해 줘.",
+            "교육실습 확인서를 찾아 PDF 발급까지 진행해 줘.",
         ],
     },
     "yonsei-notice-monitor": {
@@ -98,11 +105,11 @@ SPECS = {
         ],
     },
     "yonsei-academic-copilot": {
-        "version": "0.3.0",
+        "version": "0.4.0",
         "display": "연세 학사·졸업 도우미",
-        "description": "학사정보와 성적표를 정리하고, 학번·전공별 공식 기준으로 졸업 진행도와 남은 학기 계획을 계산합니다.",
-        "short": "성적·학적 정리와 졸업요건 계산",
-        "long": "첨부한 학사정보와 성적표를 정리하고 정확한 학번·전공의 공식 졸업요건과 비교해 부족한 학점·과목·인증을 계산합니다. 남은 요건은 선수과목과 개설학기를 반영한 학기별 계획으로 만듭니다.",
+        "description": "Underwood 학사정보·학사신청·교직이수를 정리하고, 공식 진행표와 학번·전공별 기준으로 졸업요건과 남은 학기를 계산합니다.",
+        "short": "학사신청·교직·졸업요건을 한눈에",
+        "long": "기존 브라우저 로그인으로 Underwood의 학사정보, 학사신청, 교직이수, 공식 학점진행표를 읽습니다. 정확한 학번·전공 기준과 비교해 졸업까지 부족한 학점·과목·인증과 다음 학기 계획을 보여 주며, 학과별 특수 요건은 확인 필요로 남깁니다.",
         "keywords": ["yonsei", "academic", "records", "student"],
         "capabilities": [
             "Supplied class snapshot normalization",
@@ -110,6 +117,8 @@ SPECS = {
             "Enrollment and registration status checks",
             "Sourced graduation progress calculation",
             "Semester-by-semester graduation planning",
+            "Underwood academic-application radar",
+            "Teaching-credential progress and workflow",
         ],
         "prompts": [
             "첨부한 학사정보 화면에서 이번 학기 강의를 정리해 줘.",
@@ -117,14 +126,16 @@ SPECS = {
             "이 화면에서 내 학적 상태와 확인이 필요한 항목을 알려 줘.",
             "내 성적표와 전공 졸업요건을 비교해 부족한 항목을 계산해 줘.",
             "졸업까지 남은 과목을 학기별로 배치해 줘.",
+            "지금 열려 있는 학사신청과 곧 끝나는 마감을 보여 줘.",
+            "내 교직이수에서 남은 교육·실습 요건을 계산해 줘.",
         ],
     },
     "yonsei-course-registration": {
-        "version": "0.3.0",
+        "version": "0.4.0",
         "display": "연세 수강계획 도우미",
         "description": "시간표 충돌을 확인하고 정원·신청자·지난 마일리지 컷·졸업 중요도를 반영해 수강신청 전략을 만듭니다.",
         "short": "시간표 조합과 마일리지 배분 전략",
-        "long": "과목 목록에서 시간·캠퍼스 이동·공강·학점 조건을 검사하고 시간표 후보를 순위화합니다. 현재 정원과 신청자, 이전 마일리지 결과, 필수 여부와 대체 과목을 함께 고려해 위험도별 배분안을 계산합니다.",
+        "long": "과목 목록에서 시간·캠퍼스 이동·공강·학점 조건을 검사하고 시간표 후보를 순위화합니다. Underwood의 개인 마일리지 이력과 현재 정원·신청자, 동점자 기준, 필수 여부, 대체 과목을 함께 고려해 불확실성을 표시한 배분안을 계산합니다.",
         "keywords": ["yonsei", "courses", "registration", "schedule"],
         "capabilities": [
             "Course-row normalization",
@@ -132,13 +143,13 @@ SPECS = {
             "Explicit course-plan constraint audits",
             "Ranked timetable construction",
             "Official entry diagnostics",
-            "Risk-aware mileage allocation",
+            "Underwood history-aware mileage allocation",
         ],
         "prompts": [
             "이 과목 목록으로 충돌 없는 시간표 후보를 만들어 줘.",
             "금요일 공강과 18학점 조건으로 이 수강계획을 점검해 줘.",
             "이 시간표에서 겹치는 수업과 캠퍼스 이동 문제를 찾아 줘.",
-            "정원과 지난 마일리지 결과를 고려해서 72점을 전략적으로 나눠 줘.",
+            "내 Underwood 마일리지 이력과 현재 정원을 고려해서 72점을 전략적으로 나눠 줘.",
         ],
     },
     "yonsei-attendance-copilot": {
@@ -160,7 +171,7 @@ SPECS = {
         ],
     },
     "yonsei-shuttle-booking": {
-        "version": "0.4.0",
+        "version": "0.5.0",
         "display": "연세 셔틀 조회·예약",
         "description": "Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 예약·대기·취소합니다.",
         "short": "신촌·국제캠퍼스 셔틀 조회와 예약",
@@ -172,6 +183,7 @@ SPECS = {
             "Conservative seat and waitlist status",
             "Confirmed official reservation and cancellation workflow",
             "Cross-platform persistent browser workflow",
+            "Daily round-trip and 20-minute rule checks",
         ],
         "prompts": [
             "내일 신촌에서 국제캠퍼스로 가는 셔틀을 이 화면에서 찾아 줘.",

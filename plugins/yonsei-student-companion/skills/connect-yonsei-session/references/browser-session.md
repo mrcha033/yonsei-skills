@@ -2,10 +2,14 @@
 
 ## Preferred session
 
-- Prefer the student's persistent Chrome profile for reuse across tasks.
+- Prefer the student's already authenticated persistent Chrome, Edge, or
+  Chromium profile for reuse across tasks.
 - Reuse an already open official Yonsei tab before creating another tab.
 - Use the in-app browser only when it already contains the needed authenticated
   state or persistent Chrome is unavailable.
+- A logged-in ordinary browser and a logged-out in-app browser are different
+  sessions. Continue in the authenticated ordinary browser instead of asking
+  the student to log in again.
 - Do not copy cookies between browsers or create a local credential store.
 
 ## Connected
@@ -35,6 +39,7 @@ browser profile; do not promise one cookie works for every domain.
 
 ## After expiry
 
-Repeat only the last read-only navigation or data read. Never repeat a final
-reservation, application, issuance, cancellation, upload, or payment action
-whose result is uncertain.
+Remember the requested service and last confirmed safe read. After one visible
+login handoff, repeat only that read-only navigation or data read. Never repeat
+a final reservation, application, issuance, cancellation, upload, or payment
+action whose result is uncertain.

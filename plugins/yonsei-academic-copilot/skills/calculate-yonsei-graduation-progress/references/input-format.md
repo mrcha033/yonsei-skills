@@ -10,6 +10,10 @@ Use an object with:
 - `facts`: non-course facts such as language certification or chapel passes.
 - `requirements`: explicit rules with a unique `id`, `label`, `type`, and
   `source_id`.
+- `official_progress`: existing Underwood rows with `program` (first, second,
+  or third major; minor; micro major; track or depth), `requirement`, `earned`,
+  `in_progress`, `recognized`, `substituted`, `cross_recognized`, and
+  `missing`.
 
 Supported requirement types:
 
@@ -23,3 +27,8 @@ Set `allow_overlap: false` on a category requirement when the supplied official
 rule says its credits cannot overlap with earlier non-overlap category
 requirements. The calculator reports incomplete source linkage and unknown
 course categorization instead of guessing.
+
+Do not create `official_progress` by pressing the official self-diagnosis
+button unless the student explicitly requested that action. Underwood warns
+that special department requirements may be incomplete, so this snapshot and
+the local calculation remain advisory.

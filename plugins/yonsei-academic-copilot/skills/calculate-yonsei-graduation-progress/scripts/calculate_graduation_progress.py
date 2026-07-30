@@ -129,6 +129,40 @@ def run(payload: Any) -> dict[str, Any]:
     facts = payload.get("facts", {})
     if not isinstance(facts, dict):
         raise InputError("invalid-facts", "facts must be an object.", "$.facts")
+    official_progress_raw = payload.get("official_progress", [])
+    if not isinstance(official_progress_raw, list):
+        raise InputError(
+            "invalid-official-progress",
+            "official_progress must be an array.",
+            "$.official_progress",
+        )
+    official_progress: list[dict[str, Any]] = []
+    official_fields = (
+        "requirement",
+        "earned",
+        "in_progress",
+        "recognized",
+        "substituted",
+        "cross_recognized",
+        "missing",
+    )
+    for index, raw in enumerate(official_progress_raw):
+        path = f"$.official_progress[{index}]"
+        if not isinstance(raw, dict):
+            raise InputError(
+                "invalid-official-progress-row",
+                "Each progress row must be an object.",
+                path,
+            )
+        official_progress.append(
+            {
+                "program": text(raw.get("program"), f"{path}.program"),
+                **{
+                    field: number(raw.get(field, 0), f"{path}.{field}")
+                    for field in official_fields
+                },
+            }
+        )
 
     completed = [item for item in courses if item["status"] == "completed"]
     in_progress = [item for item in courses if item["status"] == "in_progress"]
@@ -248,12 +282,22 @@ def run(payload: Any) -> dict[str, Any]:
         "schema": "yonsei-graduation-progress/v1",
         "profile": normalized_profile,
         "official_audit": False,
+        "official_self_diagnosis_triggered": False,
         "advisory_only": True,
         "complete": complete,
         "all_requirements_satisfied": satisfied,
         "requirements": reports,
         "unknowns": unknowns,
         "sources": list(sources.values()),
+        "official_progress_snapshot": official_progress,
+        "official_progress_total_remaining": round(
+            sum(item["missing"] for item in official_progress),
+            3,
+        ),
+        "official_caveat": (
+            "Underwood credit progress can omit or incompletely reflect special department "
+            "requirements; use it as an advisory snapshot and confirm with the department."
+        ),
         "next_action": (
             "confirm-with-official-graduation-audit"
             if satisfied

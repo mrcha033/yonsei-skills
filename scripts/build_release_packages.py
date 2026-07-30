@@ -109,8 +109,8 @@ def student_skills() -> list[Path]:
                 raise PackageError(f"Duplicate student skill name: {name}")
             names.add(name)
             result.append(skill_dir)
-    if len(result) != 35:
-        raise PackageError(f"Expected 35 student skills, found {len(result)}")
+    if len(result) != 41:
+        raise PackageError(f"Expected 41 student skills, found {len(result)}")
     return result
 
 
@@ -185,7 +185,7 @@ def build_codex_ui_pack(output: Path, version: str) -> None:
         add_bytes(
             archive,
             f"{root}/PACKAGE_INFO.txt",
-            f"Yonsei Student UI Pack {version}\nStudent plugins: 9\nStudent skills: 35\n".encode(),
+            f"Yonsei Student UI Pack {version}\nStudent plugins: 9\nStudent skills: 41\n".encode(),
         )
         for plugin_name in STUDENT_PLUGINS:
             add_tree(
@@ -214,7 +214,7 @@ def universal_manifest(version: str) -> dict:
     return {
         "name": "yonsei-student-life",
         "version": version,
-        "description": "Yonsei student-life workflows with reusable browser login, a daily briefing, notices, courses, graduation, shuttle, spaces, certificates, and LearnUs.",
+        "description": "41 Yonsei student-life workflows with reusable browser login, a daily briefing, notices, courses, graduation, applications, dorms, scholarships, exchange, shuttle, spaces, documents, and LearnUs.",
         "author": {"name": "mrcha033", "url": "https://github.com/mrcha033"},
         "homepage": "https://github.com/mrcha033/yonsei-skills",
         "repository": "https://github.com/mrcha033/yonsei-skills",
@@ -224,7 +224,7 @@ def universal_manifest(version: str) -> dict:
         "interface": {
             "displayName": "연세 학생생활 도우미",
             "shortDescription": "한 번 로그인하고 오늘 할 일부터 졸업까지",
-            "longDescription": "공식 연세 로그인 화면에서 한 번 인증한 브라우저 프로필을 이어 사용하고, 오늘의 수업·마감·출결·예약과 공지, 수강계획, 셔틀, 공간대관, 학사·졸업, 증명서, LearnUs 업무를 자연어로 처리합니다.",
+            "longDescription": "이미 인증된 연세 브라우저 프로필을 이어 사용하고, 오늘의 수업·마감·출결·예약과 공지, 수강계획, 셔틀, 공간대관, 학사신청·졸업·교직, 생활관·장학금·교환학생, 증명서·학생활동 문서, LearnUs 업무를 자연어로 처리합니다.",
             "developerName": "mrcha033",
             "category": "Education",
             "capabilities": [
@@ -232,6 +232,9 @@ def universal_manifest(version: str) -> dict:
                 "Reusable official browser session",
                 "Read-only daily student briefing",
                 "Course and graduation planning",
+                "Academic applications and teaching credential",
+                "Dorm, scholarship, and exchange workflows",
+                "Student activity document issuance",
                 "Reviewed campus workflow assistance",
             ],
             "websiteURL": "https://github.com/mrcha033/yonsei-skills",

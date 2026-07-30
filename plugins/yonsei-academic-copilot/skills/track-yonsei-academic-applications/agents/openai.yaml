@@ -1,0 +1,4 @@
+interface:
+  display_name: "연세 학사신청 일정 도우미"
+  short_description: "Underwood 학사신청 마감과 준비사항을 한눈에 정리"
+  default_prompt: "Use $track-yonsei-academic-applications to check my active Yonsei academic applications and next actions."

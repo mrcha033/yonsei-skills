@@ -1,6 +1,6 @@
 ---
 name: summarize-yonsei-today
-description: Build a read-only daily Yonsei student briefing from the student's already authenticated official pages, covering today's classes, LearnUs deadlines, attendance issues, shuttle or room reservations, library loans and seats, and urgent notices. Use when a student asks 오늘 뭐 해야 해, 오늘의 연세, 이번 주 학교 일정, 마감 한 번에, or wants a recurring campus dashboard.
+description: Build a read-only daily Yonsei student briefing from already authenticated official pages, covering classes, LearnUs, attendance, reservations, library, notices, and active Underwood academic applications, scholarships, tuition, and dorm tasks. Use when a student asks 오늘 뭐 해야 해, 오늘의 연세, 이번 주 학교 일정, 마감 한 번에, or wants a recurring campus dashboard.
 ---
 
 # Summarize Yonsei Today
@@ -26,6 +26,8 @@ several portal menus.
    - active shuttle, space, or library reservations
    - library loans due within seven days
    - official notices with a concrete imminent deadline
+   - Underwood academic applications, scholarships, tuition or payment, dorm,
+     exchange, and teaching-credential items that are active or due soon
 
 5. Never click attendance check-in, submit an assignment, reserve a seat, renew
    a loan, book a shuttle, apply for a room, or pay anything in this read-only
@@ -39,7 +41,7 @@ several portal menus.
      --input "<temporary-json>"
    ```
 
-8. Present **지금**, **오늘**, **7일 안**, and **확인 필요**. Omit empty
+8. Present **지금**, **오늘**, **7일 안**, **진행 중**, and **확인 필요**. Omit empty
    sections and delete the temporary file.
 
 ## Result

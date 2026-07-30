@@ -1,7 +1,7 @@
 {
   "name": "yonsei-academic-copilot",
-  "version": "0.3.0",
-  "description": "학사정보와 성적표를 정리하고, 학번·전공별 공식 기준으로 졸업 진행도와 남은 학기 계획을 계산합니다.",
+  "version": "0.4.0",
+  "description": "Underwood 학사정보·학사신청·교직이수를 정리하고, 공식 진행표와 학번·전공별 기준으로 졸업요건과 남은 학기를 계산합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -18,8 +18,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "연세 학사·졸업 도우미",
-    "shortDescription": "성적·학적 정리와 졸업요건 계산",
-    "longDescription": "첨부한 학사정보와 성적표를 정리하고 정확한 학번·전공의 공식 졸업요건과 비교해 부족한 학점·과목·인증을 계산합니다. 남은 요건은 선수과목과 개설학기를 반영한 학기별 계획으로 만듭니다.",
+    "shortDescription": "학사신청·교직·졸업요건을 한눈에",
+    "longDescription": "기존 브라우저 로그인으로 Underwood의 학사정보, 학사신청, 교직이수, 공식 학점진행표를 읽습니다. 정확한 학번·전공 기준과 비교해 졸업까지 부족한 학점·과목·인증과 다음 학기 계획을 보여 주며, 학과별 특수 요건은 확인 필요로 남깁니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
@@ -27,7 +27,9 @@
       "Conservative term grade summaries",
       "Enrollment and registration status checks",
       "Sourced graduation progress calculation",
-      "Semester-by-semester graduation planning"
+      "Semester-by-semester graduation planning",
+      "Underwood academic-application radar",
+      "Teaching-credential progress and workflow"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
@@ -35,7 +37,9 @@
       "이 성적표를 학점과 평량평균 중심으로 요약해 줘.",
       "이 화면에서 내 학적 상태와 확인이 필요한 항목을 알려 줘.",
       "내 성적표와 전공 졸업요건을 비교해 부족한 항목을 계산해 줘.",
-      "졸업까지 남은 과목을 학기별로 배치해 줘."
+      "졸업까지 남은 과목을 학기별로 배치해 줘.",
+      "지금 열려 있는 학사신청과 곧 끝나는 마감을 보여 줘.",
+      "내 교직이수에서 남은 교육·실습 요건을 계산해 줘."
     ]
   }
 }

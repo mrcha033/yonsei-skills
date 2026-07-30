@@ -10,7 +10,10 @@ browser session as the shared login layer for later Yonsei tasks.
 
 ## Workflow
 
-1. Reuse an already open official Yonsei tab when one exists. Otherwise open:
+1. Check the student's ordinary persistent desktop browser first. Reuse an
+   already authenticated Chrome, Edge, or Chromium profile and an already open
+   official Yonsei tab when one exists. Do not assume an in-app browser is
+   authenticated merely because the ordinary browser is. Otherwise open:
 
    `https://portal.yonsei.ac.kr/ui/index.html`
 
@@ -25,23 +28,28 @@ browser session as the shared login layer for later Yonsei tasks.
      --success-marker "<visible authorized service label>"
    ```
 
-3. If the requested service opens without an ID, password, MFA, or portal-login
+3. Open Portal first, then follow its visible **학사정보시스템/Underwood** link
+   when the requested task is in Underwood. Let the official redirect perform
+   SSO in that same profile; do not reconstruct the POST or copy session data.
+4. If the requested service opens without an ID, password, MFA, or portal-login
    screen, continue without interrupting the student.
-4. If authentication is required, leave that exact official tab open and ask
+5. If authentication is required, leave that exact official tab open and ask
    the student once to finish login there. Never ask for a password or OTP in
    chat and never move those values into a terminal command.
-5. After the student finishes, resume in the same browser profile and open the
+6. After the student finishes, resume in the same browser profile and open the
    requested service again. Treat visible service content, not a portal HTTP
    response or a stored-cookie claim, as proof that login worked.
-6. Keep using the same browser profile for academic information, LearnUs,
+7. Keep using the same browser profile for academic information, LearnUs,
    attendance, shuttle, space, library, counseling, student ID, and
    certificates. Do not start a separate headless browser for each service.
-7. If a downstream service has a separate institutional login, group the
+8. If a downstream service has a separate institutional login, group the
    remaining login screens together, let the student complete each official
    screen once, then continue the original task.
-8. On expiry, return to the official login screen in the same profile and
-   resume from the last read-only step. Never repeat an uncertain reservation,
-   application, issuance, or payment action after reauthentication.
+9. On expiry, record the requested service and last confirmed read-only step,
+   return to the official login screen in the same profile, ask for one login
+   handoff, and resume from that safe step. Never repeat an uncertain
+   reservation, application, issuance, or payment action after
+   reauthentication.
 
 Read `references/browser-session.md` when deciding whether a page is connected,
 expired, or service-specific.

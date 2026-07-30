@@ -1,6 +1,6 @@
 {
   "name": "yonsei-shuttle-booking",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 예약·대기·취소합니다.",
   "author": {
     "name": "mrcha033",
@@ -30,7 +30,8 @@
       "Supplied trip option filtering",
       "Conservative seat and waitlist status",
       "Confirmed official reservation and cancellation workflow",
-      "Cross-platform persistent browser workflow"
+      "Cross-platform persistent browser workflow",
+      "Daily round-trip and 20-minute rule checks"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [

@@ -10,11 +10,21 @@ Use:
 - `required_for_graduation`: boolean.
 - `alternatives`: course IDs that can replace the course.
 - `history_as_of`: term or date attached to historical figures.
+- `underwood_history`: authorized rows read from Underwood with `term`,
+  `course_id` or `course_code`, `section`, `mileage`, and `successful` or
+  `status`.
+- Optional history detail fields: `applied_course_count`, `first_time`,
+  `major_status`, `year`, `earned_credit_ratio`,
+  `total_earned_credit_ratio`, and `graduation_context`.
 
 The optimizer uses current demand and historical cutoff only as planning
 signals. It reports unknown evidence explicitly and never predicts admission
 as certain. Confirm current policy, quotas, and tie-break ordering on the
 official registration screen for the student's term.
+
+Personal history is evidence about this student's prior outcome, not a true
+population cutoff. Show it separately from published or observed section
+cutoffs. Do not turn tie-break fields into a fabricated numerical score.
 
 Official starting points:
 
