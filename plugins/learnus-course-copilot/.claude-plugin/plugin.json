@@ -3,7 +3,7 @@
   "name": "learnus-course-copilot",
   "displayName": "LearnUs 학습 도우미",
   "version": "0.3.0",
-  "description": "LearnUs 강의, 과제 마감일, 학습자료를 정리하는 도구입니다. 로그인 정보는 저장하지 않습니다.",
+  "description": "LearnUs 강의, 과제 마감일, 학습자료를 정리합니다. 비밀번호는 숨김 입력으로 받아 실행 중 메모리에만 유지합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

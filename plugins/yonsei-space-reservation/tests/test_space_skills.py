@@ -20,9 +20,48 @@ def load(relative: str):
 SEARCH = load("skills/search-yonsei-spaces/scripts/search_spaces.py")
 RULES = load("skills/check-yonsei-space-rules/scripts/check_space_rules.py")
 PREPARE = load("skills/prepare-yonsei-space-request/scripts/prepare_space_request.py")
+SUBMIT = load("skills/submit-yonsei-space-request/scripts/prepare_space_submission.py")
 
 
 class SpaceSkillTests(unittest.TestCase):
+    def test_submission_requires_live_fee_and_reviewed_reports(self) -> None:
+        result = SUBMIT.run(
+            {
+                "request": {
+                    "applicant_type": "student",
+                    "organizer": "학생",
+                    "contact": "local-only",
+                    "space_id": "R1",
+                    "space_name": "강의실",
+                    "date": "2026-08-05",
+                    "start": "10:00",
+                    "end": "12:00",
+                    "headcount": 10,
+                    "purpose": "스터디",
+                },
+                "selected_space": {
+                    "space_id": "R1",
+                    "space_name": "강의실",
+                    "date": "2026-08-05",
+                    "available_start": "09:00",
+                    "available_end": "13:00",
+                    "capacity": 20,
+                    "displayed_fee": 0,
+                },
+                "rule_report": {
+                    "schema": "yonsei-space-rule-report/v1",
+                    "eligible": True,
+                },
+                "draft_report": {
+                    "schema": "yonsei-space-request-draft/v1",
+                    "ready_for_user_review": True,
+                },
+            }
+        )
+        self.assertTrue(result["ready_for_confirmation"])
+        self.assertFalse(result["submission_performed"])
+        self.assertEqual(result["selected_space"]["displayed_fee"], 0.0)
+
     def test_search_requires_evaluable_snapshot_fields(self) -> None:
         result = SEARCH.run(
             {

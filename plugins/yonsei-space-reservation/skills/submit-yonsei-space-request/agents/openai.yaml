@@ -1,0 +1,4 @@
+interface:
+  display_name: "연세 공간 대관 신청"
+  short_description: "인원·시간·목적에 맞는 공간을 찾고 확인 후 신청"
+  default_prompt: "Use $submit-yonsei-space-request to find a suitable Yonsei space and submit the reviewed request."

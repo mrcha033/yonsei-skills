@@ -95,7 +95,7 @@
         "path": "./plugins/learnus-course-copilot"
       },
       "policy": {
-        "installation": "NOT_AVAILABLE",
+        "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"

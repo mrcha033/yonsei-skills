@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-academic-copilot",
-  "displayName": "연세 학사정보 정리",
-  "version": "0.2.0",
-  "description": "학사정보 화면 캡처나 붙여 넣은 표에서 강의·성적·학적 상태를 정리합니다. 학교 기록은 변경하지 않습니다.",
+  "displayName": "연세 학사·졸업 도우미",
+  "version": "0.3.0",
+  "description": "학사정보와 성적표를 정리하고, 학번·전공별 공식 기준으로 졸업 진행도와 남은 학기 계획을 계산합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

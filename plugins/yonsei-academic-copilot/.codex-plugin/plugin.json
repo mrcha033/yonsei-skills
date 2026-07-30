@@ -1,7 +1,7 @@
 {
   "name": "yonsei-academic-copilot",
-  "version": "0.2.0",
-  "description": "학사정보 화면 캡처나 붙여 넣은 표에서 강의·성적·학적 상태를 정리합니다. 학교 기록은 변경하지 않습니다.",
+  "version": "0.3.0",
+  "description": "학사정보와 성적표를 정리하고, 학번·전공별 공식 기준으로 졸업 진행도와 남은 학기 계획을 계산합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -17,21 +17,25 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "연세 학사정보 정리",
-    "shortDescription": "강의·성적·학적 화면을 쉽게 정리",
-    "longDescription": "사용자가 첨부한 학사정보 화면, 표 또는 내보내기 파일을 바탕으로 이번 학기 강의, 성적 요약, 학적 상태를 정리합니다. 실시간 서버 조회 결과로 과장하지 않습니다.",
+    "displayName": "연세 학사·졸업 도우미",
+    "shortDescription": "성적·학적 정리와 졸업요건 계산",
+    "longDescription": "첨부한 학사정보와 성적표를 정리하고 정확한 학번·전공의 공식 졸업요건과 비교해 부족한 학점·과목·인증을 계산합니다. 남은 요건은 선수과목과 개설학기를 반영한 학기별 계획으로 만듭니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
       "Supplied class snapshot normalization",
       "Conservative term grade summaries",
-      "Enrollment and registration status checks"
+      "Enrollment and registration status checks",
+      "Sourced graduation progress calculation",
+      "Semester-by-semester graduation planning"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
       "첨부한 학사정보 화면에서 이번 학기 강의를 정리해 줘.",
       "이 성적표를 학점과 평량평균 중심으로 요약해 줘.",
-      "이 화면에서 내 학적 상태와 확인이 필요한 항목을 알려 줘."
+      "이 화면에서 내 학적 상태와 확인이 필요한 항목을 알려 줘.",
+      "내 성적표와 전공 졸업요건을 비교해 부족한 항목을 계산해 줘.",
+      "졸업까지 남은 과목을 학기별로 배치해 줘."
     ]
   }
 }

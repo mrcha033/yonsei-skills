@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-certificate-assistant",
-  "displayName": "연세 증명서 Mac 도우미",
-  "version": "0.5.0",
-  "description": "macOS에서 연세 인터넷증명서 ReportX 출력을 진단하고, 본인이 정상 발급한 준비 문서를 호환 PDF로 렌더링합니다.",
+  "displayName": "연세 증명서 발급 도우미",
+  "version": "0.6.0",
+  "description": "macOS에서 증명서 선택부터 ReportX 인계, 문서번호 1회 예약, 호환 PDF 확인과 선택적 인쇄까지 진행합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

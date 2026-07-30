@@ -21,9 +21,53 @@ def load(relative: str):
 LIST = load("skills/list-yonsei-shuttle-options/scripts/list_shuttle_options.py")
 SEATS = load("skills/check-yonsei-shuttle-seats/scripts/check_shuttle_seats.py")
 DIAGNOSE = load("skills/diagnose-yonsei-shuttle-access/scripts/diagnose_shuttle_access.py")
+BOOK = load("skills/book-yonsei-shuttle/scripts/prepare_shuttle_booking.py")
 
 
 class ShuttleSkillTests(unittest.TestCase):
+    def test_booking_shortlist_prefers_live_seat_near_time(self) -> None:
+        result = BOOK.run(
+            {
+                "query": {
+                    "origin": "신촌",
+                    "destination": "국제캠퍼스",
+                    "date": "2026-08-03",
+                    "preferred_time": "09:00",
+                    "allow_waitlist": True,
+                },
+                "trips": [
+                    {
+                        "areaDivCd": "S",
+                        "busCd": "B1",
+                        "busNm": "1호차",
+                        "stdrDt": "20260803",
+                        "beginTm": "0900",
+                        "endTm": "1000",
+                        "thrstNm": "신촌→국제",
+                        "remndSeat": 2,
+                        "resveYn": "Y",
+                        "resveWaitYn": "Y",
+                    },
+                    {
+                        "areaDivCd": "S",
+                        "busCd": "B2",
+                        "busNm": "2호차",
+                        "stdrDt": "20260803",
+                        "beginTm": "0830",
+                        "endTm": "0930",
+                        "thrstNm": "신촌→국제",
+                        "remndSeat": 0,
+                        "resveYn": "N",
+                        "resveWaitYn": "Y",
+                    },
+                ],
+            }
+        )
+        self.assertEqual(result["candidates"][0]["bus_code"], "B1")
+        self.assertEqual(result["candidates"][0]["mode"], "reserve")
+        self.assertFalse(result["reservation_performed"])
+        self.assertEqual(len(result["candidates"][0]["selector"]), 16)
+
     def test_list_filters_official_fields_and_reports_unknown(self) -> None:
         result = LIST.run(
             {

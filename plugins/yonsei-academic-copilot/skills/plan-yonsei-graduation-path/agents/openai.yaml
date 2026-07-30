@@ -1,0 +1,4 @@
+interface:
+  display_name: "졸업까지 남은 학기 계획"
+  short_description: "남은 졸업요건과 선수과목을 학기별 수강계획으로 배치"
+  default_prompt: "Use $plan-yonsei-graduation-path to create a semester-by-semester plan for my remaining Yonsei requirements."

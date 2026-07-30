@@ -1,0 +1,4 @@
+interface:
+  display_name: "수강신청 마일리지 전략"
+  short_description: "이전 경쟁률·정원·마일리지 이력으로 배분 전략 계산"
+  default_prompt: "Use $plan-yonsei-mileage-strategy to allocate my Yonsei mileage across these courses using capacity and past results."

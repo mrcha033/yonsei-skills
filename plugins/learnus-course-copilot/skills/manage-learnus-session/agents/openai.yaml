@@ -1,4 +1,4 @@
 interface:
-  display_name: "Manage LearnUs Session"
-  short_description: "Run a secure memory-only LearnUs login session"
-  default_prompt: "Use $manage-learnus-session to start or inspect my GUI-less LearnUs session securely."
+  display_name: "LearnUs 로그인 세션"
+  short_description: "비밀번호를 저장하지 않고 로그인 만료를 자동 복구"
+  default_prompt: "Use $manage-learnus-session to start my secure memory-only LearnUs session."

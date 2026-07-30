@@ -1,7 +1,7 @@
 {
   "name": "learnus-course-copilot",
   "version": "0.3.0",
-  "description": "LearnUs 강의, 과제 마감일, 학습자료를 정리하는 도구입니다. 로그인 정보는 저장하지 않습니다.",
+  "description": "LearnUs 강의, 과제 마감일, 학습자료를 정리합니다. 비밀번호는 숨김 입력으로 받아 실행 중 메모리에만 유지합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -18,8 +18,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "LearnUs 학습 도우미",
-    "shortDescription": "강의·과제·자료를 한 번에 정리",
-    "longDescription": "LearnUs 세션 관리, 수강 강의 확인, 과제 마감일 정리, 학습자료 목록 만들기를 각각 수행합니다. 학교의 지속형 API 토큰이 없어 공개 설치는 아직 보류됩니다.",
+    "shortDescription": "강의·과제·자료와 로그인 만료 복구",
+    "longDescription": "한 번의 숨김 비밀번호 입력으로 GUI 없는 LearnUs 세션을 시작하고, 실행 중 로그인 만료를 자동 복구하며 강의·과제·자료를 읽기 전용으로 정리합니다. 재부팅하거나 서비스를 끄면 다시 입력해야 합니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [

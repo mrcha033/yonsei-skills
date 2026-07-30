@@ -1,7 +1,7 @@
 {
   "name": "yonsei-space-reservation",
-  "version": "0.2.0",
-  "description": "공간 목록 화면에서 조건에 맞는 장소를 찾고 공개 규칙을 확인해 제출 전 신청 내용을 준비합니다.",
+  "version": "0.3.0",
+  "description": "시간·인원·목적·장비 조건으로 공식 공간을 찾고, 검토한 대관 신청을 확인받아 제출합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -17,21 +17,23 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "연세 공간대관 도우미",
-    "shortDescription": "공간 후보·이용 규칙·신청 초안 확인",
-    "longDescription": "사용자가 첨부한 공간대관 화면이나 표를 시간·수용인원·장비 기준으로 정리하고 공식 공개 규칙을 확인해 전송 전 신청 초안을 만듭니다.",
+    "displayName": "연세 공간 검색·신청",
+    "shortDescription": "공간 후보 확인부터 대관 신청까지",
+    "longDescription": "공식 공간대관 화면에서 조건에 맞는 방을 찾고 공개 규칙, 수용인원, 시간과 표시 요금을 확인합니다. 최종 내용과 연락처를 보여 준 뒤 한 번만 제출하고 신청 내역에서 접수 상태를 검증합니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
       "Supplied space snapshot filtering",
       "Official public booking-rule checks",
-      "Unsent reservation drafts"
+      "Unsent reservation drafts",
+      "Confirmed official application submission workflow"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
       "이 공간 목록에서 15명이 쓸 수 있는 프로젝터 있는 방을 찾아 줘.",
       "이 대관 계획이 공개 이용 규칙에 맞는지 확인해 줘.",
-      "이 내용으로 공간대관 신청 초안을 만들되 제출하지는 마."
+      "이 내용으로 공간대관 신청 초안을 만들되 제출하지는 마.",
+      "다음 주 수요일 15명 스터디 공간을 찾아 신청까지 해 줘."
     ]
   }
 }

@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-shuttle-booking",
-  "displayName": "연세 셔틀 확인 도우미",
-  "version": "0.2.0",
-  "description": "셔틀 조회 화면에서 원하는 시간대와 잔여석을 정리하고 접속 문제를 진단합니다. 예약·취소는 수행하지 않습니다.",
+  "displayName": "연세 셔틀 조회·예약",
+  "version": "0.3.0",
+  "description": "방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고, 선택한 편을 확인받아 예약·대기·취소합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

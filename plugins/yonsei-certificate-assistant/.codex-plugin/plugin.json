@@ -1,7 +1,7 @@
 {
   "name": "yonsei-certificate-assistant",
-  "version": "0.5.0",
-  "description": "macOS에서 연세 인터넷증명서 ReportX 출력을 진단하고, 본인이 정상 발급한 준비 문서를 호환 PDF로 렌더링합니다.",
+  "version": "0.6.0",
+  "description": "macOS에서 증명서 선택부터 ReportX 인계, 문서번호 1회 예약, 호환 PDF 확인과 선택적 인쇄까지 진행합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
@@ -20,9 +20,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "연세 증명서 Mac 도우미",
-    "shortDescription": "Mac의 ReportX 증명서 출력 문제 해결",
-    "longDescription": "Windows 전용 ReportX 인계 정보를 해석하고 검증된 런타임 자산과 독립 FP3 렌더러로 호환 PDF를 만듭니다. 문서번호 예약은 명시적으로 한 번만 수행하며 결과는 공식 전자원본으로 주장하지 않습니다.",
+    "displayName": "연세 증명서 발급 도우미",
+    "shortDescription": "증명서 선택부터 PDF 확인까지 진행",
+    "longDescription": "공식 무료 프린터 출력 화면에서 학생이 선택한 증명서를 받아 검증된 런타임 자산과 독립 FP3 렌더러로 호환 PDF를 만듭니다. 발급 직전 확인과 문서번호 1회 예약 보호를 적용하며 공식 전자원본으로 주장하지 않습니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
@@ -34,6 +34,7 @@
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
+      "재학증명서를 국문 PDF로 발급하는 과정을 끝까지 진행해 줘.",
       "Mac에서 연세 증명서 프린터 출력이 안 되는 문제를 해결해 줘.",
       "이 ReportX 발급 건을 진단하고 호환 PDF 범위를 설명해 줘."
     ]

@@ -14,8 +14,8 @@
   "plugins": [
     {
       "plugin": "learnus-course-copilot",
-      "release": "alpha-live-auth-pending",
-      "installation": "NOT_AVAILABLE",
+      "release": "beta-memory-session",
+      "installation": "AVAILABLE",
       "outcomes": [
         {
           "skill": "manage-learnus-session",
@@ -41,9 +41,25 @@
     },
     {
       "plugin": "yonsei-certificate-assistant",
-      "release": "external-user-work",
+      "release": "beta-free-print-e2e",
       "installation": "AVAILABLE",
-      "outcomes": []
+      "outcomes": [
+        {
+          "skill": "yonsei-certificate-assistant",
+          "primary_result": "authorized ReportX ticket retrieval and compatibility rendering",
+          "state": "implemented"
+        },
+        {
+          "skill": "render-reportx-fp3-pdf",
+          "primary_result": "bounded local FP3 compatibility PDF",
+          "state": "implemented"
+        },
+        {
+          "skill": "issue-yonsei-certificate",
+          "primary_result": "reviewed end-to-end free-print PDF result after explicit confirmation",
+          "state": "implemented"
+        }
+      ]
     },
     {
       "plugin": "yonsei-notice-monitor",
@@ -86,6 +102,16 @@
           "skill": "check-yonsei-enrollment",
           "primary_result": "current enrollment and academic status",
           "state": "implemented"
+        },
+        {
+          "skill": "calculate-yonsei-graduation-progress",
+          "primary_result": "advisory graduation progress against sourced program rules",
+          "state": "implemented"
+        },
+        {
+          "skill": "plan-yonsei-graduation-path",
+          "primary_result": "semester plan for supplied remaining requirements and offerings",
+          "state": "implemented"
         }
       ]
     },
@@ -117,6 +143,11 @@
         {
           "skill": "diagnose-yonsei-course-access",
           "primary_result": "bounded official entry-point access diagnosis",
+          "state": "implemented"
+        },
+        {
+          "skill": "plan-yonsei-mileage-strategy",
+          "primary_result": "risk-aware mileage allocation from supplied demand and history",
           "state": "implemented"
         },
         {
@@ -169,14 +200,9 @@
           "state": "implemented"
         },
         {
-          "skill": "reserve-yonsei-shuttle",
-          "primary_result": "verified reservation receipt after explicit confirmation",
-          "state": "blocked-authorized-live-test"
-        },
-        {
-          "skill": "cancel-yonsei-shuttle",
-          "primary_result": "verified cancellation receipt after explicit confirmation",
-          "state": "blocked-authorized-live-test"
+          "skill": "book-yonsei-shuttle",
+          "primary_result": "verified official reservation, waitlist, or cancellation result after explicit confirmation",
+          "state": "implemented"
         }
       ]
     },
@@ -201,9 +227,9 @@
           "state": "implemented"
         },
         {
-          "skill": "request-yonsei-space",
+          "skill": "submit-yonsei-space-request",
           "primary_result": "verified reservation request after explicit confirmation",
-          "state": "blocked-authorized-live-test"
+          "state": "implemented"
         }
       ]
     },

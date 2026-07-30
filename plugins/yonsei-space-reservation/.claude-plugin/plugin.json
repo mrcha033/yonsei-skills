@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-space-reservation",
-  "displayName": "연세 공간대관 도우미",
-  "version": "0.2.0",
-  "description": "공간 목록 화면에서 조건에 맞는 장소를 찾고 공개 규칙을 확인해 제출 전 신청 내용을 준비합니다.",
+  "displayName": "연세 공간 검색·신청",
+  "version": "0.3.0",
+  "description": "시간·인원·목적·장비 조건으로 공식 공간을 찾고, 검토한 대관 신청을 확인받아 제출합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

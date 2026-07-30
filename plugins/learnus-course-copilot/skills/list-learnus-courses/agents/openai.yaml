@@ -1,4 +1,4 @@
 interface:
-  display_name: "List LearnUs Courses"
-  short_description: "List the courses visible on your LearnUs dashboard"
-  default_prompt: "Use $list-learnus-courses to show my current LearnUs course index."
+  display_name: "LearnUs 강의 목록"
+  short_description: "로그인된 LearnUs에서 이번 학기 강의 목록 정리"
+  default_prompt: "Use $list-learnus-courses to list my current LearnUs courses."
