@@ -18,8 +18,8 @@ jobs:
   package:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Choose package version
@@ -36,7 +36,7 @@ jobs:
       - name: Build student downloads
         run: python3 -B scripts/build_release_packages.py --version "${{ steps.version.outputs.value }}"
       - name: Upload workflow artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: yonsei-student-downloads-${{ steps.version.outputs.value }}
           path: |
