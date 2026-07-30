@@ -86,12 +86,12 @@
 
 | 스킬 | 상세 기능 | 이렇게 요청해 보세요 |
 | --- | --- | --- |
-| [과목표 자동 정리](plugins/yonsei-course-registration/skills/normalize-yonsei-courses/SKILL.md) `normalize-yonsei-courses` | 수강편람 캡처, PDF, 엑셀, 붙여 넣은 표의 한·영문 필드를 과목번호·분반·학점·교수·시간·캠퍼스로 정리합니다. 이후 모든 시간표 계산의 입력이 됩니다. | “이 수강편람 캡처를 시간표 짜기 좋게 정리해 줘.” |
+| [공식 수강편람 조회·과목표 정리](plugins/yonsei-course-registration/skills/normalize-yonsei-courses/SKILL.md) `normalize-yonsei-courses` | 로그인된 Underwood의 `수업 → 수강편람`을 직접 조회해 과목번호·분반·학점·교수·시간·캠퍼스로 정리합니다. 수강신청 기간이 아니어도 편람 조회를 먼저 시도하며, 캡처·PDF·엑셀은 공식 조회 실패 시 보조 입력으로만 씁니다. | “2026년 2학기 공과대학 자료구조 과목을 찾아 시간표용으로 정리해 줘.” |
 | [시간표 충돌 검사](plugins/yonsei-course-registration/skills/check-yonsei-schedule/SKILL.md) `check-yonsei-schedule` | 수업 시간 중복, 같은 과목의 중복 분반, 개인 차단 시간, 신촌↔국제캠퍼스 이동시간 부족을 찾아냅니다. 시간이 불명확한 과목은 안전하다고 단정하지 않습니다. | “이 시간표에 겹치는 수업이나 캠퍼스 이동 문제가 있어?” |
 | [수강계획 조건 점검](plugins/yonsei-course-registration/skills/audit-yonsei-course-plan/SKILL.md) `audit-yonsei-course-plan` | 선택한 시간표가 목표 학점, 필수 과목, 금요일 공강, 수업 시작·종료 시간, 하루 최대 수업량 등 학생이 말한 조건을 모두 만족하는지 항목별로 검사합니다. | “18학점, 전공필수 포함, 금요일 공강 조건을 만족하는지 봐 줘.” |
 | [시간표 후보 자동 생성](plugins/yonsei-course-registration/skills/build-yonsei-timetable/SKILL.md) `build-yonsei-timetable` | 원하는 과목마다 가능한 분반을 조합해 충돌 없는 시간표를 만들고 공강, 등교일 수, 이동 부담, 선호 시간에 따라 후보를 순위화합니다. 실제 수강신청은 수행하지 않습니다. | “월요일 오전은 비우고 등교일이 적은 시간표 세 개 만들어 줘.” |
 | [개인 맞춤 마일리지 전략](plugins/yonsei-course-registration/skills/plan-yonsei-mileage-strategy/SKILL.md) `plan-yonsei-mileage-strategy` | Underwood 개인 신청 이력, 과거 성공·실패, 현재 정원과 신청자, 마일리지 상한, 졸업 중요도, 동점 기준과 대체 과목을 반영해 배분안과 위험도를 계산합니다. | “내 이력과 현재 정원을 보고 마일리지 72점을 나눠 줘.” |
-| [수강 사이트 접속 진단](plugins/yonsei-course-registration/skills/diagnose-yonsei-course-access/SKILL.md) `diagnose-yonsei-course-access` | 공식 수강편람·학부·대학원 수강신청 주소의 연결, 리다이렉트, 로그인 필요 여부와 오래된 링크를 진단합니다. 근거 없이 VPN이 필요하다고 단정하지 않습니다. | “수강신청 페이지가 안 열리는 이유를 확인해 줘.” |
+| [수강 사이트 접속 진단](plugins/yonsei-course-registration/skills/diagnose-yonsei-course-access/SKILL.md) `diagnose-yonsei-course-access` | 상시 조회 가능한 로그인된 Underwood 수강편람과 기간 중에만 열릴 수 있는 학부·대학원 수강신청 화면을 분리해 진단합니다. 편람의 실제 과목 행, 등록 기간, 로그인, 오래된 링크를 각각 확인하며 근거 없이 VPN이 필요하다고 단정하지 않습니다. | “수강신청은 닫혔어도 수강편람에서 과목은 직접 찾아 줘.” |
 
 ### 전자출결 — 기록 확인과 정정 준비
 
@@ -220,8 +220,11 @@ ChatGPT Work와 Codex의 공개 Plugins 화면에 바로 나오려면 OpenAI의
 아니요. 사용자는 JSON 파일을 만들 필요가 없습니다.
 
 - 공지는 원하는 주제와 기간만 말하면 됩니다.
-- 시간표·학사·출결 정보는 화면 캡처를 첨부하거나 표를 그대로
-  붙여 넣으면 됩니다.
+- 시간표는 원하는 학기·단과대·학과·과목명을 말하면 로그인된
+  Underwood 수강편람을 직접 조회합니다. 캡처나 표는 공식 조회가
+  실패했을 때만 보조 입력으로 사용합니다.
+- 학사·출결 정보도 가능한 항목은 로그인된 공식 화면을 먼저 읽고,
+  직접 조회할 수 없는 자료만 화면이나 표를 받습니다.
 - 포털·LearnUs·셔틀·공간·증명서는 같은 브라우저 프로필을 우선
   재사용합니다. 학생은 공식 화면에서 한 번 로그인하고, 학교 세션이
   만료될 때만 다시 연결합니다.
@@ -232,7 +235,7 @@ ChatGPT Work와 Codex의 공개 Plugins 화면에 바로 나오려면 OpenAI의
 
 예시:
 
-> 이 수강편람 캡처로 금요일 공강, 18학점, 신촌캠퍼스 위주 시간표를 만들어 줘.
+> 2026년 2학기 신촌 공과대학 수강편람을 직접 찾아서 금요일 공강, 18학점 시간표를 만들어 줘.
 
 > 첨부한 전자출결 화면에서 결석과 지각을 과목별로 정리해 줘.
 

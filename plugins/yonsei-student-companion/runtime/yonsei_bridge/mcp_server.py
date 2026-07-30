@@ -28,7 +28,8 @@ TOOLS = [
         "name": "yonsei_student",
         "description": (
             "Use this single student-friendly tool for Yonsei daily tasks, academic applications, "
-            "course mileage, graduation, shuttle, spaces, dorms, documents, LearnUs, and attendance. "
+            "official course-handbook search and mileage, graduation, shuttle, spaces, dorms, "
+            "documents, LearnUs, and attendance. "
             "Ask only for missing student information. For a write, show primary_result and call again "
             "with the returned selection_id and confirmed=true after the student confirms."
         ),
@@ -76,6 +77,11 @@ TOOLS = [
                         "category": {"type": "string"},
                         "application": {"type": "string"},
                         "include_teaching": {"type": "boolean"},
+                        "year": {"type": "string"},
+                        "semester": {"type": "string"},
+                        "course_type": {"type": "string"},
+                        "department": {"type": "string"},
+                        "keyword": {"type": "string"},
                         "origin": {"type": "string"},
                         "destination": {"type": "string"},
                         "date": {"type": "string"},
@@ -170,7 +176,7 @@ def main() -> int:
                     {
                         "protocolVersion": message.get("params", {}).get("protocolVersion", "2025-06-18"),
                         "capabilities": {"tools": {"listChanged": False}},
-                        "serverInfo": {"name": "yonsei-bridge", "version": "0.4.0"},
+                        "serverInfo": {"name": "yonsei-bridge", "version": "0.5.0"},
                     },
                 )
             elif method == "ping":

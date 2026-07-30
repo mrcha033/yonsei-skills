@@ -17,6 +17,7 @@ sys.path.insert(0, str(BRIDGE_DIR.parent))
 
 from yonsei_bridge.bridge import (  # noqa: E402
     BrowserPage,
+    MENU_ROUTES,
     PageSnapshot,
     SPACE_REQUEST_FIELDS,
     YonseiBridge,
@@ -50,8 +51,13 @@ class YonseiBridgeTests(unittest.TestCase):
         request_properties = router["inputSchema"]["properties"]["request"]["properties"]
         self.assertIn("headcount", request_properties)
         self.assertIn("purpose", request_properties)
+        self.assertIn("keyword", request_properties)
+        self.assertIn("semester", request_properties)
         self.assertNotIn("row_terms", request_properties)
         self.assertNotIn("fields", request_properties)
+
+    def test_course_handbook_has_its_own_underwood_route(self):
+        self.assertEqual(MENU_ROUTES["handbook"], ("수업", "수강편람"))
 
     def test_structured_rows_preserve_headers_and_unlabelled_rows(self):
         snapshot = PageSnapshot(
@@ -158,6 +164,42 @@ class YonseiBridgeTests(unittest.TestCase):
         )
         self.assertNotIn("row_terms", fake.arguments)
 
+    def test_course_router_queries_catalog_before_registration_period(self):
+        class FakeBridge:
+            def mileage(self, **arguments):
+                self.arguments = arguments
+                return {
+                    "catalog": {
+                        "state": "available",
+                        "registration_period_required": False,
+                        "rows": [{"text": "CSI2102-01 | 자료구조"}],
+                    },
+                    "history": {"state": "available", "rows": []},
+                    "current_registration": {
+                        "state": "registration_period_limited_or_unavailable",
+                        "rows": [],
+                    },
+                }
+
+        fake = FakeBridge()
+        result = StudentRouter(fake).run(
+            intent="courses",
+            request={
+                "year": "2026",
+                "semester": "2학기",
+                "course_type": "공과대학",
+                "keyword": "자료구조",
+            },
+        )
+        primary = result["primary_result"]
+        self.assertEqual(primary["course_count"], 1)
+        self.assertFalse(primary["registration_period_required_for_catalog"])
+        self.assertEqual(
+            primary["current_registration_state"],
+            "registration_period_limited_or_unavailable",
+        )
+        self.assertEqual(fake.arguments["keyword"], "자료구조")
+
     def test_errors_are_student_friendly(self):
         missing = friendly_error(ValueError("missing:origin,date"))
         self.assertEqual(missing["status"], "more_information_needed")
@@ -188,7 +230,7 @@ class YonseiBridgeTests(unittest.TestCase):
                 process.stdin.flush()
             initialized = json.loads(process.stdout.readline())
             listed = json.loads(process.stdout.readline())
-            self.assertEqual(initialized["result"]["serverInfo"]["version"], "0.4.0")
+            self.assertEqual(initialized["result"]["serverInfo"]["version"], "0.5.0")
             self.assertEqual(len(listed["result"]["tools"]), 2)
         finally:
             process.terminate()

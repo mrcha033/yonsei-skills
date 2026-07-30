@@ -153,14 +153,23 @@ class StudentRouter:
                 "applications": rows,
             }
         if intent == "courses":
+            catalog = result.get("catalog", {})
+            catalog_rows = catalog.get("rows", [])
             history = result.get("history", {}).get("rows", [])
             current = result.get("current_registration", {}).get("rows", [])
             return {
-                "title": "수강 마일리지 자료를 준비했습니다.",
+                "title": "공식 수강편람과 개인 수강 자료를 확인했습니다.",
+                "course_count": len(catalog_rows),
                 "history_count": len(history),
                 "current_course_count": len(current),
+                "catalog_state": catalog.get("state"),
+                "registration_period_required_for_catalog": False,
+                "courses": catalog_rows,
                 "history": history,
                 "current_courses": current,
+                "current_registration_state": result.get(
+                    "current_registration", {}
+                ).get("state"),
             }
         if intent == "graduation":
             calculator = result.get("calculator_input", {})
@@ -238,7 +247,14 @@ class StudentRouter:
                 application=request.get("application"),
             )
         elif intent == "courses":
-            result = self.bridge.mileage()
+            result = self.bridge.mileage(
+                year=request.get("year"),
+                semester=request.get("semester"),
+                campus=request.get("campus"),
+                course_type=request.get("course_type"),
+                department=request.get("department"),
+                keyword=request.get("keyword"),
+            )
         elif intent == "graduation":
             result = self.bridge.graduation_teaching(
                 include_teaching=bool(request.get("include_teaching", True))

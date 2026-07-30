@@ -11,7 +11,7 @@
       "displayName": "오늘의 연세·포털 연결",
       "source": "./plugins/yonsei-student-companion",
       "description": "한 번 로그인한 공통 브라우저를 이어 쓰고 포털·Underwood·LearnUs·출결·셔틀·공간·증명서를 빠른 명령으로 처리합니다.",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "author": {
         "name": "mrcha033"
       },
@@ -52,8 +52,8 @@
       "name": "yonsei-course-registration",
       "displayName": "연세 수강계획 도우미",
       "source": "./plugins/yonsei-course-registration",
-      "description": "시간표 충돌을 확인하고 정원·신청자·지난 마일리지 컷·졸업 중요도를 반영해 수강신청 전략을 만듭니다.",
-      "version": "0.4.0",
+      "description": "Underwood 수강편람을 직접 조회하고 시간표 충돌, 정원·신청자·개인 마일리지 이력·졸업 중요도를 반영해 수강신청 전략을 만듭니다.",
+      "version": "0.5.0",
       "author": {
         "name": "mrcha033"
       },

@@ -33,6 +33,7 @@ ATTENDANCE = "https://ysrollbook.yonsei.ac.kr/"
 
 MENU_ROUTES = {
     "scholarships": ("장학", "학생장학신청"),
+    "handbook": ("수업", "수강편람"),
     "mileage": ("수업", "마일리지신청내역"),
     "classes": ("수업", "수강신청내역"),
     "graduation": ("졸업", "학점취득현황조회"),
@@ -220,7 +221,8 @@ class BrowserPage:
                     try {{ if (frame.contentDocument) docs.push(frame.contentDocument); }} catch (_) {{}}
                   }}
                   const nodes = docs.flatMap(doc => [...doc.querySelectorAll(
-                    'button,a,label,[role="button"],[role="tab"],.cl-button,.cl-tabfolder-item,.cl-grid-row'
+                    'button,a,label,[role="button"],[role="tab"],[role="option"],'
+                    + '.cl-button,.cl-tabfolder-item,.cl-combobox-item,.cl-grid-row'
                   )])
                     .filter(el => {{
                       const label = (el.innerText || el.textContent || el.getAttribute('aria-label') || '').trim();
@@ -233,6 +235,156 @@ class BrowserPage:
                 }})()
             """
         )
+
+    def _click_point(self, x: float, y: float) -> None:
+        for event_type in ("mousePressed", "mouseReleased"):
+            self.connection.command(
+                "Input.dispatchMouseEvent",
+                {
+                    "type": event_type,
+                    "x": x,
+                    "y": y,
+                    "button": "left",
+                    "clickCount": 1,
+                },
+            )
+
+    def select_after_label(self, label: str, value: str, *, index: int = 0) -> bool:
+        """Choose a CPR combobox adjacent to a visible student-facing label."""
+        geometry_expression = f"""
+            (() => {{
+              const wanted = {json.dumps(label, ensure_ascii=False)};
+              const index = {index};
+              const labels = [...document.querySelectorAll('.label_search,.cl-output')]
+                .filter(el => (el.innerText || el.textContent || '').trim() === wanted);
+              for (const label of labels) {{
+                const container = label.nextElementSibling;
+                if (!container) continue;
+                const combos = [
+                  ...(container.matches('.cl-combobox') ? [container] : []),
+                  ...container.querySelectorAll('.cl-combobox')
+                ];
+                const combo = combos[index];
+                const button = combo?.querySelector('.cl-combobox-button');
+                if (!button) continue;
+                const rect = button.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0) {{
+                  return {{x: rect.x + rect.width / 2, y: rect.y + rect.height / 2}};
+                }}
+              }}
+              return null;
+            }})()
+        """
+        geometry = next(
+            (
+                value
+                for value in self._evaluate_frames(geometry_expression)
+                if isinstance(value, dict) and "x" in value and "y" in value
+            ),
+            None,
+        )
+        if geometry is None:
+            return False
+        self._click_point(float(geometry["x"]), float(geometry["y"]))
+        time.sleep(0.2)
+        option_expression = f"""
+            (() => {{
+              const wanted = {json.dumps(value, ensure_ascii=False)};
+              const norm = text => String(text || '').replace(/\\s+/g, ' ').trim();
+              const visible = el => {{
+                const style = getComputedStyle(el);
+                const rect = el.getBoundingClientRect();
+                return style.display !== 'none' && style.visibility !== 'hidden'
+                  && rect.width > 0 && rect.height > 0;
+              }};
+              const options = [...document.querySelectorAll(
+                '[role="option"],.cl-combobox-item'
+              )].filter(visible);
+              const option = options.find(el => norm(el.innerText) === norm(wanted))
+                || options.find(el => norm(el.innerText).includes(norm(wanted)))
+                || options.find(el => norm(wanted).includes(norm(el.innerText)));
+              if (!option) return null;
+              const rect = option.getBoundingClientRect();
+              return {{x: rect.x + rect.width / 2, y: rect.y + rect.height / 2}};
+            }})()
+        """
+        option = next(
+            (
+                value
+                for value in self._evaluate_frames(option_expression)
+                if isinstance(value, dict) and "x" in value and "y" in value
+            ),
+            None,
+        )
+        if option is None:
+            return False
+        self._click_point(float(option["x"]), float(option["y"]))
+        time.sleep(0.4)
+        return True
+
+    def type_after_label(self, label: str, value: str, *, index: int = 0) -> bool:
+        """Type into an input adjacent to a visible label using real input events."""
+        focus_expression = f"""
+            (() => {{
+              const wanted = {json.dumps(label, ensure_ascii=False)};
+              const index = {index};
+              const label = [...document.querySelectorAll('.label_search,.cl-output')]
+                .find(el => (el.innerText || el.textContent || '').trim() === wanted);
+              const input = label?.nextElementSibling?.querySelectorAll('input,textarea')[index];
+              if (!input) return false;
+              input.focus();
+              if (typeof input.select === 'function') input.select();
+              return true;
+            }})()
+        """
+        if not self._evaluate_until_true(focus_expression):
+            return False
+        self.connection.command("Input.insertText", {"text": value})
+        self._evaluate_until_true(
+            f"""
+                (() => {{
+                  const wanted = {json.dumps(label, ensure_ascii=False)};
+                  const index = {index};
+                  const label = [...document.querySelectorAll('.label_search,.cl-output')]
+                    .find(el => (el.innerText || el.textContent || '').trim() === wanted);
+                  const input = label?.nextElementSibling?.querySelectorAll('input,textarea')[index];
+                  if (!input) return false;
+                  for (const type of ['input','keyup','change','blur']) {{
+                    input.dispatchEvent(new Event(type, {{bubbles: true}}));
+                  }}
+                  input.blur();
+                  return true;
+                }})()
+            """
+        )
+        return True
+
+    def values_after_labels(self, labels: list[str]) -> dict[str, list[str]]:
+        encoded = json.dumps(labels, ensure_ascii=False)
+        payloads = self._evaluate_frames(
+            f"""
+                (() => {{
+                  const labels = {encoded};
+                  const result = {{}};
+                  for (const wanted of labels) {{
+                    const label = [...document.querySelectorAll('.label_search,.cl-output')]
+                      .find(el => (el.innerText || el.textContent || '').trim() === wanted);
+                    if (!label?.nextElementSibling) continue;
+                    result[wanted] = [...label.nextElementSibling.querySelectorAll('input,textarea')]
+                      .map(input => input.value).filter(Boolean);
+                  }}
+                  return result;
+                }})()
+            """
+        )
+        for payload in payloads:
+            if isinstance(payload, dict) and payload:
+                return {
+                    str(key): [str(item) for item in values]
+                    for key, values in payload.items()
+                    if isinstance(values, list)
+                }
+        return {}
 
     def fill_label(self, label: str, value: str) -> bool:
         return self._evaluate_until_true(
@@ -691,20 +843,114 @@ class YonseiBridge:
             "submission_performed": False,
         }
 
-    def mileage(self) -> dict[str, Any]:
-        history = self._open_menu("mileage")
-        current = self._open_menu("classes")
+    def course_catalog(
+        self,
+        *,
+        year: str | None = None,
+        semester: str | None = None,
+        campus: str | None = None,
+        course_type: str | None = None,
+        department: str | None = None,
+        keyword: str | None = None,
+    ) -> dict[str, Any]:
+        """Query the authenticated Underwood handbook independently of registration."""
+        self._open_menu("handbook")
+        page = self._page()
+        applied: dict[str, bool] = {}
+        if year:
+            applied["year"] = page.type_after_label("학년도/학기", str(year), index=0)
+        if semester:
+            applied["semester"] = page.select_after_label(
+                "학년도/학기", str(semester), index=0
+            )
+        if campus:
+            applied["campus"] = page.select_after_label("구분", str(campus))
+        if course_type:
+            applied["course_type"] = page.select_after_label(
+                "대학(원)/분류", str(course_type)
+            )
+        if department:
+            applied["department"] = page.select_after_label("개설학과", str(department))
+        if keyword:
+            applied["keyword"] = page.type_after_label("통합검색", str(keyword))
+        if not page.click_text("조회"):
+            raise BridgeError("The official course-handbook query button was not available.")
+        time.sleep(1.8)
+        snapshot = page.snapshot(text_after="수강편람")
+        rows = [
+            row
+            for row in self._rows(snapshot)
+            if "조회된 내역이 없습니다" not in row.get("text", "")
+        ]
+        if keyword and not applied.get("keyword"):
+            folded = keyword.casefold()
+            rows = [row for row in rows if folded in row.get("text", "").casefold()]
+        no_results = "조회된 내역이 없습니다" in snapshot.text and not rows
+        return {
+            "schema": "yonsei-course-catalog-command/v1",
+            "state": "no_results" if no_results else "available",
+            "source": "underwood-course-handbook",
+            "registration_period_required": False,
+            "snapshot": snapshot.as_dict(),
+            "filters": page.values_after_labels(
+                ["학년도/학기", "구분", "대학(원)/분류", "개설학과", "통합검색"]
+            ),
+            "requested_filters_applied": applied,
+            "rows": rows,
+        }
+
+    def mileage(
+        self,
+        *,
+        year: str | None = None,
+        semester: str | None = None,
+        campus: str | None = None,
+        course_type: str | None = None,
+        department: str | None = None,
+        keyword: str | None = None,
+    ) -> dict[str, Any]:
+        catalog = self.course_catalog(
+            year=year,
+            semester=semester,
+            campus=campus,
+            course_type=course_type,
+            department=department,
+            keyword=keyword,
+        )
+        try:
+            history_snapshot = self._open_menu("mileage")
+            history = {
+                "state": "available",
+                "snapshot": history_snapshot.as_dict(),
+                "rows": self._rows(history_snapshot),
+            }
+        except BridgeError as error:
+            history = {"state": str(error), "rows": []}
+        try:
+            current_snapshot = self._open_menu("classes")
+            current_rows = self._rows(current_snapshot)
+            current = {
+                "state": "available" if current_rows else "no_current_registration_rows",
+                "snapshot": current_snapshot.as_dict(),
+                "rows": current_rows,
+            }
+        except BridgeError as error:
+            current = {
+                "state": (
+                    "registration_period_limited_or_unavailable"
+                    if str(error) != "login_required"
+                    else "login_required"
+                ),
+                "rows": [],
+            }
         return {
             "schema": "yonsei-mileage-history-command/v1",
-            "history": {
-                "snapshot": history.as_dict(),
-                "rows": self._rows(history),
-            },
-            "current_registration": {
-                "snapshot": current.as_dict(),
-                "rows": self._rows(current),
-            },
-            "planning_inputs_ready": bool(self._rows(history) or self._rows(current)),
+            "catalog": catalog,
+            "history": history,
+            "current_registration": current,
+            "planning_inputs_ready": bool(
+                catalog.get("rows") or history.get("rows") or current.get("rows")
+            ),
             "planning_performed": False,
             "registration_performed": False,
         }

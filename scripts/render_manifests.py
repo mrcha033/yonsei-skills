@@ -20,7 +20,7 @@ INSTALLATIONS = {
 
 SPECS = {
     "yonsei-student-companion": {
-        "version": "0.4.0",
+        "version": "0.5.0",
         "display": "오늘의 연세·포털 연결",
         "description": "한 번 로그인한 공통 브라우저를 이어 쓰고 포털·Underwood·LearnUs·출결·셔틀·공간·증명서를 빠른 명령으로 처리합니다.",
         "short": "한 번 로그인하고 학교생활을 한눈에",
@@ -34,6 +34,7 @@ SPECS = {
             "Scholarship opportunity and application tracking",
             "Exchange journey tracking",
             "Fast authenticated Portal and Underwood commands",
+            "Direct official Underwood course-handbook search",
             "Cross-platform shuttle, space, dorm, and document actions",
             "Single student-language router",
             "Student-friendly recovery messages and primary results",
@@ -135,14 +136,16 @@ SPECS = {
         ],
     },
     "yonsei-course-registration": {
-        "version": "0.4.0",
+        "version": "0.5.0",
         "display": "연세 수강계획 도우미",
-        "description": "시간표 충돌을 확인하고 정원·신청자·지난 마일리지 컷·졸업 중요도를 반영해 수강신청 전략을 만듭니다.",
+        "description": "Underwood 수강편람을 직접 조회하고 시간표 충돌, 정원·신청자·개인 마일리지 이력·졸업 중요도를 반영해 수강신청 전략을 만듭니다.",
         "short": "시간표 조합과 마일리지 배분 전략",
-        "long": "과목 목록에서 시간·캠퍼스 이동·공강·학점 조건을 검사하고 시간표 후보를 순위화합니다. Underwood의 개인 마일리지 이력과 현재 정원·신청자, 동점자 기준, 필수 여부, 대체 과목을 함께 고려해 불확실성을 표시한 배분안을 계산합니다.",
+        "long": "로그인된 Underwood의 수업 → 수강편람을 직접 조회하고, 시간·캠퍼스 이동·공강·학점 조건을 검사해 시간표 후보를 순위화합니다. 개인 마일리지 이력과 현재 확인 가능한 정원·신청자, 동점자 기준, 필수 여부, 대체 과목을 함께 고려해 불확실성을 표시한 배분안을 계산합니다. 수강신청 화면이 기간 제한으로 닫혀도 수강편람 조회는 별도로 이어갑니다.",
         "keywords": ["yonsei", "courses", "registration", "schedule"],
         "capabilities": [
             "Course-row normalization",
+            "Authenticated Underwood handbook query",
+            "Registration-period independent course discovery",
             "Schedule and campus conflict checks",
             "Explicit course-plan constraint audits",
             "Ranked timetable construction",
@@ -150,7 +153,7 @@ SPECS = {
             "Underwood history-aware mileage allocation",
         ],
         "prompts": [
-            "이 과목 목록으로 충돌 없는 시간표 후보를 만들어 줘.",
+            "2026년 2학기 공과대학 수강편람을 직접 찾아 충돌 없는 시간표 후보를 만들어 줘.",
             "금요일 공강과 18학점 조건으로 이 수강계획을 점검해 줘.",
             "이 시간표에서 겹치는 수업과 캠퍼스 이동 문제를 찾아 줘.",
             "내 Underwood 마일리지 이력과 현재 정원을 고려해서 72점을 전략적으로 나눠 줘.",

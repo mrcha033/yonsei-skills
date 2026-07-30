@@ -1,6 +1,6 @@
 {
   "name": "yonsei-student-companion",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "한 번 로그인한 공통 브라우저를 이어 쓰고 포털·Underwood·LearnUs·출결·셔틀·공간·증명서를 빠른 명령으로 처리합니다.",
   "author": {
     "name": "mrcha033",
@@ -34,6 +34,7 @@
       "Scholarship opportunity and application tracking",
       "Exchange journey tracking",
       "Fast authenticated Portal and Underwood commands",
+      "Direct official Underwood course-handbook search",
       "Cross-platform shuttle, space, dorm, and document actions",
       "Single student-language router",
       "Student-friendly recovery messages and primary results"
