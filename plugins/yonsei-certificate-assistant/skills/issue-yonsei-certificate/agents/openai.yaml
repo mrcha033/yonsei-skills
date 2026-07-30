@@ -1,4 +1,4 @@
 interface:
   display_name: "연세 증명서 발급"
-  short_description: "Windows·Mac·Linux에서 증명서 발급을 끝까지 진행"
+  short_description: "원본 연세체를 유지해 증명서 발급을 끝까지 진행"
   default_prompt: "Use $issue-yonsei-certificate to issue my Yonsei certificate with the right Windows, macOS, or Linux path."

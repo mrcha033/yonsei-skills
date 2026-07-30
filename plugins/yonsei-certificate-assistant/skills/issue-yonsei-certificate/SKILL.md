@@ -34,7 +34,10 @@ local compatibility-PDF path on macOS/Linux. Read
    ReportX window, and verify the official result. Do not start the local agent
    by default. Then stop.
 4. On macOS or Linux, check the environment and prepare pinned official runtime
-   assets:
+   assets. Also require both official member-only `연세제목.TTF` and
+   `연세본문.TTF` files. Look in Downloads and installed-font folders
+   automatically; if absent, open the official Yonsei font guidance and let the
+   student download/select them through the authorized school account.
 
    ```bash
    python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" doctor
@@ -73,7 +76,9 @@ local compatibility-PDF path on macOS/Linux. Read
 
 11. Require `server_report_rendered_pdf_unverified` or
     `server_pdf_saved_unverified`, inspect the PDF page count and visible
-    certificate identity fields, and provide the local file.
+    certificate identity fields, verify that the result lists the selected
+    `YonseiB`/`YonseiL` font hashes when those faces occur in the FP3, and
+    provide the local file.
 12. For physical printing on macOS/Linux, recheck the PDF digest, name the
     action-time confirmation, and run the existing `print-job ... --confirm`
     command once.
@@ -84,5 +89,8 @@ local compatibility-PDF path on macOS/Linux. Read
 - Never call the compatibility PDF an official electronic original.
 - Never automate paid electronic-certificate payment in this skill.
 - Never retry a document-number reservation or an uncertain printer submission.
+- Never substitute AppleGothic, Nanum, or another Korean font for a live
+  certificate. Stop before reservation when the official title/body faces are
+  unavailable.
 - A rendered PDF is the end-to-end free-print result. Institutional verification
   and submission to a third party remain separate.

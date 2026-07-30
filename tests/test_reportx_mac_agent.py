@@ -413,6 +413,28 @@ class ReportXMacAgentWorkerTests(unittest.TestCase):
         self.state.close()
         self.tmp.cleanup()
 
+    def test_live_render_requires_both_yonsei_font_faces(self) -> None:
+        with self.assertRaises(ValueError):
+            agent.build_yonsei_font_map(
+                Path("/missing/title.ttf"),
+                None,
+            )
+
+    def test_job_manifest_reports_embedded_font_hashes_without_paths(self) -> None:
+        job = agent.Job("font-job", agent.utc_now(), "fixture")
+        job.rendered_fonts = (
+            ("연세제목.TTF", "a" * 64),
+            ("연세본문.TTF", "b" * 64),
+        )
+        public = agent.public_job_view(job)
+        self.assertEqual(
+            [
+                {"file": "연세제목.TTF", "sha256": "a" * 64},
+                {"file": "연세본문.TTF", "sha256": "b" * 64},
+            ],
+            public["rendered_pdf"]["fonts"],
+        )
+
     def test_existing_private_tree_permissions_are_repaired(self) -> None:
         with tempfile.TemporaryDirectory(prefix="yonsei-permissions-") as tmp:
             root = Path(tmp) / "cache"

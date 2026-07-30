@@ -43,7 +43,7 @@ FP3_RENDERER_DIR = (
 if str(FP3_RENDERER_DIR) not in sys.path:
     sys.path.insert(0, str(FP3_RENDERER_DIR))
 
-from fp3_pdf import FP3RenderError, render_fp3_pdf
+from fp3_pdf import FP3RenderError, TrueTypeFont, render_fp3_pdf
 from reportx_protocol import (
     AcceptServerResponse,
     BrokerPolicy,
@@ -96,6 +96,7 @@ TERMINAL_STATES = frozenset(
         "server_pdf_saved_unverified",
         "server_report_decoded_unrendered",
         "server_report_document_number_required",
+        "server_report_fonts_required",
         "server_report_official_assets_required",
         "server_report_rendered_pdf_unverified",
         "server_report_saved_unrendered",
@@ -106,6 +107,44 @@ TERMINAL_STATES = frozenset(
         "protocol_failed",
     }
 )
+YONSEI_TITLE_FONT_NAMES = (
+    "YonseiB",
+    "연세제목체",
+    "연세제목",
+)
+YONSEI_BODY_FONT_NAMES = (
+    "YonseiL",
+    "연세본문체",
+    "연세본문",
+)
+
+
+def build_yonsei_font_map(
+    title_font: Path | None,
+    body_font: Path | None,
+) -> dict[str, Path]:
+    """Validate the two member-supplied Yonsei faces and map FP3 names."""
+
+    if title_font is None and body_font is None:
+        return {}
+    if title_font is None or body_font is None:
+        raise ValueError("both Yonsei title and body fonts are required")
+    title = TrueTypeFont(title_font.expanduser().resolve())
+    body = TrueTypeFont(body_font.expanduser().resolve())
+    if title.postscript_name.casefold() != "yonseib":
+        raise ValueError("title font must have PostScript name YonseiB")
+    if body.postscript_name.casefold() != "yonseil":
+        raise ValueError("body font must have PostScript name YonseiL")
+    coverage_probe = "연세대학교 성적증명서 ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789"
+    if not title.supports(coverage_probe) or not body.supports(coverage_probe):
+        raise ValueError("Yonsei font lacks required Korean, Latin, or digit glyphs")
+    return {
+        name.casefold(): title.path
+        for name in YONSEI_TITLE_FONT_NAMES
+    } | {
+        name.casefold(): body.path
+        for name in YONSEI_BODY_FONT_NAMES
+    }
 
 
 def utc_now() -> str:
@@ -285,6 +324,7 @@ class Job:
     rendered_page_count: int | None = None
     rendered_object_count: int | None = None
     rendered_replay_verified: bool = False
+    rendered_fonts: tuple[tuple[str, str], ...] = ()
     bundle_primary_length: int | None = None
     bundle_primary_sha256: str | None = None
     bundle_additional_sha256: tuple[str, ...] = ()
@@ -339,6 +379,10 @@ class Job:
                 "deterministic_replay_verified": (
                     self.rendered_replay_verified
                 ),
+                "fonts": [
+                    {"file": name, "sha256": digest}
+                    for name, digest in self.rendered_fonts
+                ],
                 "status": (
                     "compatibility_unverified"
                     if self.rendered_pdf_path
@@ -379,11 +423,15 @@ class AgentState:
         allow_fetch: bool,
         allow_document_reservation: bool = False,
         token: str,
+        font_map: dict[str, Path] | None = None,
+        require_original_fonts: bool = False,
     ) -> None:
         self.root = root
         self.allow_fetch = allow_fetch
         self.allow_document_reservation = allow_document_reservation
         self.token = token
+        self.font_map = dict(font_map or {})
+        self.require_original_fonts = require_original_fonts
         self.jobs_dir = root / "jobs"
         self.out_dir = root / "output"
         self.reservations_dir = root / "reservations"
@@ -795,11 +843,18 @@ def process_job(job: Job, state: AgentState) -> None:
             elif runtime_profile_required is None:
                 job.status = "server_report_decoded_unrendered"
                 job.note("decoded ReportX FP3 failed structural inspection")
+            elif state.require_original_fonts and not state.font_map:
+                job.status = "server_report_fonts_required"
+                job.note(
+                    "official Yonsei title/body fonts are required before "
+                    "rendering; no document number was reserved"
+                )
             elif not runtime_profile_required:
                 try:
                     rendered = _render_fp3_pdf_replayed(
                         bundle.primary,
                         bundle.additional,
+                        font_map=state.font_map or None,
                     )
                 except (TypeError, FP3RenderError) as error:
                     job.status = "server_report_decoded_unrendered"
@@ -815,6 +870,10 @@ def process_job(job: Job, state: AgentState) -> None:
                     job.rendered_page_count = rendered.page_count
                     job.rendered_object_count = rendered.object_count
                     job.rendered_replay_verified = True
+                    job.rendered_fonts = tuple(
+                        (Path(path).name, digest)
+                        for path, digest in rendered.font_files
+                    )
                     job.note(
                         "rendered a prepared report with no runtime-only "
                         "ReportX placeholders"
@@ -1010,6 +1069,7 @@ def process_job(job: Job, state: AgentState) -> None:
                         rendered = _render_fp3_pdf_replayed(
                             bundle.primary,
                             bundle.additional,
+                            font_map=state.font_map or None,
                             runtime_pictures=bindings.pictures,
                             runtime_text=bindings.text,
                             official_empty_pictures=(
@@ -1030,6 +1090,10 @@ def process_job(job: Job, state: AgentState) -> None:
                         job.rendered_page_count = rendered.page_count
                         job.rendered_object_count = rendered.object_count
                         job.rendered_replay_verified = True
+                        job.rendered_fonts = tuple(
+                            (Path(path).name, digest)
+                            for path, digest in rendered.font_files
+                        )
                         job.note(
                             "rendered the decoded FP3 with the pinned runtime "
                             "logo and reserved verification number; no "
@@ -1510,6 +1574,16 @@ def main() -> int:
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     parser.add_argument("--dir", type=Path, default=DEFAULT_DIR)
     parser.add_argument(
+        "--title-font",
+        type=Path,
+        help="Member-supplied official Yonsei title TrueType font.",
+    )
+    parser.add_argument(
+        "--body-font",
+        type=Path,
+        help="Member-supplied official Yonsei body TrueType font.",
+    )
+    parser.add_argument(
         "--allow-fetch",
         action="store_true",
         help="Opt in to the decoded, allowlisted HTTPS URLFile request",
@@ -1537,9 +1611,22 @@ def main() -> int:
             file=sys.stderr,
         )
         return 2
+    if args.allow_fetch and (
+        args.title_font is None or args.body_font is None
+    ):
+        print(
+            "Original Yonsei title and body fonts are required before "
+            "fetching and rendering a report.",
+            file=sys.stderr,
+        )
+        return 2
 
     root = args.dir.expanduser()
     try:
+        font_map = build_yonsei_font_map(
+            args.title_font,
+            args.body_font,
+        )
         secure_mkdir(root)
         token = load_or_create_token(root, args.token)
         write_token_file(root, token)
@@ -1548,6 +1635,8 @@ def main() -> int:
             allow_fetch=bool(args.allow_fetch),
             allow_document_reservation=bool(args.reserve_document_number),
             token=token,
+            font_map=font_map,
+            require_original_fonts=bool(args.allow_fetch),
         )
     except (OSError, ValueError) as error:
         print(

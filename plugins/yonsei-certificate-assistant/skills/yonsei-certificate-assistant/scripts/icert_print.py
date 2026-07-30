@@ -39,15 +39,21 @@ DEFAULT_PORT = 65432
 DEFAULT_DIR = Path.home() / ".cache" / "yonsei-certificate-assistant"
 PORTAL = "https://portal.yonsei.ac.kr/ui/index.html"
 ICERT = "https://icert.yonsei.ac.kr/"
+FONT_GUIDE = "https://www.yonsei.ac.kr/sc/337/subview.do"
 SCRIPT_DIR = Path(__file__).resolve().parent
 AGENT_SCRIPT = SCRIPT_DIR / "reportx_mac_agent.py"
 DIAGNOSE = SCRIPT_DIR / "diagnose_print_env.py"
+YONSEI_FONT_FILENAMES = {
+    "title": ("연세제목.TTF", "연세제목.ttf", "YonseiB.ttf"),
+    "body": ("연세본문.TTF", "연세본문.ttf", "YonseiL.ttf"),
+}
 SUCCESS_STATES = frozenset(
     {
         "decoded_network_disabled",
         "server_pdf_saved_unverified",
         "server_report_decoded_unrendered",
         "server_report_document_number_required",
+        "server_report_fonts_required",
         "server_report_official_assets_required",
         "server_report_rendered_pdf_unverified",
         "server_report_saved_unrendered",
@@ -155,6 +161,42 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     return 1
 
 
+def local_font_roots() -> tuple[Path, ...]:
+    roots = [
+        Path.home() / "Downloads",
+        Path.home() / "Library" / "Fonts",
+        Path("/Library/Fonts"),
+        Path.home() / ".local" / "share" / "fonts",
+        Path.home() / ".fonts",
+        Path("/usr/share/fonts"),
+    ]
+    local_app_data = os.environ.get("LOCALAPPDATA")
+    windows_dir = os.environ.get("WINDIR")
+    if local_app_data:
+        roots.append(Path(local_app_data) / "Microsoft" / "Windows" / "Fonts")
+    if windows_dir:
+        roots.append(Path(windows_dir) / "Fonts")
+    return tuple(roots)
+
+
+def find_local_yonsei_font(kind: str) -> Path | None:
+    filenames = {name.casefold() for name in YONSEI_FONT_FILENAMES[kind]}
+    for root in local_font_roots():
+        if not root.is_dir():
+            continue
+        if root == Path("/usr/share/fonts"):
+            paths = root.rglob("*.ttf")
+        else:
+            paths = root.glob("*")
+        for path in paths:
+            try:
+                if path.is_file() and path.name.casefold() in filenames:
+                    return path.resolve()
+            except OSError:
+                continue
+    return None
+
+
 def cmd_agent(args: argparse.Namespace) -> int:
     command = [
         sys.executable,
@@ -168,6 +210,43 @@ def cmd_agent(args: argparse.Namespace) -> int:
         command.append("--allow-fetch")
     if args.reserve_document_number:
         command.append("--reserve-document-number")
+    title_font = (
+        Path(args.title_font).expanduser().resolve()
+        if args.title_font
+        else find_local_yonsei_font("title")
+    )
+    body_font = (
+        Path(args.body_font).expanduser().resolve()
+        if args.body_font
+        else find_local_yonsei_font("body")
+    )
+    if args.allow_fetch and (
+        title_font is None or body_font is None
+    ):
+        open_url(FONT_GUIDE)
+        print(
+            "연세 제목체와 본문체가 모두 필요합니다. 교내 구성원용 공식 "
+            "연세체 안내를 열었습니다. 학교 계정으로 두 글꼴을 내려받은 "
+            "뒤 파일을 선택해 주세요.",
+            file=sys.stderr,
+        )
+        return 2
+    if title_font is not None and body_font is not None:
+        command.extend(
+            [
+                "--title-font",
+                str(title_font),
+                "--body-font",
+                str(body_font),
+            ]
+        )
+        print(
+            "fonts:",
+            title_font.name,
+            body_font.name,
+            "(embedded from local authorized copies)",
+            flush=True,
+        )
     print("exec:", " ".join(command), flush=True)
     os.execvp(command[0], command)
     return 0
@@ -423,6 +502,14 @@ def main() -> int:
         "--allow-fetch",
         action="store_true",
         help="Opt in to the decoded allowlisted HTTPS URLFile request",
+    )
+    agent_parser.add_argument(
+        "--title-font",
+        help="Official Yonsei title TTF selected by the student.",
+    )
+    agent_parser.add_argument(
+        "--body-font",
+        help="Official Yonsei body TTF selected by the student.",
     )
     agent_parser.add_argument(
         "--reserve-document-number",

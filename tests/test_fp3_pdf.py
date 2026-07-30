@@ -476,6 +476,41 @@ class FP3PDFTests(unittest.TestCase):
         self.assertIn(b"/F2 ", content)
         self.assertEqual(2, len(rendered.font_files))
 
+    def test_exact_font_map_keeps_title_and_body_paths_distinct(self) -> None:
+        title = Path("/authorized/연세제목.TTF")
+        body = Path("/authorized/연세본문.TTF")
+        registry = fp3_pdf.FontRegistry(
+            font_map={
+                "YonseiB": title,
+                "연세제목체": title,
+                "YonseiL": body,
+                "연세본문체": body,
+            }
+        )
+        self.assertEqual([title], list(registry._paths_for("YonseiB", False)))
+        self.assertEqual(
+            [title],
+            list(registry._paths_for("연세제목체", False)),
+        )
+        self.assertEqual([body], list(registry._paths_for("YonseiL", False)))
+        self.assertEqual(
+            [body],
+            list(registry._paths_for("연세본문체", False)),
+        )
+
+    def test_font_map_cli_rejects_duplicate_or_malformed_names(self) -> None:
+        parsed = fp3_pdf._parse_font_map(
+            ["YonseiB=/fonts/title.ttf", "YonseiL=/fonts/body.ttf"]
+        )
+        self.assertEqual(Path("/fonts/title.ttf"), parsed["yonseib"])
+        self.assertEqual(Path("/fonts/body.ttf"), parsed["yonseil"])
+        with self.assertRaises(FP3RenderError):
+            fp3_pdf._parse_font_map(["missing-separator"])
+        with self.assertRaises(FP3RenderError):
+            fp3_pdf._parse_font_map(
+                ["YonseiB=/fonts/a.ttf", "yonseib=/fonts/b.ttf"]
+            )
+
     def test_korean_serif_aliases_share_one_embedded_face(self) -> None:
         serif = Path("/System/Library/Fonts/Supplemental/AppleMyungjo.ttf")
         if not serif.is_file():

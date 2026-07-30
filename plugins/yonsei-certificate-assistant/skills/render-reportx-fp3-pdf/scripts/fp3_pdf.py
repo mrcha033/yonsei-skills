@@ -1390,8 +1390,17 @@ class FontUse:
 
 
 class FontRegistry:
-    def __init__(self, explicit_font: Path | None = None):
+    def __init__(
+        self,
+        explicit_font: Path | None = None,
+        font_map: Mapping[str, Path] | None = None,
+    ):
         self.explicit_font = explicit_font
+        self.font_map = {
+            name.strip().casefold(): path
+            for name, path in (font_map or {}).items()
+            if name.strip()
+        }
         self._faces: dict[Path, TrueTypeFont] = {}
         self._uses: list[FontUse] = []
         self._uses_by_key: dict[tuple[str, bool], list[FontUse]] = {}
@@ -1405,6 +1414,10 @@ class FontRegistry:
         return face
 
     def _paths_for(self, name: str, bold: bool) -> Iterator[Path]:
+        mapped = self.font_map.get(name.strip().casefold())
+        if mapped is not None:
+            yield mapped
+            return
         if self.explicit_font is not None:
             yield self.explicit_font
             return
@@ -2562,6 +2575,7 @@ def render_fp3_pdf(
     sidecars: Sequence[bytes] = (),
     *,
     font_path: Path | None = None,
+    font_map: Mapping[str, Path] | None = None,
     runtime_pictures: Mapping[str, bytes] | None = None,
     runtime_text: Mapping[str, str] | None = None,
     official_empty_pictures: frozenset[str] = frozenset(),
@@ -2662,7 +2676,7 @@ def render_fp3_pdf(
     ) + sum(len(item) for item in picture_bindings.values())
     if total_image_bytes > MAX_TOTAL_SIDECAR_BYTES:
         raise FP3RenderError("aggregate image resources exceed policy")
-    registry = FontRegistry(font_path)
+    registry = FontRegistry(font_path, font_map)
     fonts_by_item = _collect_fonts(model, registry)
 
     image_cache: dict[
@@ -2989,7 +3003,32 @@ def _parser() -> argparse.ArgumentParser:
         type=Path,
         help="Explicit embeddable TrueType font for all text.",
     )
+    render_parser.add_argument(
+        "--font-map",
+        action="append",
+        default=[],
+        metavar="REPORTX_NAME=FONT.TTF",
+        help=(
+            "Map one exact FP3 Font.Name to an authorized local TrueType "
+            "font; repeat for multiple faces."
+        ),
+    )
     return parser
+
+
+def _parse_font_map(values: Sequence[str]) -> dict[str, Path]:
+    result: dict[str, Path] = {}
+    for value in values:
+        name, separator, path = value.partition("=")
+        if not separator or not name.strip() or not path.strip():
+            raise FP3RenderError(
+                "--font-map must use REPORTX_NAME=FONT.TTF"
+            )
+        normalized = name.strip().casefold()
+        if normalized in result:
+            raise FP3RenderError("duplicate --font-map name")
+        result[normalized] = Path(path.strip())
+    return result
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -3013,7 +3052,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             }
         else:
             sidecars = _load_sidecars(args.sidecar)
-            rendered = render_fp3_pdf(data, sidecars, font_path=args.font)
+            rendered = render_fp3_pdf(
+                data,
+                sidecars,
+                font_path=args.font,
+                font_map=_parse_font_map(args.font_map),
+            )
             _secure_atomic_write(args.output, rendered.pdf)
             payload = {
                 "ok": True,

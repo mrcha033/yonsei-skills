@@ -19,6 +19,13 @@ macOS/Linux 증명서 PDF는 학교의 유료 전자서명 원본과 다른 호�
 렌더링입니다. 전자서명된 원본 파일이 필요하면 운영체제와 관계없이
 공식 **전자증명서발급** 메뉴를 사용하세요.
 
+macOS/Linux에서 처음 증명서를 발급할 때는 교내 구성원용
+`연세제목.TTF`와 `연세본문.TTF`가 필요합니다. 이미 다운로드 또는
+설치되어 있으면 자동으로 찾습니다. 없으면 도구가 학교 공식 연세체
+안내([로고/연세체](https://www.yonsei.ac.kr/sc/337/subview.do))를 열고
+두 파일 선택을 요청합니다. 공개 ZIP에는 구성원 전용 폰트를
+재배포하지 않으며, 두 글꼴이 없을 때 다른 글꼴로 발급하지 않습니다.
+
 ## Codex 데스크톱 앱
 
 1. [Codex용 ZIP 받기](https://github.com/mrcha033/yonsei-skills/releases/latest/download/yonsei-codex-ui-pack.zip)를 누릅니다.

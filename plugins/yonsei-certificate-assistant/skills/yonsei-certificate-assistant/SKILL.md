@@ -86,9 +86,15 @@ python3 "$SKILL_DIR/scripts/icert_print.py" prepare-assets
 python3 "$SKILL_DIR/scripts/icert_print.py" agent
 
 # Full PDF path. The second flag explicitly permits one URLCheck reservation.
+# The command automatically finds official 연세제목/연세본문 TTF files in the
+# student's Downloads or installed-font folder.
 python3 "$SKILL_DIR/scripts/icert_print.py" agent \
   --allow-fetch --reserve-document-number
 ```
+
+If automatic discovery does not find both files, let the student select the
+two official member-only downloads and pass `--title-font` and `--body-font`.
+Never download or bundle a third-party repost.
 
 In another terminal:
 
@@ -116,6 +122,7 @@ Private state is under:
 | `decoded_network_disabled` | Ticket decoded and URLFile reconstructed; no request made |
 | `server_report_official_assets_required` | Live runtime placeholders were found, but pinned official assets were not prepared |
 | `server_report_document_number_required` | FP3 was decoded, but URLCheck reservation was not explicitly enabled |
+| `server_report_fonts_required` | Both official Yonsei title/body TTF files were not available; no document number was reserved |
 | `document_number_reservation_unknown` | URLCheck started but no valid response was retained; retry is blocked |
 | `server_report_saved_unrendered` | Exact server response saved as `.reportx`, but its outer container was not decoded |
 | `server_report_decoded_unrendered` | Outer container decoded, but profile or renderer rejected unsupported semantics |
@@ -162,6 +169,9 @@ unrendered `.reportx` response is not printable through this command.
   rejected response bodies are not persisted in manifests.
 - Runtime assets require pinned installer, executable, BMP dimensions, format,
   and hashes. Version drift fails closed.
+- Live certificate rendering requires locally authorized `YonseiB` and
+  `YonseiL` TrueType faces. Map title/body names separately, embed the selected
+  bytes in the PDF, and expose their hashes without publishing the TTF files.
 - URLCheck supports one copy only. A durable ticket-hash guard is written
   before the request; timeout, malformed output, or restart cannot trigger an
   automatic retry.

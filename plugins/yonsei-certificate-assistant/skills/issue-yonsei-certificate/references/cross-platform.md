@@ -20,6 +20,12 @@ already saved PDF to a named CUPS printer only after explicit confirmation.
 The legacy implementation filename `reportx_mac_agent.py` is retained for
 backward compatibility; the supported runtime is macOS and Linux.
 
+Require the official member-only `YonseiB` title face and `YonseiL` body face
+before live rendering. Search Downloads and installed-font folders
+automatically, or let the student select both files. Map the FP3 names
+`YonseiB`/`연세제목체` and `YonseiL`/`연세본문체` separately. Never produce a
+live certificate with a generic Korean fallback.
+
 If a signed electronic original is required, route the student to the official
 paid **전자증명서발급** browser product instead. Do not describe a compatibility
 PDF or a print capture as that signed product.

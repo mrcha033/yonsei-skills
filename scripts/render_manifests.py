@@ -58,11 +58,11 @@ SPECS = {
         ],
     },
     "yonsei-certificate-assistant": {
-        "version": "0.7.0",
+        "version": "0.8.0",
         "display": "연세 증명서 발급 도우미",
-        "description": "Windows에서는 공식 ReportX, macOS·Linux에서는 호환 PDF 경로를 자동 선택해 증명서 발급을 진행합니다.",
+        "description": "Windows 공식 ReportX 또는 macOS·Linux 호환 PDF 경로를 선택하고, 원본 연세 제목체·본문체를 각각 유지해 증명서 발급을 진행합니다.",
         "short": "운영체제에 맞춰 증명서 발급 진행",
-        "long": "학생의 운영체제를 자동 확인해 Windows에서는 학교의 공식 ReportX 무료 출력 경로를, macOS와 Linux에서는 문서번호 1회 예약을 포함한 독립 호환 PDF 경로를 사용합니다. 공식 전자원본이 필요하면 유료 전자증명서 메뉴로 구분해 안내합니다.",
+        "long": "학생의 운영체제를 자동 확인해 Windows에서는 학교의 공식 ReportX 무료 출력 경로를, macOS와 Linux에서는 문서번호 1회 예약을 포함한 독립 호환 PDF 경로를 사용합니다. 교내 구성원용 연세 제목체와 본문체를 자동 탐색해 각각 PDF에 임베드하며, 두 글꼴이 없으면 대체 출력하지 않고 발급 전에 안내합니다.",
         "keywords": ["yonsei", "certificate", "icert", "print", "pdf", "windows", "macos", "linux", "reportx"],
         "capabilities": [
             "ReportX 인계 정보 진단",
@@ -71,6 +71,7 @@ SPECS = {
             "문서번호 1회 예약 보호",
             "명시적 프린터 제출",
             "Windows/macOS/Linux 경로 자동 선택",
+            "원본 연세 제목체·본문체 개별 PDF 임베딩",
         ],
         "prompts": [
             "재학증명서를 국문 PDF로 발급하는 과정을 끝까지 진행해 줘.",

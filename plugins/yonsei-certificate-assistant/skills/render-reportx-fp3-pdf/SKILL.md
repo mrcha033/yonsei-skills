@@ -42,16 +42,25 @@ For the Yonsei print profile, use `yonsei-certificate-assistant`; it supplies
 strict named bindings for `__LOGO1__`, `__SERIAL__`, and a source-fingerprinted
 empty `__SEAL1__`. An unresolved zero-indexed placeholder fails closed.
 
-On macOS, Korean FastReport font names resolve to the installed
-`AppleGothic.ttf`. On another headless host, provide a TrueType font that
-covers every character and permits embedding:
+For an exact institutional face, map every FP3 `Font.Name` to the matching
+member-authorized local TrueType file. Do not collapse title and body into one
+fallback:
 
 ```bash
 python3 "$SKILL_DIR/scripts/fp3_pdf.py" render PRIMARY.fp3 \
   --sidecar COMPONENT-1.bin \
-  --font /absolute/path/to/authorized-korean-font.ttf \
+  --font-map "YonseiB=/path/to/연세제목.TTF" \
+  --font-map "연세제목체=/path/to/연세제목.TTF" \
+  --font-map "YonseiL=/path/to/연세본문.TTF" \
+  --font-map "연세본문체=/path/to/연세본문.TTF" \
   --output OUTPUT.pdf
 ```
+
+The renderer validates TrueType embedding permissions, character coverage, and
+records every embedded font hash in the result. The certificate workflow must
+stop before a document-number reservation if both official Yonsei faces are
+not available. Generic AppleGothic/Nanum fallback remains available only for
+non-certificate FP3 inspection and must not be presented as original typography.
 
 The output and JSON manifest are written with private permissions. The status
 is `rendered_pdf_unverified`: this means the prepared pages were rendered, not
@@ -98,6 +107,8 @@ and a live user-authorized issuance:
   palettes, transparent color keys, and alpha masks;
 - embedded Unicode TrueType fonts, deterministic PDF object ordering, and
   byte-for-byte replay checks in the certificate agent.
+- exact per-`Font.Name` mappings so distinct institutional title and body faces
+  remain distinct PDF font resources.
 
 Unknown drawable classes and unsupported visual semantics fail closed.
 Read `references/fp3-format.md` before extending this contract.
