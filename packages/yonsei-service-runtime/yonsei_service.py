@@ -244,7 +244,16 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def configure_utf8_stdio() -> None:
+    """Keep Korean service catalog output lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 def main() -> int:
+    configure_utf8_stdio()
     args = build_parser().parse_args()
     try:
         catalog = load_catalog(args.catalog)
