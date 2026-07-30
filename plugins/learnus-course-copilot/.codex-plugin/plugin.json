@@ -1,13 +1,14 @@
 {
   "name": "learnus-course-copilot",
   "version": "0.3.0",
-  "description": "Manage a memory-only LearnUs session and separately list authorized courses, deadlines, or materials with fail-closed parsing.",
+  "description": "LearnUs 강의, 과제 마감일, 학습자료를 정리하는 도구입니다. 로그인 정보는 저장하지 않습니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "learnus",
     "yonsei",
@@ -16,9 +17,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "LearnUs Course Tools",
-    "shortDescription": "Fine-grained LearnUs session and course tools",
-    "longDescription": "Install four result-specific skills for hidden-terminal session management, course discovery, assignment deadlines, and material links without persisting credentials.",
+    "displayName": "LearnUs 학습 도우미",
+    "shortDescription": "강의·과제·자료를 한 번에 정리",
+    "longDescription": "LearnUs 세션 관리, 수강 강의 확인, 과제 마감일 정리, 학습자료 목록 만들기를 각각 수행합니다. 학교의 지속형 API 토큰이 없어 공개 설치는 아직 보류됩니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
@@ -29,9 +30,9 @@
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "List my authorized LearnUs courses.",
-      "Show the deadlines in this LearnUs course.",
-      "List the materials in this LearnUs course."
+      "내 LearnUs 강의와 이번 주 마감 과제를 정리해 줘.",
+      "이 LearnUs 강의에서 제출할 과제를 찾아 줘.",
+      "이 강의의 학습자료와 영상을 목록으로 만들어 줘."
     ]
   }
 }

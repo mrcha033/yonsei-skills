@@ -1,11 +1,18 @@
 ---
 name: prepare-yonsei-space-request
-description: Build a complete but unsent Yonsei space reservation draft and evidence checklist from explicit applicant, room, time, headcount, purpose, and equipment details. Use after rule checking and before the user manually reviews the official form; never submit or imply approval.
+description: Build a complete but unsent Yonsei space reservation draft and evidence checklist from applicant, room, time, headcount, purpose, and equipment details supplied in ordinary language, a screenshot, pasted form, export, or JSON. Use after rule checking and before manual review; never submit or imply approval.
 ---
 
 # Prepare Yonsei Space Request
 
 Return a structured draft and missing-field checklist.
+
+## Prepare the input
+
+Accept the request details in ordinary language or from an attached form and
+convert confirmed fields to a private temporary JSON file. Do not ask the user
+to write JSON. Ask only for missing required fields and avoid repeating contact
+details in chat.
 
 ## Run
 

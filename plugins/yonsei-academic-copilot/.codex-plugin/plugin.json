@@ -1,13 +1,14 @@
 {
   "name": "yonsei-academic-copilot",
   "version": "0.2.0",
-  "description": "Normalize supplied class and enrollment snapshots or calculate a conservative grade summary without live-system claims or academic writes.",
+  "description": "학사정보 화면 캡처나 붙여 넣은 표에서 강의·성적·학적 상태를 정리합니다. 학교 기록은 변경하지 않습니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "academic",
@@ -16,9 +17,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Academic Snapshot Tools",
-    "shortDescription": "Audit supplied academic records safely",
-    "longDescription": "Install separate snapshot-only skills for class-list normalization, conservative grade calculations, and enrollment-status checks with completeness and privacy guards.",
+    "displayName": "연세 학사정보 정리",
+    "shortDescription": "강의·성적·학적 화면을 쉽게 정리",
+    "longDescription": "사용자가 첨부한 학사정보 화면, 표 또는 내보내기 파일을 바탕으로 이번 학기 강의, 성적 요약, 학적 상태를 정리합니다. 실시간 서버 조회 결과로 과장하지 않습니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
@@ -28,9 +29,9 @@
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Normalize this authorized Yonsei class snapshot.",
-      "Summarize this supplied Yonsei grade snapshot.",
-      "Check this supplied enrollment status."
+      "첨부한 학사정보 화면에서 이번 학기 강의를 정리해 줘.",
+      "이 성적표를 학점과 평량평균 중심으로 요약해 줘.",
+      "이 화면에서 내 학적 상태와 확인이 필요한 항목을 알려 줘."
     ]
   }
 }

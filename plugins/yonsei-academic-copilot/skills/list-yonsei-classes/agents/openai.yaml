@@ -1,6 +1,4 @@
 interface:
-  display_name: "List Yonsei Classes"
-  short_description: "Normalize an academic class snapshot"
-  default_prompt: "Use $list-yonsei-classes to list the classes in my supplied Yonsei academic snapshot."
-policy:
-  allow_implicit_invocation: true
+  display_name: "연세 강의 목록 정리"
+  short_description: "첨부한 학사정보 화면에서 이번 학기 강의를 정리합니다"
+  default_prompt: "Use $list-yonsei-classes to 첨부한 학사정보 화면에서 이번 학기 강의를 정리해 줘."

@@ -1,11 +1,18 @@
 ---
 name: list-yonsei-shuttle-options
-description: Normalize, filter, and sort a user-supplied Yonsei shuttle result by date, departure area, time window, and minimum remaining seats. Use after the user exports, pastes, or transcribes rows from the official shuttle screen; never use it to claim live availability.
+description: Normalize, filter, and sort a user-supplied Yonsei shuttle screenshot, pasted table, export, or JSON by date, departure area, time window, and minimum remaining seats. Use for an official shuttle-screen snapshot; never use it to claim live availability.
 ---
 
 # List Yonsei Shuttle Options
 
 Return matching trips from one explicit snapshot.
+
+## Prepare the input
+
+If the user attaches a shuttle screen or pastes rows, transcribe the visible
+route, date, time, and seat fields into a private temporary JSON file. Do not
+ask the user to write JSON. Preserve the screen timestamp and ask about
+unreadable values rather than treating them as available seats.
 
 ## Run
 

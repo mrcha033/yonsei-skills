@@ -8,6 +8,7 @@
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "groupware",
@@ -16,7 +17,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Groupware Offline Tools",
+    "displayName": "연세 그룹웨어 내보내기 점검",
     "shortDescription": "Review supplied groupware exports safely",
     "longDescription": "Install separate offline skills for approval inbox triage, local authorized-export search, and unsent message drafting with no external communication or workflow mutation.",
     "developerName": "mrcha033",

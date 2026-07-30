@@ -1,6 +1,4 @@
 interface:
-  display_name: "Audit Yonsei Course Plan"
-  short_description: "Audit one plan against explicit constraints"
-  default_prompt: "Use $audit-yonsei-course-plan to audit my selected courses against my stated planning constraints."
-policy:
-  allow_implicit_invocation: true
+  display_name: "연세 수강계획 점검"
+  short_description: "학점·공강·시간대 등 학생이 정한 조건을 점검합니다"
+  default_prompt: "Use $audit-yonsei-course-plan to 금요일 공강과 18학점 조건으로 이 수강계획을 점검해 줘."

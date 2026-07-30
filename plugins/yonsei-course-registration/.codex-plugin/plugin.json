@@ -1,13 +1,14 @@
 {
   "name": "yonsei-course-registration",
   "version": "0.2.0",
-  "description": "Normalize supplied Yonsei course rows, audit a selected plan, check schedule conflicts, build ranked timetables, or diagnose official entry access without registration writes.",
+  "description": "붙여 넣은 과목 목록이나 화면 캡처로 시간표 충돌을 찾고 조건에 맞는 시간표 후보를 만듭니다. 수강신청은 대신 누르지 않습니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "courses",
@@ -16,9 +17,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Course Planner",
-    "shortDescription": "Fine-grained read-only Yonsei course planning",
-    "longDescription": "Install five result-specific skills for course-data normalization, conflict checks, course-plan audits, deterministic timetable construction, and bounded entry-point diagnostics.",
+    "displayName": "연세 수강계획 도우미",
+    "shortDescription": "시간표 충돌 확인과 후보 조합 만들기",
+    "longDescription": "과목 표나 화면 캡처를 정리해 시간·캠퍼스 이동·공강·학점 조건을 검사하고 시간표 후보를 순위화합니다. 실제 수강신청, 취소, 대기 신청은 수행하지 않습니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
@@ -30,10 +31,9 @@
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Normalize these Yonsei course rows.",
-      "Audit this Yonsei course plan against my constraints.",
-      "Check this proposed Yonsei timetable for conflicts.",
-      "Build ranked conflict-free timetables from these choices."
+      "이 과목 목록으로 충돌 없는 시간표 후보를 만들어 줘.",
+      "금요일 공강과 18학점 조건으로 이 수강계획을 점검해 줘.",
+      "이 시간표에서 겹치는 수업과 캠퍼스 이동 문제를 찾아 줘."
     ]
   }
 }

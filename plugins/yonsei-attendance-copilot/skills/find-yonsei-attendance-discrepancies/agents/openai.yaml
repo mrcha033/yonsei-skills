@@ -1,6 +1,4 @@
 interface:
-  display_name: "Find Yonsei Attendance Discrepancies"
-  short_description: "Find explicitly reviewable attendance mismatches"
-  default_prompt: "Use $find-yonsei-attendance-discrepancies to review my supplied attendance snapshot for mismatches."
-policy:
-  allow_implicit_invocation: true
+  display_name: "연세 출결 오류 확인"
+  short_description: "사용자가 확인한 출결 기록에서 정정 검토 항목을 찾습니다"
+  default_prompt: "Use $find-yonsei-attendance-discrepancies to 이 출결 기록에서 내가 확인해야 할 항목을 찾아 줘."

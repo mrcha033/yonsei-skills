@@ -5,46 +5,10 @@
   },
   "plugins": [
     {
-      "name": "learnus-course-copilot",
-      "source": {
-        "source": "local",
-        "path": "./plugins/learnus-course-copilot"
-      },
-      "policy": {
-        "installation": "NOT_AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Education"
-    },
-    {
-      "name": "yonsei-certificate-assistant",
-      "source": {
-        "source": "local",
-        "path": "./plugins/yonsei-certificate-assistant"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Education"
-    },
-    {
       "name": "yonsei-notice-monitor",
       "source": {
         "source": "local",
         "path": "./plugins/yonsei-notice-monitor"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Education"
-    },
-    {
-      "name": "yonsei-academic-copilot",
-      "source": {
-        "source": "local",
-        "path": "./plugins/yonsei-academic-copilot"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -96,6 +60,42 @@
       },
       "policy": {
         "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "yonsei-academic-copilot",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yonsei-academic-copilot"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "yonsei-certificate-assistant",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yonsei-certificate-assistant"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "learnus-course-copilot",
+      "source": {
+        "source": "local",
+        "path": "./plugins/learnus-course-copilot"
+      },
+      "policy": {
+        "installation": "NOT_AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Education"

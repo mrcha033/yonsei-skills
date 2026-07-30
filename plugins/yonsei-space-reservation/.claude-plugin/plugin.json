@@ -1,15 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-space-reservation",
-  "displayName": "Yonsei Space Planning Tools",
+  "displayName": "연세 공간대관 도우미",
   "version": "0.2.0",
-  "description": "Filter supplied room snapshots, check a proposal against official public rules, or prepare an unsent reservation draft without submission.",
+  "description": "공간 목록 화면에서 조건에 맞는 장소를 찾고 공개 규칙을 확인해 제출 전 신청 내용을 준비합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "space",

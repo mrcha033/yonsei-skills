@@ -7,29 +7,10 @@
   },
   "plugins": [
     {
-      "name": "yonsei-certificate-assistant",
-      "displayName": "Yonsei Certificate Assistant",
-      "source": "./plugins/yonsei-certificate-assistant",
-      "description": "Choose and complete an official Yonsei electronic or paper certificate issuance path without bypassing print controls.",
-      "version": "0.1.0",
-      "author": {
-        "name": "mrcha033"
-      },
-      "homepage": "https://github.com/mrcha033/yonsei-skills",
-      "repository": "https://github.com/mrcha033/yonsei-skills",
-      "category": "education",
-      "tags": [
-        "yonsei",
-        "certificate",
-        "pdf",
-        "macos"
-      ]
-    },
-    {
       "name": "yonsei-notice-monitor",
-      "displayName": "Yonsei Notice Tools",
+      "displayName": "연세 공지·마감일 찾기",
       "source": "./plugins/yonsei-notice-monitor",
-      "description": "Search official Yonsei notices, extract contextual deadline candidates, or detect changes against an explicit local snapshot.",
+      "description": "연세대학교와 신촌 IT 공식 공지를 검색하고, 신청·납부·행사 마감일과 지난 확인 이후 달라진 공지를 찾습니다.",
       "version": "0.2.0",
       "author": {
         "name": "mrcha033"
@@ -45,29 +26,10 @@
       ]
     },
     {
-      "name": "yonsei-academic-copilot",
-      "displayName": "Yonsei Academic Snapshot Tools",
-      "source": "./plugins/yonsei-academic-copilot",
-      "description": "Normalize supplied class and enrollment snapshots or calculate a conservative grade summary without live-system claims or academic writes.",
-      "version": "0.2.0",
-      "author": {
-        "name": "mrcha033"
-      },
-      "homepage": "https://github.com/mrcha033/yonsei-skills",
-      "repository": "https://github.com/mrcha033/yonsei-skills",
-      "category": "education",
-      "tags": [
-        "yonsei",
-        "academic",
-        "records",
-        "student"
-      ]
-    },
-    {
       "name": "yonsei-course-registration",
-      "displayName": "Yonsei Course Planner",
+      "displayName": "연세 수강계획 도우미",
       "source": "./plugins/yonsei-course-registration",
-      "description": "Normalize supplied Yonsei course rows, audit a selected plan, check schedule conflicts, build ranked timetables, or diagnose official entry access without registration writes.",
+      "description": "붙여 넣은 과목 목록이나 화면 캡처로 시간표 충돌을 찾고 조건에 맞는 시간표 후보를 만듭니다. 수강신청은 대신 누르지 않습니다.",
       "version": "0.2.0",
       "author": {
         "name": "mrcha033"
@@ -84,9 +46,9 @@
     },
     {
       "name": "yonsei-attendance-copilot",
-      "displayName": "Yonsei Attendance Review Tools",
+      "displayName": "연세 출결 확인 도우미",
       "source": "./plugins/yonsei-attendance-copilot",
-      "description": "Summarize supplied attendance records, identify user-review discrepancies, or prepare an unsent correction draft without check-in or location inference.",
+      "description": "전자출결 화면이나 붙여 넣은 표를 요약하고, 확인할 기록과 정정 문의 초안을 만듭니다. 출석 체크는 수행하지 않습니다.",
       "version": "0.2.0",
       "author": {
         "name": "mrcha033"
@@ -103,9 +65,9 @@
     },
     {
       "name": "yonsei-shuttle-booking",
-      "displayName": "Yonsei Shuttle Review Tools",
+      "displayName": "연세 셔틀 확인 도우미",
       "source": "./plugins/yonsei-shuttle-booking",
-      "description": "Diagnose the official shuttle client or filter supplied trip and seat snapshots without reserving, waitlisting, cancelling, or polling.",
+      "description": "셔틀 조회 화면에서 원하는 시간대와 잔여석을 정리하고 접속 문제를 진단합니다. 예약·취소는 수행하지 않습니다.",
       "version": "0.2.0",
       "author": {
         "name": "mrcha033"
@@ -122,9 +84,9 @@
     },
     {
       "name": "yonsei-space-reservation",
-      "displayName": "Yonsei Space Planning Tools",
+      "displayName": "연세 공간대관 도우미",
       "source": "./plugins/yonsei-space-reservation",
-      "description": "Filter supplied room snapshots, check a proposal against official public rules, or prepare an unsent reservation draft without submission.",
+      "description": "공간 목록 화면에서 조건에 맞는 장소를 찾고 공개 규칙을 확인해 제출 전 신청 내용을 준비합니다.",
       "version": "0.2.0",
       "author": {
         "name": "mrcha033"
@@ -140,8 +102,49 @@
       ]
     },
     {
+      "name": "yonsei-academic-copilot",
+      "displayName": "연세 학사정보 정리",
+      "source": "./plugins/yonsei-academic-copilot",
+      "description": "학사정보 화면 캡처나 붙여 넣은 표에서 강의·성적·학적 상태를 정리합니다. 학교 기록은 변경하지 않습니다.",
+      "version": "0.2.0",
+      "author": {
+        "name": "mrcha033"
+      },
+      "homepage": "https://github.com/mrcha033/yonsei-skills",
+      "repository": "https://github.com/mrcha033/yonsei-skills",
+      "category": "education",
+      "tags": [
+        "yonsei",
+        "academic",
+        "records",
+        "student"
+      ]
+    },
+    {
+      "name": "yonsei-certificate-assistant",
+      "displayName": "연세 증명서 Mac 도우미",
+      "source": "./plugins/yonsei-certificate-assistant",
+      "description": "macOS에서 연세 인터넷증명서 ReportX 출력을 진단하고, 본인이 정상 발급한 준비 문서를 호환 PDF로 렌더링합니다.",
+      "version": "0.5.0",
+      "author": {
+        "name": "mrcha033"
+      },
+      "homepage": "https://github.com/mrcha033/yonsei-skills",
+      "repository": "https://github.com/mrcha033/yonsei-skills",
+      "category": "education",
+      "tags": [
+        "yonsei",
+        "certificate",
+        "icert",
+        "print",
+        "pdf",
+        "macos",
+        "reportx"
+      ]
+    },
+    {
       "name": "yonsei-yri",
-      "displayName": "Yonsei YRI Export Tools",
+      "displayName": "연세 YRI 업적 정리",
       "source": "./plugins/yonsei-yri",
       "description": "Normalize an authorized YRI export, reconcile it with a supplied reference list, or prepare an unsaved field-level change draft.",
       "version": "0.2.0",
@@ -160,7 +163,7 @@
     },
     {
       "name": "yonsei-rms",
-      "displayName": "Yonsei RMS Snapshot Tools",
+      "displayName": "연세 RMS 연구과제 점검",
       "source": "./plugins/yonsei-rms",
       "description": "Summarize supplied RMS project data and audit its budget arithmetic or participant roles and periods without uploads, approvals, or submissions.",
       "version": "0.2.0",
@@ -179,7 +182,7 @@
     },
     {
       "name": "yonsei-erp",
-      "displayName": "Yonsei ERP Snapshot Tools",
+      "displayName": "연세 ERP 내보내기 점검",
       "source": "./plugins/yonsei-erp",
       "description": "Filter supplied ERP request and approval snapshots or audit payment lifecycle status without accessing payroll, approving, paying, or submitting.",
       "version": "0.2.0",
@@ -198,7 +201,7 @@
     },
     {
       "name": "yonsei-groupware",
-      "displayName": "Yonsei Groupware Offline Tools",
+      "displayName": "연세 그룹웨어 내보내기 점검",
       "source": "./plugins/yonsei-groupware",
       "description": "Triage supplied approval data, search an explicit authorized document export, or prepare an unsent message without approving, sending, or sharing.",
       "version": "0.2.0",

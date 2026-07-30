@@ -1,11 +1,18 @@
 ---
 name: check-yonsei-space-rules
-description: Check one proposed Yonsei space booking against the public official lead-time, duration, booking-count, ten-minute interval, actor eligibility, and restricted-period rules. Use before preparing a request; returns unknown when required calendar facts are not supplied.
+description: Check a Yonsei space-booking proposal supplied in ordinary language, a screenshot, pasted form, export, or JSON against public lead-time, duration, booking-count, ten-minute interval, applicant eligibility, and restricted-period rules. Use before preparing a request; return unknown when required facts are absent.
 ---
 
 # Check Yonsei Space Rules
 
 Return one evidence-linked eligibility report.
+
+## Prepare the input
+
+Collect the proposal in ordinary language or from an attached form and convert
+only the required fields to a private temporary JSON file. Do not ask the user
+to write JSON. Ask about restricted periods or prior booking counts when they
+are not visible instead of inferring them.
 
 ## Run
 

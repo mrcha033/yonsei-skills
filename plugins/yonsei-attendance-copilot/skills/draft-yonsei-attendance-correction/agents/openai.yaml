@@ -1,6 +1,4 @@
 interface:
-  display_name: "Draft Yonsei Attendance Correction"
-  short_description: "Create an unsent attendance correction draft"
-  default_prompt: "Use $draft-yonsei-attendance-correction to draft, but not submit, a correction for this attendance discrepancy."
-policy:
-  allow_implicit_invocation: true
+  display_name: "연세 출결 정정 문의"
+  short_description: "확인된 출결 불일치에 대한 전송 전 문의 초안을 만듭니다"
+  default_prompt: "Use $draft-yonsei-attendance-correction to 이 출결 오류의 정정 문의를 작성하되 보내지는 마."

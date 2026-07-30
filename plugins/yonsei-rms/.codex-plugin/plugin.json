@@ -8,6 +8,7 @@
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "rms",
@@ -16,7 +17,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei RMS Snapshot Tools",
+    "displayName": "연세 RMS 연구과제 점검",
     "shortDescription": "Audit supplied RMS project snapshots",
     "longDescription": "Install separate snapshot-only skills for project summaries, budget consistency checks, and participant-period validation against explicit supplied data.",
     "developerName": "mrcha033",

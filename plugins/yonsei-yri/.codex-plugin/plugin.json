@@ -8,6 +8,7 @@
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "yri",
@@ -16,7 +17,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei YRI Export Tools",
+    "displayName": "연세 YRI 업적 정리",
     "shortDescription": "Audit supplied YRI research achievements",
     "longDescription": "Install separate export-only skills for achievement listing, conservative missing-record reconciliation, and unsaved field-level change preparation.",
     "developerName": "mrcha033",

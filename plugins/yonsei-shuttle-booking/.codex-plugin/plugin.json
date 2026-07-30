@@ -1,13 +1,14 @@
 {
   "name": "yonsei-shuttle-booking",
   "version": "0.2.0",
-  "description": "Diagnose the official shuttle client or filter supplied trip and seat snapshots without reserving, waitlisting, cancelling, or polling.",
+  "description": "셔틀 조회 화면에서 원하는 시간대와 잔여석을 정리하고 접속 문제를 진단합니다. 예약·취소는 수행하지 않습니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "shuttle",
@@ -16,9 +17,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Shuttle Review Tools",
-    "shortDescription": "Review shuttle options and seat snapshots",
-    "longDescription": "Install separate skills for official entry diagnostics, trip filtering, and conservative seat or waitlist verdicts while every reservation write remains disabled.",
+    "displayName": "연세 셔틀 확인 도우미",
+    "shortDescription": "신촌·국제캠퍼스 셔틀 옵션 확인",
+    "longDescription": "사용자가 첨부한 셔틀 조회 화면이나 표를 날짜·방향·시간·잔여석 기준으로 정리하고 공식 진입점의 접속 문제를 확인합니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
@@ -28,9 +29,9 @@
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Diagnose the Yonsei shuttle entry.",
-      "Filter these supplied shuttle options.",
-      "Check the seat status in this supplied trip snapshot."
+      "내일 신촌에서 국제캠퍼스로 가는 셔틀을 이 화면에서 찾아 줘.",
+      "오전 9시 이전 셔틀 중 잔여석 있는 편을 정리해 줘.",
+      "연세 셔틀 페이지가 열리지 않는 이유를 진단해 줘."
     ]
   }
 }

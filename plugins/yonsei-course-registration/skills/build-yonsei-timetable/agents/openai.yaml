@@ -1,6 +1,4 @@
 interface:
-  display_name: "Build Yonsei Timetable"
-  short_description: "Construct ranked conflict-free timetables"
-  default_prompt: "Use $build-yonsei-timetable to construct conflict-free schedules from my acceptable sections."
-policy:
-  allow_implicit_invocation: true
+  display_name: "연세 시간표 후보 만들기"
+  short_description: "여러 분반에서 조건에 맞는 시간표 후보를 순위로 만듭니다"
+  default_prompt: "Use $build-yonsei-timetable to 이 과목 목록으로 충돌 없는 시간표 후보를 만들어 줘."

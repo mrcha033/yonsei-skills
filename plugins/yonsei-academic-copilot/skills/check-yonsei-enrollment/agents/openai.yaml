@@ -1,6 +1,4 @@
 interface:
-  display_name: "Check Yonsei Enrollment"
-  short_description: "Check a supplied enrollment-status snapshot"
-  default_prompt: "Use $check-yonsei-enrollment to check the status fields in my supplied Yonsei academic snapshot."
-policy:
-  allow_implicit_invocation: true
+  display_name: "연세 학적 상태 확인"
+  short_description: "첨부한 학사 화면에서 학적 상태와 빠진 근거를 확인합니다"
+  default_prompt: "Use $check-yonsei-enrollment to 이 화면에서 내 학적 상태와 추가 확인 항목을 알려 줘."

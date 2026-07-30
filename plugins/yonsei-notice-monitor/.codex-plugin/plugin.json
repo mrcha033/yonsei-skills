@@ -1,13 +1,14 @@
 {
   "name": "yonsei-notice-monitor",
   "version": "0.2.0",
-  "description": "Search official Yonsei notices, extract contextual deadline candidates, or detect changes against an explicit local snapshot.",
+  "description": "연세대학교와 신촌 IT 공식 공지를 검색하고, 신청·납부·행사 마감일과 지난 확인 이후 달라진 공지를 찾습니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "notices",
@@ -16,9 +17,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Notice Tools",
-    "shortDescription": "Search notices, deadlines, and changes",
-    "longDescription": "Install three public read-only skills for globally sorted official notice search, contextual deadline extraction, and explicit-state change detection.",
+    "displayName": "연세 공지·마감일 찾기",
+    "shortDescription": "공식 공지와 놓치기 쉬운 마감일 확인",
+    "longDescription": "로그인 없이 공식 공지를 통합 검색하고, 본문에서 신청·제출·납부·행사 날짜를 추려 주며, 사용자가 선택한 파일을 기준으로 새 공지와 변경된 공지를 비교합니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
@@ -28,9 +29,9 @@
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Search current official Yonsei notices.",
-      "List upcoming deadlines from recent Yonsei notices.",
-      "Show notices changed since my last snapshot."
+      "이번 주에 내가 놓치면 안 되는 연세대 공지를 찾아 줘.",
+      "최근 장학·등록금 공지에서 다가오는 마감일을 정리해 줘.",
+      "지난번 확인 이후 새로 올라오거나 바뀐 공지를 보여 줘."
     ]
   }
 }

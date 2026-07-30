@@ -1,6 +1,4 @@
 interface:
-  display_name: "Normalize Yonsei Courses"
-  short_description: "Normalize Korean course rows into planning JSON"
-  default_prompt: "Use $normalize-yonsei-courses to validate and normalize my Yonsei course data."
-policy:
-  allow_implicit_invocation: true
+  display_name: "연세 과목표 정리"
+  short_description: "첨부한 과목표나 화면을 시간표 계획용 자료로 정리합니다"
+  default_prompt: "Use $normalize-yonsei-courses to 첨부한 연세대 과목표를 시간표 계획용으로 정리해 줘."

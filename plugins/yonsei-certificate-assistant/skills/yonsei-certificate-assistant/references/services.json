@@ -3,13 +3,18 @@
   "services": {
     "certificate": {
       "access": "portal-authenticated-issuance",
-      "direct_url": "https://icert.yonsei.ac.kr/servlet/YSID?COMMAND=VERIFY&LANG=0",
+      "direct_url": "https://icert.yonsei.ac.kr/",
       "entry_url": "https://portal.yonsei.ac.kr/ui/index.html",
-      "label": "Internet Certificate Issuance",
-      "mutation_policy": "official-issuance-only",
+      "label": "Internet Certificate Issuance (icert free print)",
+      "mutation_policy": "explicit-one-shot-document-number-then-local-compatibility-pdf",
       "notes": [
-        "The direct pre-login URL is for original-document verification.",
-        "Start issuance from the authenticated portal Internet Certificate menu."
+        "Issuance center host is https://icert.yonsei.ac.kr/ (WebMinwon ReportX free print).",
+        "Start from portal 인터넷증명서 → 인터넷즉시발급; VERIFY URL is original-check only.",
+        "Official print hands an encrypted dzreportx ticket to a Windows-only listener on 127.0.0.1:65432.",
+        "The macOS compatibility agent decodes the current encrypted ticket, materializes the pinned ReportX runtime profile, and independently renders the returned FP3 prepared report to PDF.",
+        "Document-number reservation is an explicit one-shot mutation guarded against automatic retry; PDF rendering never calls printcomplete.",
+        "A compatibility PDF is unverified and is not automatically an official electronic certificate or paper original.",
+        "Out of scope for this skill: paid 전자증명서발급 electronic PDF product."
       ],
       "portal_key": "LK011_A",
       "portal_url": "https://icert.yonsei.ac.kr/servlet/YSID?COMMAND=VERIFY&LANG=0",

@@ -1,15 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-course-registration",
-  "displayName": "Yonsei Course Planner",
+  "displayName": "연세 수강계획 도우미",
   "version": "0.2.0",
-  "description": "Normalize supplied Yonsei course rows, audit a selected plan, check schedule conflicts, build ranked timetables, or diagnose official entry access without registration writes.",
+  "description": "붙여 넣은 과목 목록이나 화면 캡처로 시간표 충돌을 찾고 조건에 맞는 시간표 후보를 만듭니다. 수강신청은 대신 누르지 않습니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "courses",

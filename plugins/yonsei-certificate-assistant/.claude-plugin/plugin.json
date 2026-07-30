@@ -1,20 +1,24 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-certificate-assistant",
-  "displayName": "Yonsei Certificate Assistant",
-  "version": "0.1.0",
-  "description": "Choose and complete an official Yonsei electronic or paper certificate issuance path without bypassing print controls.",
+  "displayName": "연세 증명서 Mac 도우미",
+  "version": "0.5.0",
+  "description": "macOS에서 연세 인터넷증명서 ReportX 출력을 진단하고, 본인이 정상 발급한 준비 문서를 호환 PDF로 렌더링합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "certificate",
+    "icert",
+    "print",
     "pdf",
-    "macos"
+    "macos",
+    "reportx"
   ],
   "skills": "./skills/"
 }

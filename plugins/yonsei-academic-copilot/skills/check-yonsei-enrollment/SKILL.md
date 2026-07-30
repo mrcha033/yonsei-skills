@@ -1,11 +1,18 @@
 ---
 name: check-yonsei-enrollment
-description: Normalize the enrollment and academic-status fields in a user-provided Yonsei Academic Information System JSON snapshot, identify missing term-registration evidence, and flag explicit status contradictions. Use for checking a captured 재학, 휴학, 수료, 졸업, or 제적 status without querying the live system or inferring eligibility.
+description: Normalize enrollment and academic-status fields from a user-provided Yonsei Academic Information System screenshot, pasted table, export, or JSON, identify missing term-registration evidence, and flag explicit contradictions. Use for a captured 재학, 휴학, 수료, 졸업, or 제적 status without querying the live system or inferring eligibility.
 ---
 
 # Check Yonsei Enrollment
 
 Return one status report from one supplied academic snapshot.
+
+## Prepare the input
+
+When the user supplies a screen capture, PDF, spreadsheet, or pasted table,
+extract only the status fields needed for this check into a private temporary
+JSON file. Do not ask the user to write JSON. Redact or omit student numbers and
+contact details before running the script.
 
 ## Run
 
@@ -19,7 +26,7 @@ Report contradictions and unknowns exactly. A historical snapshot is evidence on
 
 ## Boundaries
 
-- Process only supplied JSON and reject credential or session fields.
+- Process only user-supplied attachments, pasted data, or JSON and reject credential or session fields.
 - Do not return student numbers, addresses, phone numbers, or other unrecognized profile fields.
 - Do not infer eligibility for graduation, scholarships, registration, visas, services, or benefits.
 - Never submit leave, return, graduation, enrollment, or personal-information changes.

@@ -1,13 +1,14 @@
 {
   "name": "yonsei-space-reservation",
   "version": "0.2.0",
-  "description": "Filter supplied room snapshots, check a proposal against official public rules, or prepare an unsent reservation draft without submission.",
+  "description": "공간 목록 화면에서 조건에 맞는 장소를 찾고 공개 규칙을 확인해 제출 전 신청 내용을 준비합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "space",
@@ -16,9 +17,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Space Planning Tools",
-    "shortDescription": "Check space candidates, rules, and drafts",
-    "longDescription": "Install separate skills for snapshot filtering, evidence-linked rule checks, and unsent request preparation while availability claims, payment, approval, and submission stay disabled.",
+    "displayName": "연세 공간대관 도우미",
+    "shortDescription": "공간 후보·이용 규칙·신청 초안 확인",
+    "longDescription": "사용자가 첨부한 공간대관 화면이나 표를 시간·수용인원·장비 기준으로 정리하고 공식 공개 규칙을 확인해 전송 전 신청 초안을 만듭니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
@@ -28,9 +29,9 @@
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Filter this supplied Yonsei space snapshot.",
-      "Check this proposed booking against Yonsei public rules.",
-      "Prepare but do not submit a space request."
+      "이 공간 목록에서 15명이 쓸 수 있는 프로젝터 있는 방을 찾아 줘.",
+      "이 대관 계획이 공개 이용 규칙에 맞는지 확인해 줘.",
+      "이 내용으로 공간대관 신청 초안을 만들되 제출하지는 마."
     ]
   }
 }

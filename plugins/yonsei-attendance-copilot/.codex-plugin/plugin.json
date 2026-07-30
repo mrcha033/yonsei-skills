@@ -1,13 +1,14 @@
 {
   "name": "yonsei-attendance-copilot",
   "version": "0.2.0",
-  "description": "Summarize supplied attendance records, identify user-review discrepancies, or prepare an unsent correction draft without check-in or location inference.",
+  "description": "전자출결 화면이나 붙여 넣은 표를 요약하고, 확인할 기록과 정정 문의 초안을 만듭니다. 출석 체크는 수행하지 않습니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "attendance",
@@ -16,9 +17,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Attendance Review Tools",
-    "shortDescription": "Review supplied attendance records safely",
-    "longDescription": "Install three snapshot-only skills for attendance totals, conservative discrepancy review, and unsent correction drafting while check-in and record changes stay disabled.",
+    "displayName": "연세 출결 확인 도우미",
+    "shortDescription": "결석·지각 확인과 정정 문의 초안",
+    "longDescription": "사용자가 첨부한 전자출결 화면, 표 또는 파일에서 과목별 출결을 정리하고 사용자가 지적한 불일치를 검토해 전송 전 문의 초안을 만듭니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
@@ -28,9 +29,9 @@
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Summarize this Yonsei attendance snapshot.",
-      "Find records in this attendance snapshot that I should review.",
-      "Draft but do not send an attendance correction request."
+      "첨부한 전자출결 화면에서 결석과 지각을 과목별로 정리해 줘.",
+      "이 출결 기록에서 내가 확인해야 할 항목을 찾아 줘.",
+      "이 출결 오류에 대한 정정 문의를 작성하되 보내지는 마."
     ]
   }
 }

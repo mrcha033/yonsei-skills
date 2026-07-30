@@ -1,34 +1,41 @@
 {
   "name": "yonsei-certificate-assistant",
-  "version": "0.1.0",
-  "description": "Choose and complete an official Yonsei electronic or paper certificate issuance path without bypassing print controls.",
+  "version": "0.5.0",
+  "description": "macOS에서 연세 인터넷증명서 ReportX 출력을 진단하고, 본인이 정상 발급한 준비 문서를 호환 PDF로 렌더링합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "certificate",
+    "icert",
+    "print",
     "pdf",
-    "macos"
+    "macos",
+    "reportx"
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei Certificate Assistant",
-    "shortDescription": "Issue valid Yonsei certificates on macOS",
-    "longDescription": "Choose the valid electronic-original or paper-original workflow, enter through the official portal, and avoid print-control bypasses that would produce an invalid copy.",
+    "displayName": "연세 증명서 Mac 도우미",
+    "shortDescription": "Mac의 ReportX 증명서 출력 문제 해결",
+    "longDescription": "Windows 전용 ReportX 인계 정보를 해석하고 검증된 런타임 자산과 독립 FP3 렌더러로 호환 PDF를 만듭니다. 문서번호 예약은 명시적으로 한 번만 수행하며 결과는 공식 전자원본으로 주장하지 않습니다.",
     "developerName": "mrcha033",
     "category": "Education",
     "capabilities": [
-      "Certificate path selection",
-      "Official issuance guidance",
-      "Mac compatibility checks"
+      "ReportX 인계 정보 진단",
+      "검증된 런타임 자산 준비",
+      "FP3 호환 PDF 렌더링",
+      "문서번호 1회 예약 보호",
+      "명시적 프린터 제출"
     ],
     "websiteURL": "https://github.com/mrcha033/yonsei-skills",
     "defaultPrompt": [
-      "Help me issue a valid Yonsei certificate from my Mac."
+      "Mac에서 연세 증명서 프린터 출력이 안 되는 문제를 해결해 줘.",
+      "이 ReportX 발급 건을 진단하고 호환 PDF 범위를 설명해 줘."
     ]
   }
 }

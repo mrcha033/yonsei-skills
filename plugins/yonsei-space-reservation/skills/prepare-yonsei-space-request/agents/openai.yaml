@@ -1,6 +1,4 @@
 interface:
-  display_name: "Prepare Yonsei Space Request"
-  short_description: "Prepare an unsent request and checklist"
-  default_prompt: "Use $prepare-yonsei-space-request to prepare an unsent Yonsei space request and evidence checklist."
-policy:
-  allow_implicit_invocation: true
+  display_name: "연세 공간대관 신청 초안"
+  short_description: "확인한 공간과 일정으로 제출 전 신청 초안을 준비합니다"
+  default_prompt: "Use $prepare-yonsei-space-request to 이 내용으로 공간대관 신청 초안을 만들되 제출하지는 마."

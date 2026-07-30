@@ -1,11 +1,18 @@
 ---
 name: find-yonsei-attendance-discrepancies
-description: Compare displayed and user-expected statuses in a supplied Yonsei attendance JSON snapshot, identify records explicitly disputed by the user, and report which items have enough reason and evidence to draft a correction. Use for reviewing possible attendance errors without inferring presence or changing official records.
+description: Compare displayed and user-expected statuses from a supplied Yonsei attendance screenshot, pasted table, export, or JSON, identify records explicitly disputed by the user, and report which items have enough reason and evidence to draft a correction. Use without inferring presence or changing official records.
 ---
 
 # Find Yonsei Attendance Discrepancies
 
 Return one discrepancy report from a supplied review snapshot.
+
+## Prepare the input
+
+If the user supplies an attendance screen or table, extract the displayed
+records into a private temporary JSON file, then ask the user which entries they
+dispute and what evidence they want considered. Do not make the user write JSON
+or infer an expected status from location or timetable data.
 
 ## Run
 
@@ -20,6 +27,6 @@ Each record needs course, date, and `recorded_status`. Supply `expected_status` 
 ## Boundaries
 
 - Never infer presence from timetable, location, Bluetooth, device, or network data.
-- Process only supplied JSON and reject credential, session, check-in, beacon, or location fields.
+- Process only user-supplied attachments, pasted data, or JSON and reject credential, session, check-in, beacon, or location fields.
 - Do not accuse a person or system of error; report a user-review candidate.
 - Never submit a correction or alter an attendance record.

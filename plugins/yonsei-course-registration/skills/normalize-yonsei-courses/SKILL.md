@@ -1,11 +1,19 @@
 ---
 name: normalize-yonsei-courses
-description: Normalize Yonsei course rows or manually collected catalogue data into a stable JSON course-plan schema. Use when course data has Korean or English field names, campus aliases, Korean weekday/time strings, mixed section identifiers, or needs validation before conflict checking and timetable construction.
+description: Normalize Yonsei course rows from a screenshot, PDF, spreadsheet, pasted table, export, or JSON into stable course-planning data. Use when course data has Korean or English fields, campus aliases, Korean weekday/time strings, mixed section identifiers, or needs validation before conflict checking and timetable construction.
 ---
 
 # Normalize Yonsei Courses
 
 Convert user-provided, exported, or browser-collected course rows into deterministic planning data.
+
+## Prepare the input
+
+When the user attaches a course-catalogue screen, PDF, spreadsheet, or pasted
+table, extract recognized course fields into a private temporary JSON file. Do
+not ask the user to write JSON. Preserve unreadable or missing times as
+unknowns, ask only for information required by the requested plan, and never
+guess official period-to-clock mappings.
 
 ## Run
 

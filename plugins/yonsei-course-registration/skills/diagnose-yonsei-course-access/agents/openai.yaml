@@ -1,6 +1,4 @@
 interface:
-  display_name: "Diagnose Yonsei Course Access"
-  short_description: "Probe official course-system entry points"
-  default_prompt: "Use $diagnose-yonsei-course-access to diagnose access to the Yonsei course systems."
-policy:
-  allow_implicit_invocation: true
+  display_name: "연세 수강 페이지 진단"
+  short_description: "수강편람·수강신청 페이지의 접속 문제를 안전하게 진단합니다"
+  default_prompt: "Use $diagnose-yonsei-course-access to 연세 수강편람 페이지가 열리지 않는 이유를 진단해 줘."

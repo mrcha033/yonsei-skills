@@ -1,15 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-academic-copilot",
-  "displayName": "Yonsei Academic Snapshot Tools",
+  "displayName": "연세 학사정보 정리",
   "version": "0.2.0",
-  "description": "Normalize supplied class and enrollment snapshots or calculate a conservative grade summary without live-system claims or academic writes.",
+  "description": "학사정보 화면 캡처나 붙여 넣은 표에서 강의·성적·학적 상태를 정리합니다. 학교 기록은 변경하지 않습니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "academic",

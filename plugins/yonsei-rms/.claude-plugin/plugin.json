@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-rms",
-  "displayName": "Yonsei RMS Snapshot Tools",
+  "displayName": "연세 RMS 연구과제 점검",
   "version": "0.2.0",
   "description": "Summarize supplied RMS project data and audit its budget arithmetic or participant roles and periods without uploads, approvals, or submissions.",
   "author": {
@@ -10,6 +10,7 @@
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "rms",

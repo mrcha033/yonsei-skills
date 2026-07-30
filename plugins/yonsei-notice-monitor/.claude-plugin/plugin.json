@@ -1,15 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-notice-monitor",
-  "displayName": "Yonsei Notice Tools",
+  "displayName": "연세 공지·마감일 찾기",
   "version": "0.2.0",
-  "description": "Search official Yonsei notices, extract contextual deadline candidates, or detect changes against an explicit local snapshot.",
+  "description": "연세대학교와 신촌 IT 공식 공지를 검색하고, 신청·납부·행사 마감일과 지난 확인 이후 달라진 공지를 찾습니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "notices",

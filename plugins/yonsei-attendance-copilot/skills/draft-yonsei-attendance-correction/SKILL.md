@@ -1,11 +1,18 @@
 ---
 name: draft-yonsei-attendance-correction
-description: Create an unsent Korean attendance-correction draft and evidence checklist from one user-confirmed discrepancy in a supplied Yonsei attendance JSON snapshot. Use when the user wants a reviewable request draft while keeping all official submission, status changes, attendance check-in, and external communication disabled.
+description: Create an unsent Korean attendance-correction draft and evidence checklist from a user-confirmed discrepancy supplied as a screenshot, pasted record, export, or JSON. Use when the user wants a reviewable request draft while official submission, status changes, attendance check-in, and external communication remain disabled.
 ---
 
 # Draft Yonsei Attendance Correction
 
 Create one deterministic, unsent correction draft.
+
+## Prepare the input
+
+Accept the disputed record and evidence in ordinary language or as an attached
+screen. Convert only the confirmed fields to a private temporary JSON file. Do
+not ask the user to write JSON, and do not infer a recipient or requested status
+that the user did not state.
 
 ## Run
 
@@ -21,5 +28,5 @@ Review the structured fields, message text, evidence checklist, and `ready_for_u
 
 - Never accept or execute `submit`, `send`, `apply_change`, or automatic-action flags.
 - Never enter an attendance code, attest presence, use location or beacon data, or perform check-in.
-- Process only supplied JSON and reject credential/session fields.
+- Process only user-supplied attachments, statements, or JSON and reject credential/session fields.
 - Do not claim a correction was accepted; the user must review and submit through the official path.

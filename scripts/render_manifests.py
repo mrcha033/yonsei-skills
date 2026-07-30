@@ -21,10 +21,10 @@ INSTALLATIONS = {
 SPECS = {
     "learnus-course-copilot": {
         "version": "0.3.0",
-        "display": "LearnUs Course Tools",
-        "description": "Manage a memory-only LearnUs session and separately list authorized courses, deadlines, or materials with fail-closed parsing.",
-        "short": "Fine-grained LearnUs session and course tools",
-        "long": "Install four result-specific skills for hidden-terminal session management, course discovery, assignment deadlines, and material links without persisting credentials.",
+        "display": "LearnUs 학습 도우미",
+        "description": "LearnUs 강의, 과제 마감일, 학습자료를 정리하는 도구입니다. 로그인 정보는 저장하지 않습니다.",
+        "short": "강의·과제·자료를 한 번에 정리",
+        "long": "LearnUs 세션 관리, 수강 강의 확인, 과제 마감일 정리, 학습자료 목록 만들기를 각각 수행합니다. 학교의 지속형 API 토큰이 없어 공개 설치는 아직 보류됩니다.",
         "keywords": ["learnus", "yonsei", "lms", "course"],
         "capabilities": [
             "Memory-only LearnUs session management",
@@ -33,27 +33,36 @@ SPECS = {
             "Material and video inventory",
         ],
         "prompts": [
-            "List my authorized LearnUs courses.",
-            "Show the deadlines in this LearnUs course.",
-            "List the materials in this LearnUs course.",
+            "내 LearnUs 강의와 이번 주 마감 과제를 정리해 줘.",
+            "이 LearnUs 강의에서 제출할 과제를 찾아 줘.",
+            "이 강의의 학습자료와 영상을 목록으로 만들어 줘.",
         ],
     },
     "yonsei-certificate-assistant": {
-        "version": "0.1.0",
-        "display": "Yonsei Certificate Assistant",
-        "description": "Choose and complete an official Yonsei electronic or paper certificate issuance path without bypassing print controls.",
-        "short": "Issue valid Yonsei certificates on macOS",
-        "long": "Choose the valid electronic-original or paper-original workflow, enter through the official portal, and avoid print-control bypasses that would produce an invalid copy.",
-        "keywords": ["yonsei", "certificate", "pdf", "macos"],
-        "capabilities": ["Certificate path selection", "Official issuance guidance", "Mac compatibility checks"],
-        "prompts": ["Help me issue a valid Yonsei certificate from my Mac."],
+        "version": "0.5.0",
+        "display": "연세 증명서 Mac 도우미",
+        "description": "macOS에서 연세 인터넷증명서 ReportX 출력을 진단하고, 본인이 정상 발급한 준비 문서를 호환 PDF로 렌더링합니다.",
+        "short": "Mac의 ReportX 증명서 출력 문제 해결",
+        "long": "Windows 전용 ReportX 인계 정보를 해석하고 검증된 런타임 자산과 독립 FP3 렌더러로 호환 PDF를 만듭니다. 문서번호 예약은 명시적으로 한 번만 수행하며 결과는 공식 전자원본으로 주장하지 않습니다.",
+        "keywords": ["yonsei", "certificate", "icert", "print", "pdf", "macos", "reportx"],
+        "capabilities": [
+            "ReportX 인계 정보 진단",
+            "검증된 런타임 자산 준비",
+            "FP3 호환 PDF 렌더링",
+            "문서번호 1회 예약 보호",
+            "명시적 프린터 제출",
+        ],
+        "prompts": [
+            "Mac에서 연세 증명서 프린터 출력이 안 되는 문제를 해결해 줘.",
+            "이 ReportX 발급 건을 진단하고 호환 PDF 범위를 설명해 줘.",
+        ],
     },
     "yonsei-notice-monitor": {
         "version": "0.2.0",
-        "display": "Yonsei Notice Tools",
-        "description": "Search official Yonsei notices, extract contextual deadline candidates, or detect changes against an explicit local snapshot.",
-        "short": "Search notices, deadlines, and changes",
-        "long": "Install three public read-only skills for globally sorted official notice search, contextual deadline extraction, and explicit-state change detection.",
+        "display": "연세 공지·마감일 찾기",
+        "description": "연세대학교와 신촌 IT 공식 공지를 검색하고, 신청·납부·행사 마감일과 지난 확인 이후 달라진 공지를 찾습니다.",
+        "short": "공식 공지와 놓치기 쉬운 마감일 확인",
+        "long": "로그인 없이 공식 공지를 통합 검색하고, 본문에서 신청·제출·납부·행사 날짜를 추려 주며, 사용자가 선택한 파일을 기준으로 새 공지와 변경된 공지를 비교합니다.",
         "keywords": ["yonsei", "notices", "it", "monitor"],
         "capabilities": [
             "Globally sorted official notice search",
@@ -61,17 +70,17 @@ SPECS = {
             "Explicit-state change detection",
         ],
         "prompts": [
-            "Search current official Yonsei notices.",
-            "List upcoming deadlines from recent Yonsei notices.",
-            "Show notices changed since my last snapshot.",
+            "이번 주에 내가 놓치면 안 되는 연세대 공지를 찾아 줘.",
+            "최근 장학·등록금 공지에서 다가오는 마감일을 정리해 줘.",
+            "지난번 확인 이후 새로 올라오거나 바뀐 공지를 보여 줘.",
         ],
     },
     "yonsei-academic-copilot": {
         "version": "0.2.0",
-        "display": "Yonsei Academic Snapshot Tools",
-        "description": "Normalize supplied class and enrollment snapshots or calculate a conservative grade summary without live-system claims or academic writes.",
-        "short": "Audit supplied academic records safely",
-        "long": "Install separate snapshot-only skills for class-list normalization, conservative grade calculations, and enrollment-status checks with completeness and privacy guards.",
+        "display": "연세 학사정보 정리",
+        "description": "학사정보 화면 캡처나 붙여 넣은 표에서 강의·성적·학적 상태를 정리합니다. 학교 기록은 변경하지 않습니다.",
+        "short": "강의·성적·학적 화면을 쉽게 정리",
+        "long": "사용자가 첨부한 학사정보 화면, 표 또는 내보내기 파일을 바탕으로 이번 학기 강의, 성적 요약, 학적 상태를 정리합니다. 실시간 서버 조회 결과로 과장하지 않습니다.",
         "keywords": ["yonsei", "academic", "records", "student"],
         "capabilities": [
             "Supplied class snapshot normalization",
@@ -79,17 +88,17 @@ SPECS = {
             "Enrollment and registration status checks",
         ],
         "prompts": [
-            "Normalize this authorized Yonsei class snapshot.",
-            "Summarize this supplied Yonsei grade snapshot.",
-            "Check this supplied enrollment status.",
+            "첨부한 학사정보 화면에서 이번 학기 강의를 정리해 줘.",
+            "이 성적표를 학점과 평량평균 중심으로 요약해 줘.",
+            "이 화면에서 내 학적 상태와 확인이 필요한 항목을 알려 줘.",
         ],
     },
     "yonsei-course-registration": {
         "version": "0.2.0",
-        "display": "Yonsei Course Planner",
-        "description": "Normalize supplied Yonsei course rows, audit a selected plan, check schedule conflicts, build ranked timetables, or diagnose official entry access without registration writes.",
-        "short": "Fine-grained read-only Yonsei course planning",
-        "long": "Install five result-specific skills for course-data normalization, conflict checks, course-plan audits, deterministic timetable construction, and bounded entry-point diagnostics.",
+        "display": "연세 수강계획 도우미",
+        "description": "붙여 넣은 과목 목록이나 화면 캡처로 시간표 충돌을 찾고 조건에 맞는 시간표 후보를 만듭니다. 수강신청은 대신 누르지 않습니다.",
+        "short": "시간표 충돌 확인과 후보 조합 만들기",
+        "long": "과목 표나 화면 캡처를 정리해 시간·캠퍼스 이동·공강·학점 조건을 검사하고 시간표 후보를 순위화합니다. 실제 수강신청, 취소, 대기 신청은 수행하지 않습니다.",
         "keywords": ["yonsei", "courses", "registration", "schedule"],
         "capabilities": [
             "Course-row normalization",
@@ -99,18 +108,17 @@ SPECS = {
             "Official entry diagnostics",
         ],
         "prompts": [
-            "Normalize these Yonsei course rows.",
-            "Audit this Yonsei course plan against my constraints.",
-            "Check this proposed Yonsei timetable for conflicts.",
-            "Build ranked conflict-free timetables from these choices.",
+            "이 과목 목록으로 충돌 없는 시간표 후보를 만들어 줘.",
+            "금요일 공강과 18학점 조건으로 이 수강계획을 점검해 줘.",
+            "이 시간표에서 겹치는 수업과 캠퍼스 이동 문제를 찾아 줘.",
         ],
     },
     "yonsei-attendance-copilot": {
         "version": "0.2.0",
-        "display": "Yonsei Attendance Review Tools",
-        "description": "Summarize supplied attendance records, identify user-review discrepancies, or prepare an unsent correction draft without check-in or location inference.",
-        "short": "Review supplied attendance records safely",
-        "long": "Install three snapshot-only skills for attendance totals, conservative discrepancy review, and unsent correction drafting while check-in and record changes stay disabled.",
+        "display": "연세 출결 확인 도우미",
+        "description": "전자출결 화면이나 붙여 넣은 표를 요약하고, 확인할 기록과 정정 문의 초안을 만듭니다. 출석 체크는 수행하지 않습니다.",
+        "short": "결석·지각 확인과 정정 문의 초안",
+        "long": "사용자가 첨부한 전자출결 화면, 표 또는 파일에서 과목별 출결을 정리하고 사용자가 지적한 불일치를 검토해 전송 전 문의 초안을 만듭니다.",
         "keywords": ["yonsei", "attendance", "rollbook", "student"],
         "capabilities": [
             "Supplied attendance summaries",
@@ -118,17 +126,17 @@ SPECS = {
             "Unsent correction drafts",
         ],
         "prompts": [
-            "Summarize this Yonsei attendance snapshot.",
-            "Find records in this attendance snapshot that I should review.",
-            "Draft but do not send an attendance correction request.",
+            "첨부한 전자출결 화면에서 결석과 지각을 과목별로 정리해 줘.",
+            "이 출결 기록에서 내가 확인해야 할 항목을 찾아 줘.",
+            "이 출결 오류에 대한 정정 문의를 작성하되 보내지는 마.",
         ],
     },
     "yonsei-shuttle-booking": {
         "version": "0.2.0",
-        "display": "Yonsei Shuttle Review Tools",
-        "description": "Diagnose the official shuttle client or filter supplied trip and seat snapshots without reserving, waitlisting, cancelling, or polling.",
-        "short": "Review shuttle options and seat snapshots",
-        "long": "Install separate skills for official entry diagnostics, trip filtering, and conservative seat or waitlist verdicts while every reservation write remains disabled.",
+        "display": "연세 셔틀 확인 도우미",
+        "description": "셔틀 조회 화면에서 원하는 시간대와 잔여석을 정리하고 접속 문제를 진단합니다. 예약·취소는 수행하지 않습니다.",
+        "short": "신촌·국제캠퍼스 셔틀 옵션 확인",
+        "long": "사용자가 첨부한 셔틀 조회 화면이나 표를 날짜·방향·시간·잔여석 기준으로 정리하고 공식 진입점의 접속 문제를 확인합니다.",
         "keywords": ["yonsei", "shuttle", "booking", "campus"],
         "capabilities": [
             "Official shuttle client diagnostics",
@@ -136,17 +144,17 @@ SPECS = {
             "Conservative seat and waitlist status",
         ],
         "prompts": [
-            "Diagnose the Yonsei shuttle entry.",
-            "Filter these supplied shuttle options.",
-            "Check the seat status in this supplied trip snapshot.",
+            "내일 신촌에서 국제캠퍼스로 가는 셔틀을 이 화면에서 찾아 줘.",
+            "오전 9시 이전 셔틀 중 잔여석 있는 편을 정리해 줘.",
+            "연세 셔틀 페이지가 열리지 않는 이유를 진단해 줘.",
         ],
     },
     "yonsei-space-reservation": {
         "version": "0.2.0",
-        "display": "Yonsei Space Planning Tools",
-        "description": "Filter supplied room snapshots, check a proposal against official public rules, or prepare an unsent reservation draft without submission.",
-        "short": "Check space candidates, rules, and drafts",
-        "long": "Install separate skills for snapshot filtering, evidence-linked rule checks, and unsent request preparation while availability claims, payment, approval, and submission stay disabled.",
+        "display": "연세 공간대관 도우미",
+        "description": "공간 목록 화면에서 조건에 맞는 장소를 찾고 공개 규칙을 확인해 제출 전 신청 내용을 준비합니다.",
+        "short": "공간 후보·이용 규칙·신청 초안 확인",
+        "long": "사용자가 첨부한 공간대관 화면이나 표를 시간·수용인원·장비 기준으로 정리하고 공식 공개 규칙을 확인해 전송 전 신청 초안을 만듭니다.",
         "keywords": ["yonsei", "space", "room", "reservation"],
         "capabilities": [
             "Supplied space snapshot filtering",
@@ -154,14 +162,14 @@ SPECS = {
             "Unsent reservation drafts",
         ],
         "prompts": [
-            "Filter this supplied Yonsei space snapshot.",
-            "Check this proposed booking against Yonsei public rules.",
-            "Prepare but do not submit a space request.",
+            "이 공간 목록에서 15명이 쓸 수 있는 프로젝터 있는 방을 찾아 줘.",
+            "이 대관 계획이 공개 이용 규칙에 맞는지 확인해 줘.",
+            "이 내용으로 공간대관 신청 초안을 만들되 제출하지는 마.",
         ],
     },
     "yonsei-yri": {
         "version": "0.2.0",
-        "display": "Yonsei YRI Export Tools",
+        "display": "연세 YRI 업적 정리",
         "description": "Normalize an authorized YRI export, reconcile it with a supplied reference list, or prepare an unsaved field-level change draft.",
         "short": "Audit supplied YRI research achievements",
         "long": "Install separate export-only skills for achievement listing, conservative missing-record reconciliation, and unsaved field-level change preparation.",
@@ -179,7 +187,7 @@ SPECS = {
     },
     "yonsei-rms": {
         "version": "0.2.0",
-        "display": "Yonsei RMS Snapshot Tools",
+        "display": "연세 RMS 연구과제 점검",
         "description": "Summarize supplied RMS project data and audit its budget arithmetic or participant roles and periods without uploads, approvals, or submissions.",
         "short": "Audit supplied RMS project snapshots",
         "long": "Install separate snapshot-only skills for project summaries, budget consistency checks, and participant-period validation against explicit supplied data.",
@@ -197,7 +205,7 @@ SPECS = {
     },
     "yonsei-erp": {
         "version": "0.2.0",
-        "display": "Yonsei ERP Snapshot Tools",
+        "display": "연세 ERP 내보내기 점검",
         "description": "Filter supplied ERP request and approval snapshots or audit payment lifecycle status without accessing payroll, approving, paying, or submitting.",
         "short": "Review supplied ERP workflow snapshots",
         "long": "Install separate snapshot-only skills for request status, approval inbox, and payment lifecycle review with strict field whitelists and no administrative writes.",
@@ -215,7 +223,7 @@ SPECS = {
     },
     "yonsei-groupware": {
         "version": "0.2.0",
-        "display": "Yonsei Groupware Offline Tools",
+        "display": "연세 그룹웨어 내보내기 점검",
         "description": "Triage supplied approval data, search an explicit authorized document export, or prepare an unsent message without approving, sending, or sharing.",
         "short": "Review supplied groupware exports safely",
         "long": "Install separate offline skills for approval inbox triage, local authorized-export search, and unsent message drafting with no external communication or workflow mutation.",
@@ -233,6 +241,21 @@ SPECS = {
     },
 }
 
+MARKETPLACE_ORDER = [
+    "yonsei-notice-monitor",
+    "yonsei-course-registration",
+    "yonsei-attendance-copilot",
+    "yonsei-shuttle-booking",
+    "yonsei-space-reservation",
+    "yonsei-academic-copilot",
+    "yonsei-certificate-assistant",
+    "learnus-course-copilot",
+    "yonsei-yri",
+    "yonsei-rms",
+    "yonsei-erp",
+    "yonsei-groupware",
+]
+
 
 def write_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -247,6 +270,7 @@ def codex_manifest(name: str, spec: dict, version: str | None = None) -> dict:
         "author": AUTHOR,
         "homepage": REPOSITORY,
         "repository": REPOSITORY,
+        "license": "MIT",
         "keywords": spec["keywords"],
         "skills": "./skills/",
         "interface": {
@@ -272,6 +296,7 @@ def claude_manifest(name: str, spec: dict) -> dict:
         "author": AUTHOR,
         "homepage": REPOSITORY,
         "repository": REPOSITORY,
+        "license": "MIT",
         "keywords": spec["keywords"],
         "skills": "./skills/",
     }
@@ -307,7 +332,8 @@ def main() -> int:
                 "category": "education",
                 "tags": spec["keywords"],
             }
-            for name, spec in SPECS.items()
+            for name in MARKETPLACE_ORDER
+            for spec in [SPECS[name]]
             if INSTALLATIONS[name] == "AVAILABLE"
         ],
     }
@@ -327,7 +353,7 @@ def main() -> int:
                 },
                 "category": "Education",
             }
-            for name in SPECS
+            for name in MARKETPLACE_ORDER
         ],
     }
     write_json(ROOT / ".claude-plugin" / "marketplace.json", claude_marketplace)

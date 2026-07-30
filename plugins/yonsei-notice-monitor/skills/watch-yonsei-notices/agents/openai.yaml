@@ -1,4 +1,4 @@
 interface:
-  display_name: "Detect Yonsei Notice Changes"
-  short_description: "Compare official notices with explicit state"
-  default_prompt: "Use $watch-yonsei-notices to compare current official Yonsei notices with my approved state file."
+  display_name: "연세 공지 변경 확인"
+  short_description: "지난 확인 뒤 새로 올라오거나 바뀐 공식 공지를 찾습니다"
+  default_prompt: "Use $watch-yonsei-notices to 지난번 확인 이후 달라진 연세대 공지를 보여 줘."

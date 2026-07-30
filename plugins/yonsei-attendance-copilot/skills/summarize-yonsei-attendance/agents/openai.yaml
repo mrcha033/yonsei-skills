@@ -1,6 +1,4 @@
 interface:
-  display_name: "Summarize Yonsei Attendance"
-  short_description: "Summarize a supplied attendance snapshot"
-  default_prompt: "Use $summarize-yonsei-attendance to summarize my supplied Yonsei attendance records."
-policy:
-  allow_implicit_invocation: true
+  display_name: "연세 출결 요약"
+  short_description: "전자출결 화면에서 결석·지각을 과목별로 정리합니다"
+  default_prompt: "Use $summarize-yonsei-attendance to 첨부한 전자출결 화면의 결석과 지각을 과목별로 정리해 줘."

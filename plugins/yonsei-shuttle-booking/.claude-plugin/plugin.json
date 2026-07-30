@@ -1,15 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-shuttle-booking",
-  "displayName": "Yonsei Shuttle Review Tools",
+  "displayName": "연세 셔틀 확인 도우미",
   "version": "0.2.0",
-  "description": "Diagnose the official shuttle client or filter supplied trip and seat snapshots without reserving, waitlisting, cancelling, or polling.",
+  "description": "셔틀 조회 화면에서 원하는 시간대와 잔여석을 정리하고 접속 문제를 진단합니다. 예약·취소는 수행하지 않습니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "shuttle",

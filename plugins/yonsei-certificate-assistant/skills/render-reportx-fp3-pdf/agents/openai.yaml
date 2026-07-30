@@ -1,0 +1,4 @@
+interface:
+  display_name: "ReportX 호환 PDF 렌더링"
+  short_description: "준비된 FP3 문서를 안전한 호환 PDF로 렌더링합니다"
+  default_prompt: "Use $render-reportx-fp3-pdf to 준비된 ReportX FP3 문서를 호환 PDF로 렌더링해 줘."

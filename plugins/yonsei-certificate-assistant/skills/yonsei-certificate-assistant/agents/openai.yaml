@@ -1,4 +1,4 @@
 interface:
-  display_name: "Yonsei Certificate Assistant"
-  short_description: "Issue valid Yonsei certificates safely on macOS"
-  default_prompt: "Use $yonsei-certificate-assistant to choose and complete an official Yonsei certificate issuance path."
+  display_name: "연세 증명서 Mac 도우미"
+  short_description: "Mac에서 인터넷증명서 ReportX 출력 문제를 진단합니다"
+  default_prompt: "Use $yonsei-certificate-assistant to Mac에서 연세 증명서 프린터 출력이 안 되는 문제를 해결해 줘."

@@ -1,11 +1,18 @@
 ---
 name: search-yonsei-spaces
-description: Filter and rank a user-supplied Yonsei space availability snapshot by date, time containment, minimum capacity, building, and required equipment. Use after the user exports, pastes, or transcribes official space rows; never claim the result is current availability.
+description: Filter and rank a user-supplied Yonsei space screenshot, pasted table, export, or JSON by date, time containment, minimum capacity, building, and required equipment. Use for an official availability-screen snapshot; never claim the result is current availability.
 ---
 
 # Search Yonsei Spaces
 
 Return rooms that satisfy explicit requirements in one supplied snapshot.
+
+## Prepare the input
+
+When the user attaches a space list or pastes rows, extract only visible room,
+date, time, capacity, equipment, and availability fields into a private
+temporary JSON file. Do not ask the user to write JSON. Ask for requirements in
+ordinary language and preserve the capture time.
 
 ## Run
 

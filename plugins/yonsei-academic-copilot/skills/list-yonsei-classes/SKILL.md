@@ -1,11 +1,18 @@
 ---
 name: list-yonsei-classes
-description: Normalize a user-provided Yonsei Academic Information System JSON snapshot into a current-term class list with course identifiers, sections, instructors, credits, and structured meeting times. Use when the user has exported or manually captured their authorized class schedule and wants a deterministic list without querying the live academic system.
+description: Normalize a user-provided Yonsei Academic Information System screenshot, pasted table, export, or JSON snapshot into a current-term class list with course identifiers, sections, instructors, credits, and meeting times. Use when the user wants their authorized class schedule organized without querying or changing the live academic system.
 ---
 
 # List Yonsei Classes
 
 Return one normalized class list from one supplied academic snapshot.
+
+## Prepare the input
+
+When the user attaches a screenshot, PDF, spreadsheet, or pasted table, extract
+only the recognized class fields into a private temporary JSON file. Do not ask
+the user to write JSON. Ask only for fields that are unreadable or required for
+the requested result, and remove the temporary file after reporting.
 
 ## Run
 
@@ -21,7 +28,7 @@ Read `warnings` before reporting the result. State the snapshot timestamp and te
 
 ## Boundaries
 
-- Process only user-provided JSON. Do not log in, fetch live data, or infer enrollment changes.
+- Process only user-provided attachments, pasted data, or JSON. Do not log in, fetch live data, or infer enrollment changes.
 - Reject credential-shaped fields and non-finite numbers.
 - Preserve only recognized class fields; do not echo student identifiers or unrelated profile data.
 - Never submit, cancel, or modify registration.

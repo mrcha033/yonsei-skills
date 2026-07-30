@@ -8,6 +8,7 @@
   },
   "homepage": "https://github.com/mrcha033/yonsei-skills",
   "repository": "https://github.com/mrcha033/yonsei-skills",
+  "license": "MIT",
   "keywords": [
     "yonsei",
     "erp",
@@ -16,7 +17,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Yonsei ERP Snapshot Tools",
+    "displayName": "연세 ERP 내보내기 점검",
     "shortDescription": "Review supplied ERP workflow snapshots",
     "longDescription": "Install separate snapshot-only skills for request status, approval inbox, and payment lifecycle review with strict field whitelists and no administrative writes.",
     "developerName": "mrcha033",

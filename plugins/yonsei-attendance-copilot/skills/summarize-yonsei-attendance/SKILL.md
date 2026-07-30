@@ -1,11 +1,18 @@
 ---
 name: summarize-yonsei-attendance
-description: Normalize a user-provided Yonsei electronic-attendance JSON snapshot and summarize present, late, absent, early-leave, excused, and pending records overall and by course. Use when the user has exported or manually captured their authorized attendance history and wants deterministic totals without checking in or querying the live system.
+description: Normalize a user-provided Yonsei electronic-attendance screenshot, pasted table, export, or JSON snapshot and summarize present, late, absent, early-leave, excused, and pending records overall and by course. Use for authorized attendance history without checking in or querying the live system.
 ---
 
 # Summarize Yonsei Attendance
 
 Return one attendance summary from one supplied snapshot.
+
+## Prepare the input
+
+When the user attaches an attendance screen, PDF, spreadsheet, or pasted table,
+transcribe the recognized course, date, session, and displayed-status fields to
+a private temporary JSON file. Do not ask the user to create JSON. Ask about
+unreadable rows rather than inferring them.
 
 ## Run
 
@@ -19,7 +26,7 @@ Report the snapshot timestamp, computed date range, totals, and per-course break
 
 ## Boundaries
 
-- Process only supplied JSON; do not query the live attendance system.
+- Process only user-supplied attachments, pasted data, or JSON; do not query the live attendance system.
 - Reject credential or session fields and preserve only recognized attendance fields.
 - Never enter an attendance code, attest presence, use Bluetooth or location data, spoof a device, or perform a check-in.
 - Do not submit or apply an attendance correction.

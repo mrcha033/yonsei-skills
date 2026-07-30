@@ -1,6 +1,4 @@
 interface:
-  display_name: "Search Yonsei Spaces"
-  short_description: "Filter a supplied room snapshot"
-  default_prompt: "Use $search-yonsei-spaces to find matching rooms in my supplied availability snapshot."
-policy:
-  allow_implicit_invocation: true
+  display_name: "연세 공간 후보 찾기"
+  short_description: "첨부한 공간 목록에서 시간·인원·장비 조건으로 찾습니다"
+  default_prompt: "Use $search-yonsei-spaces to 이 목록에서 15명이 쓸 수 있는 프로젝터 있는 방을 찾아 줘."
