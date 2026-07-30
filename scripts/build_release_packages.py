@@ -109,8 +109,8 @@ def student_skills() -> list[Path]:
                 raise PackageError(f"Duplicate student skill name: {name}")
             names.add(name)
             result.append(skill_dir)
-    if len(result) != 41:
-        raise PackageError(f"Expected 41 student skills, found {len(result)}")
+    if len(result) != 40:
+        raise PackageError(f"Expected 40 student skills, found {len(result)}")
     return result
 
 
@@ -189,7 +189,7 @@ def build_codex_ui_pack(output: Path, version: str) -> None:
         add_bytes(
             archive,
             f"{root}/PACKAGE_INFO.txt",
-            f"Yonsei Student UI Pack {version}\nStudent plugins: 9\nStudent skills: 41\n".encode(),
+            f"Yonsei Student UI Pack {version}\nStudent plugins: 9\nStudent skills: 40\n".encode(),
         )
         for plugin_name in STUDENT_PLUGINS:
             add_tree(
@@ -218,7 +218,7 @@ def universal_manifest(version: str) -> dict:
     return {
         "name": "yonsei-student-life",
         "version": version,
-        "description": "41 Yonsei student-life workflows with reusable browser login, a daily briefing, notices, courses, graduation, applications, dorms, scholarships, exchange, shuttle, spaces, documents, and LearnUs.",
+        "description": "40 Yonsei student-life workflows with reusable browser login, a daily briefing, notices, courses, graduation, applications, dorms, scholarships, exchange, shuttle, spaces, documents, and LearnUs.",
         "author": {"name": "mrcha033", "url": "https://github.com/mrcha033"},
         "homepage": "https://github.com/mrcha033/yonsei-skills",
         "repository": "https://github.com/mrcha033/yonsei-skills",

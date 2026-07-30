@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only diagnosis of fixed official Yonsei shuttle resources."""
+"""Internal read-only recovery diagnosis for the official Yonsei shuttle."""
 
 from __future__ import annotations
 

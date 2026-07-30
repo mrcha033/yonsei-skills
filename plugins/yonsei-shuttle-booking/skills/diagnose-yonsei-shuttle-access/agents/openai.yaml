@@ -1,4 +1,0 @@
-interface:
-  display_name: "연세 셔틀 접속 진단"
-  short_description: "연세 셔틀 공식 페이지와 인증 경계의 접속 문제를 진단합니다"
-  default_prompt: "Use $diagnose-yonsei-shuttle-access to 연세 셔틀 페이지가 열리지 않는 이유를 진단해 줘."

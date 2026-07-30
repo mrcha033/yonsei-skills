@@ -247,11 +247,6 @@
           "state": "implemented"
         },
         {
-          "skill": "diagnose-yonsei-shuttle-access",
-          "primary_result": "official entry and public client contract access diagnosis",
-          "state": "implemented"
-        },
-        {
           "skill": "book-yonsei-shuttle",
           "primary_result": "verified official reservation, waitlist, or cancellation result after explicit confirmation",
           "state": "implemented"

@@ -20,7 +20,7 @@ def load(relative: str):
 
 LIST = load("skills/list-yonsei-shuttle-options/scripts/list_shuttle_options.py")
 SEATS = load("skills/check-yonsei-shuttle-seats/scripts/check_shuttle_seats.py")
-DIAGNOSE = load("skills/diagnose-yonsei-shuttle-access/scripts/diagnose_shuttle_access.py")
+DIAGNOSE = load("skills/book-yonsei-shuttle/scripts/diagnose_shuttle_access.py")
 BOOK = load("skills/book-yonsei-shuttle/scripts/prepare_shuttle_booking.py")
 
 

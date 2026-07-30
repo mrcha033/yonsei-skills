@@ -10,8 +10,8 @@ Checked 2026-07-27 using public GET requests only.
 
 The public module names read operations for reservation options, cancellation
 history, and waitlist history, plus separate `save...` operations for
-reservation and cancellation. The diagnostic enumerates these names but calls
-none of them.
+reservation and cancellation. The booking workflow's internal recovery check
+enumerates these names but calls none of them.
 
 Public reachability disproves a blanket claim that VPN is required at the front
 door. It does not establish post-login access or entitlement.

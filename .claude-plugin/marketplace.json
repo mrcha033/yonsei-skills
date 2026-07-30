@@ -90,8 +90,8 @@
       "name": "yonsei-shuttle-booking",
       "displayName": "연세 셔틀 조회·예약",
       "source": "./plugins/yonsei-shuttle-booking",
-      "description": "Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 예약·대기·취소합니다.",
-      "version": "0.5.0",
+      "description": "Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 예약·대기·취소하며, 접속 문제는 같은 흐름 안에서 자동 복구합니다.",
+      "version": "0.6.0",
       "author": {
         "name": "mrcha033"
       },

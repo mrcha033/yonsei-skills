@@ -44,7 +44,7 @@
 `yonsei-space-reservation`, 성적표나 학사 화면을 정리하려면
 `yonsei-academic-copilot`을 추가로 설치할 수 있습니다.
 
-## 41개 학생용 스킬 상세 기능
+## 40개 학생용 스킬 상세 기능
 
 스킬 이름을 알거나 직접 선택할 필요는 없습니다. 평소 말로 요청하면
 에이전트가 아래 기능 중 알맞은 것을 골라 사용합니다. **조회**는 학교
@@ -115,8 +115,7 @@
 | --- | --- | --- |
 | [셔틀 후보 정리](plugins/yonsei-shuttle-booking/skills/list-yonsei-shuttle-options/SKILL.md) `list-yonsei-shuttle-options` | 공식 화면 캡처나 표에서 날짜, 출발 캠퍼스, 시간 범위, 최소 잔여석 조건에 맞는 편을 걸러 시간순으로 정리합니다. 첨부 시점 이후의 좌석은 실시간이라고 주장하지 않습니다. | “이 화면에서 오전 9시 전 신촌 출발 셔틀만 보여 줘.” |
 | [잔여석·대기 상태 판별](plugins/yonsei-shuttle-booking/skills/check-yonsei-shuttle-seats/SKILL.md) `check-yonsei-shuttle-seats` | 선택한 한 편을 예약 가능, 대기만 가능, 매진, 확인 불가로 구분하고 공식 화면에서 읽은 잔여석과 대기 인원을 함께 보여 줍니다. | “이 9시 셔틀은 바로 예약할 수 있어, 대기해야 해?” |
-| [셔틀 접속 문제 진단](plugins/yonsei-shuttle-booking/skills/diagnose-yonsei-shuttle-access/SKILL.md) `diagnose-yonsei-shuttle-access` | 포털의 셔틀 진입 주소, 로그인 경계, 공개 화면 구성요소를 점검해 링크 만료·인증 필요·서비스 장애를 구분합니다. 예약이나 개인정보 변경은 하지 않습니다. | “포털 셔틀 메뉴가 안 열리는데 어디서 막힌 건지 봐 줘.” |
-| [셔틀 조회·예약·취소](plugins/yonsei-shuttle-booking/skills/book-yonsei-shuttle/SKILL.md) `book-yonsei-shuttle` | Windows·macOS·Linux에서 방향·날짜·선호 시간을 받아 공식 후보를 조회합니다. 선택한 편과 사유를 보여 준 뒤 확인받아 예약·대기·취소하고 공식 내역에서 결과를 다시 확인합니다. | “내일 9시쯤 신촌에서 국제캠퍼스 가는 셔틀 예약해 줘.” |
+| [셔틀 조회·예약·취소](plugins/yonsei-shuttle-booking/skills/book-yonsei-shuttle/SKILL.md) `book-yonsei-shuttle` | Windows·macOS·Linux에서 방향·날짜·선호 시간을 받아 공식 후보를 조회합니다. 접속 문제가 생기면 내부에서 로그인 만료·학교 서비스 장애·화면 변경을 자동 점검한 뒤 원래 예약을 이어갑니다. 선택한 편과 사유를 보여 준 뒤 확인받아 예약·대기·취소하고 공식 내역에서 결과를 다시 확인합니다. | “내일 9시쯤 신촌에서 국제캠퍼스 가는 셔틀 예약해 줘.” |
 
 ### 공간대관 — 조건 검색부터 접수 확인까지
 
@@ -259,9 +258,9 @@ ChatGPT Work와 Codex의 공개 Plugins 화면에 바로 나오려면 OpenAI의
 | 증명서 | `codex plugin add yonsei-certificate-assistant@yonsei-skills` | 증명서·학생활동·교육실습 문서를 Windows 공식 ReportX 또는 macOS/Linux 호환 PDF로 발급 |
 | LearnUs | `codex plugin add learnus-course-copilot@yonsei-skills` | 강의·마감일·자료 정리, 실행 중 로그인 만료 자동 복구 |
 
-학생용 플러그인 9개에 41개 스킬이 들어 있습니다. 마켓플레이스에는
+학생용 플러그인 9개에 40개 스킬이 들어 있습니다. 마켓플레이스에는
 스킬이 아니라 플러그인 단위로 표시되며, 플러그인을 설치하면 포함된
-스킬이 함께 활성화됩니다. 이전에 언급된 37개와 현재 전체 53개의 구분은
+스킬이 함께 활성화됩니다. 이전에 언급된 37개와 현재 전체 52개의 구분은
 [`docs/skill-catalog.md`](docs/skill-catalog.md)에 정리했습니다.
 
 LearnUs도 기본적으로 같은 브라우저 프로필을 이어 씁니다. 포털 로그인,

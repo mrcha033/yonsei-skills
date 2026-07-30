@@ -59,7 +59,7 @@ class ReleasePackageTests(unittest.TestCase):
                     name for name in archive.namelist()
                     if name.endswith("/SKILL.md") and "/workflows/" in name
                 ]
-                self.assertEqual(len(skill_files), 41)
+                self.assertEqual(len(skill_files), 40)
                 self.assertIn("yonsei-student-life/SKILL.md", archive.namelist())
             with zipfile.ZipFile(output / "yonsei-universal-plugin.zip") as archive:
                 manifest = json.loads(
@@ -77,7 +77,7 @@ class ReleasePackageTests(unittest.TestCase):
                     name for name in archive.namelist()
                     if name.endswith("/SKILL.md") and "/skills/" in name
                 ]
-                self.assertEqual(len(skill_files), 41)
+                self.assertEqual(len(skill_files), 40)
 
     def test_student_packages_include_authorized_yonsei_fonts(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -178,14 +178,14 @@ SPECS = {
         ],
     },
     "yonsei-shuttle-booking": {
-        "version": "0.5.0",
+        "version": "0.6.0",
         "display": "연세 셔틀 조회·예약",
-        "description": "Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 예약·대기·취소합니다.",
+        "description": "Windows·macOS·Linux에서 방향·날짜·시간을 말하면 공식 셔틀 후보를 찾고 예약·대기·취소하며, 접속 문제는 같은 흐름 안에서 자동 복구합니다.",
         "short": "신촌·국제캠퍼스 셔틀 조회와 예약",
-        "long": "Windows·macOS·Linux의 기존 연세 브라우저 로그인 세션으로 공식 셔틀 화면을 열어 조건에 맞는 편을 정리합니다. 정확한 차량과 시간을 다시 확인한 뒤 한 번만 예약·대기·취소하고 공식 내역에서 결과를 검증합니다.",
+        "long": "Windows·macOS·Linux의 기존 연세 브라우저 로그인 세션으로 공식 셔틀 화면을 열어 조건에 맞는 편을 정리합니다. 화면이 열리지 않으면 로그인 만료, 학교 서비스 장애, 화면 변경을 내부에서 자동 점검하고 원래 요청을 이어갑니다. 정확한 차량과 시간을 다시 확인한 뒤 한 번만 예약·대기·취소하고 공식 내역에서 결과를 검증합니다.",
         "keywords": ["yonsei", "shuttle", "booking", "campus", "windows", "macos", "linux"],
         "capabilities": [
-            "Official shuttle client diagnostics",
+            "Automatic access recovery inside the booking workflow",
             "Supplied trip option filtering",
             "Conservative seat and waitlist status",
             "Confirmed official reservation and cancellation workflow",
@@ -195,7 +195,7 @@ SPECS = {
         "prompts": [
             "내일 신촌에서 국제캠퍼스로 가는 셔틀을 이 화면에서 찾아 줘.",
             "오전 9시 이전 셔틀 중 잔여석 있는 편을 정리해 줘.",
-            "연세 셔틀 페이지가 열리지 않는 이유를 진단해 줘.",
+            "셔틀 페이지가 안 열리면 원인을 확인하고 예약을 계속해 줘.",
             "내일 오전 9시쯤 신촌에서 국제캠퍼스로 가는 셔틀을 찾아 예약해 줘.",
         ],
     },
