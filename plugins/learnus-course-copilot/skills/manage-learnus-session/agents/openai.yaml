@@ -1,4 +1,4 @@
 interface:
   display_name: "LearnUs 로그인 세션"
-  short_description: "비밀번호를 저장하지 않고 로그인 만료를 자동 복구"
-  default_prompt: "Use $manage-learnus-session to start my secure memory-only LearnUs session."
+  short_description: "비밀번호 저장 없이 만료 시 공식 로그인으로 다시 연결"
+  default_prompt: "Use $manage-learnus-session to 기존 연세 브라우저 로그인으로 LearnUs를 연결하고, 세션이 만료되면 공식 로그인 화면에서 다시 이어 줘."

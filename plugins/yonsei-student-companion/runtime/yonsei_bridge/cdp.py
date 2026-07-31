@@ -81,7 +81,8 @@ def find_chrome() -> str:
 
 def _http_json(url: str, *, method: str = "GET", timeout: float = 3.0) -> Any:
     request = urllib.request.Request(url, method=method)
-    with urllib.request.urlopen(request, timeout=timeout) as response:
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    with opener.open(request, timeout=timeout) as response:
         return json.loads(response.read().decode("utf-8"))
 
 
@@ -93,26 +94,49 @@ class WebSocket:
         if parsed.scheme != "ws" or parsed.hostname not in {"127.0.0.1", "localhost"}:
             raise CdpError("Only a local ws:// DevTools endpoint is allowed.")
         port = parsed.port or 80
-        self.socket = socket.create_connection((parsed.hostname, port), timeout=5)
-        self.socket.settimeout(0.5)
-        key = base64.b64encode(os.urandom(16)).decode("ascii")
-        path = urllib.parse.urlunsplit(("", "", parsed.path or "/", parsed.query, ""))
-        request = (
-            f"GET {path} HTTP/1.1\r\n"
-            f"Host: {parsed.hostname}:{port}\r\n"
-            "Upgrade: websocket\r\n"
-            "Connection: Upgrade\r\n"
-            f"Sec-WebSocket-Key: {key}\r\n"
-            "Sec-WebSocket-Version: 13\r\n\r\n"
-        )
-        self.socket.sendall(request.encode("ascii"))
-        response = self._read_headers()
-        expected = base64.b64encode(
-            hashlib.sha1((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest()
-        ).decode()
-        if " 101 " not in response.splitlines()[0] or expected.lower() not in response.lower():
-            self.socket.close()
-            raise CdpError("Chrome rejected the local DevTools WebSocket connection.")
+        try:
+            self.socket = socket.create_connection(
+                (parsed.hostname, port),
+                timeout=2,
+            )
+            self.socket.settimeout(0.75)
+            key = base64.b64encode(os.urandom(16)).decode("ascii")
+            path = urllib.parse.urlunsplit(
+                ("", "", parsed.path or "/", parsed.query, "")
+            )
+            request = (
+                f"GET {path} HTTP/1.1\r\n"
+                f"Host: {parsed.hostname}:{port}\r\n"
+                "Upgrade: websocket\r\n"
+                "Connection: Upgrade\r\n"
+                f"Sec-WebSocket-Key: {key}\r\n"
+                "Sec-WebSocket-Version: 13\r\n\r\n"
+            )
+            self.socket.sendall(request.encode("ascii"))
+            response = self._read_headers()
+            expected = base64.b64encode(
+                hashlib.sha1(
+                    (key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()
+                ).digest()
+            ).decode()
+            if (
+                " 101 " not in response.splitlines()[0]
+                or expected.lower() not in response.lower()
+            ):
+                raise CdpError(
+                    "Chrome rejected the local DevTools WebSocket connection."
+                )
+            self.socket.settimeout(0.5)
+        except CdpError:
+            if hasattr(self, "socket"):
+                self.socket.close()
+            raise
+        except OSError as error:
+            if hasattr(self, "socket"):
+                self.socket.close()
+            raise CdpError(
+                "Chrome's local browser connection was temporarily unavailable."
+            ) from error
         self._send_lock = threading.Lock()
 
     def _read_headers(self) -> str:
@@ -341,13 +365,79 @@ class ChromeRuntime:
         endpoint = self.ensure()
         return _http_json(f"{endpoint}/json/list")
 
+    def target_ids(self) -> set[str]:
+        return {
+            str(target.get("id"))
+            for target in self.targets()
+            if target.get("type") == "page" and target.get("id")
+        }
+
+    @staticmethod
+    def _connect_target(target: dict[str, Any]) -> CdpConnection:
+        last_error: CdpError | None = None
+        for attempt in range(2):
+            try:
+                return CdpConnection(str(target["webSocketDebuggerUrl"]))
+            except (CdpError, KeyError) as error:
+                last_error = (
+                    error
+                    if isinstance(error, CdpError)
+                    else CdpError(
+                        "Chrome target did not expose a browser connection."
+                    )
+                )
+                if attempt == 0:
+                    time.sleep(0.15)
+        assert last_error is not None
+        raise last_error
+
+    def connection_for_host(
+        self,
+        hostname: str,
+        *,
+        previous_target_ids: set[str] | None = None,
+        timeout: float = 8.0,
+    ) -> CdpConnection | None:
+        """Attach to a same-session page opened by an official portal action."""
+        previous_target_ids = previous_target_ids or set()
+        deadline = time.monotonic() + timeout
+        fallback: dict[str, Any] | None = None
+        while time.monotonic() < deadline:
+            for target in reversed(self.targets()):
+                parsed = urllib.parse.urlsplit(str(target.get("url", "")))
+                if target.get("type") != "page" or parsed.hostname != hostname:
+                    continue
+                if str(target.get("id", "")) not in previous_target_ids:
+                    try:
+                        return self._connect_target(target)
+                    except CdpError:
+                        continue
+                fallback = target
+            time.sleep(0.15)
+        if fallback is not None:
+            try:
+                return self._connect_target(fallback)
+            except CdpError:
+                return None
+        return None
+
     def open(self, url: str, *, reuse_hosts: set[str] | None = None) -> CdpConnection:
         endpoint = self.ensure()
         reuse_hosts = reuse_hosts or set()
+        requested_host = urllib.parse.urlsplit(url).hostname
+        reusable: list[tuple[bool, dict[str, Any]]] = []
         for target in self.targets():
             parsed = urllib.parse.urlsplit(str(target.get("url", "")))
             if target.get("type") == "page" and parsed.hostname in reuse_hosts:
-                return CdpConnection(str(target["webSocketDebuggerUrl"]))
+                reusable.append((parsed.hostname != requested_host, target))
+        for _not_requested_host, target in sorted(
+            reusable,
+            key=lambda item: item[0],
+        ):
+            try:
+                return self._connect_target(target)
+            except CdpError:
+                continue
         encoded = urllib.parse.quote(url, safe="")
         target = _http_json(f"{endpoint}/json/new?{encoded}", method="PUT")
-        return CdpConnection(str(target["webSocketDebuggerUrl"]))
+        return self._connect_target(target)

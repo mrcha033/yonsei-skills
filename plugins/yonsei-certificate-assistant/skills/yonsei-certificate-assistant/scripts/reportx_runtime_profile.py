@@ -228,22 +228,41 @@ def _download_installer() -> bytes:
 
 def _atomic_private_write(path: Path, data: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-    os.chmod(path.parent, 0o700)
+    _private_chmod(path.parent, 0o700)
     fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
     temporary_path = Path(temporary)
     try:
-        os.fchmod(fd, 0o600)
+        _private_fchmod(fd, 0o600)
         with os.fdopen(fd, "wb") as handle:
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary_path, path)
-        os.chmod(path, 0o600)
+        _private_chmod(path, 0o600)
     finally:
         try:
             temporary_path.unlink()
         except FileNotFoundError:
             pass
+
+
+def _private_chmod(path: Path, mode: int) -> None:
+    try:
+        os.chmod(path, mode)
+    except (NotImplementedError, OSError):
+        if os.name != "nt":
+            raise
+
+
+def _private_fchmod(fd: int, mode: int) -> None:
+    operation = getattr(os, "fchmod", None)
+    if operation is None:
+        return
+    try:
+        operation(fd, mode)
+    except (NotImplementedError, OSError):
+        if os.name != "nt":
+            raise
 
 
 def _extract_reportx_with_inno(
@@ -293,6 +312,47 @@ def _extract_reportx_with_inno(
     raise ReportXProfileError("official installer did not contain REPORTX.exe")
 
 
+def _installed_reportx_candidates() -> tuple[Path, ...]:
+    candidates: list[Path] = []
+    override = os.environ.get("YONSEI_REPORTX_EXE")
+    if override:
+        candidates.append(Path(override).expanduser())
+    for variable in (
+        "PROGRAMFILES",
+        "PROGRAMFILES(X86)",
+        "ProgramFiles",
+        "ProgramFiles(x86)",
+        "LOCALAPPDATA",
+    ):
+        value = os.environ.get(variable)
+        if not value:
+            continue
+        root = Path(value)
+        candidates.extend(
+            (
+                root / "REPORTX" / "REPORTX.exe",
+                root / "ICT_REPORTX" / "REPORTX.exe",
+                root / "DuzonBizon" / "REPORTX" / "REPORTX.exe",
+            )
+        )
+    candidates.append(Path("C:/REPORTX/REPORTX.exe"))
+    return tuple(dict.fromkeys(candidates))
+
+
+def _verified_installed_reportx() -> bytes | None:
+    for candidate in _installed_reportx_candidates():
+        try:
+            body = _read_regular(candidate, maximum=OFFICIAL_REPORTX_BYTES)
+        except ReportXProfileError:
+            continue
+        if (
+            len(body) == OFFICIAL_REPORTX_BYTES
+            and _sha256(body) == OFFICIAL_REPORTX_SHA256
+        ):
+            return body
+    return None
+
+
 def _asset_dir(root: Path) -> Path:
     return root / ASSET_DIRNAME
 
@@ -329,14 +389,28 @@ def prepare_official_assets(
     root: Path,
     *,
     installer_path: Path | None = None,
+    reportx_exe_path: Path | None = None,
 ) -> OfficialAssets:
     """Download/extract and cache assets from the exact Yonsei installer."""
 
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
-    os.chmod(root, 0o700)
-    if installer_path is None:
+    _private_chmod(root, 0o700)
+    if installer_path is not None and reportx_exe_path is not None:
+        raise ReportXProfileError(
+            "choose either installer_path or reportx_exe_path"
+        )
+    reportx_exe: bytes | None = None
+    if reportx_exe_path is not None:
+        reportx_exe = _read_regular(
+            reportx_exe_path,
+            maximum=OFFICIAL_REPORTX_BYTES,
+        )
+    elif installer_path is None:
+        reportx_exe = _verified_installed_reportx()
+    if reportx_exe is None and installer_path is None:
         installer = _download_installer()
-    else:
+    elif reportx_exe is None:
+        assert installer_path is not None
         installer = _read_regular(
             installer_path,
             maximum=MAX_DOWNLOAD_BYTES,
@@ -348,20 +422,21 @@ def prepare_official_assets(
             raise ReportXProfileError(
                 "installer does not match the official Yonsei release"
             )
-    with tempfile.TemporaryDirectory(
-        prefix=".reportx-official-",
-        dir=root,
-    ) as temporary:
-        temporary_root = Path(temporary)
-        os.chmod(temporary_root, 0o700)
-        reportx_exe = _extract_reportx_with_inno(
-            installer,
-            temporary_root=temporary_root,
-        )
-        assets = extract_official_assets(reportx_exe)
+    if reportx_exe is None:
+        with tempfile.TemporaryDirectory(
+            prefix=".reportx-official-",
+            dir=root,
+        ) as temporary:
+            temporary_root = Path(temporary)
+            _private_chmod(temporary_root, 0o700)
+            reportx_exe = _extract_reportx_with_inno(
+                installer,
+                temporary_root=temporary_root,
+            )
+    assets = extract_official_assets(reportx_exe)
     directory = _asset_dir(root)
     directory.mkdir(parents=True, exist_ok=True, mode=0o700)
-    os.chmod(directory, 0o700)
+    _private_chmod(directory, 0o700)
     _atomic_private_write(directory / "ImgOnebon.bmp", assets.landscape)
     _atomic_private_write(directory / "ImgOnebon1.bmp", assets.portrait)
     manifest = {

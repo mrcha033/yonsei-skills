@@ -1,47 +1,48 @@
 ---
 name: issue-yonsei-certificate
-description: Complete Yonsei internet-certificate issuance on Windows, macOS, or Linux from certificate selection and browser authentication through the platform-appropriate official ReportX or compatibility PDF path, result inspection, and optional confirmed physical printing. Use when a student asks to actually issue a Yonsei certificate end to end.
+description: Complete Yonsei 무료 인터넷즉시발급 on Windows, macOS, or Linux by selecting the certificate, choosing 프린터 출력, and saving that free-print result through a PDF virtual printer or compatible local PDF printer; optionally print the saved result physically after confirmation. Use when a student asks 증명서 무료 PDF 발급, PDF로 가상 인쇄, or to issue a Yonsei certificate end to end.
 ---
 
 # Issue Yonsei Certificate
 
-Complete the student's own issuance without collecting credentials or altering
-certificate content. Use the official native free-print path on Windows and the
-local compatibility-PDF path on macOS/Linux. Read
+The primary outcome is the student's own **무료 인터넷즉시발급 → 프린터 출력
+→ PDF 가상 인쇄** result. Do not collect credentials or alter certificate
+content. For a PDF result, use the packaged ReportX-compatible local PDF
+printer on Windows, macOS, and Linux because the university ReportX component
+rejects ordinary PDF virtual printers. Use native ReportX on Windows only when
+the student explicitly requests a named physical printer. Read
 `references/cross-platform.md` before acting.
 
 ## Preferred command path
 
 Call `yonsei_student` with `intent: "documents"` and put document type,
 language, copies, and output format in `request`. Review `primary_result`, then
-repeat with `action: "issue"` and `confirmed: true`. Windows uses official
-ReportX; macOS/Linux uses the bundled compatibility agent and authorized fonts.
+repeat with `action: "issue"` and `confirmed: true`. A PDF request uses the
+bundled local PDF printer and authorized fonts on all three desktop platforms.
 
 ## Workflow
 
-1. Collect certificate type, language, copies, purpose, and whether the desired
-   result is a reviewed PDF or a named physical printer. Run:
+1. Collect certificate type, language, copies, and purpose. Default to a PDF
+   virtual-print result; ask for a named physical printer only when the student
+   explicitly wants paper. Run:
 
    ```bash
    python3 "$SKILL_DIR/scripts/prepare_certificate_issue.py" --input "<temporary-json>"
    ```
 
 2. Stop unless the result is `ready`. Follow the returned `issuance_path`.
-3. On Windows, run the environment check, reuse the student's persistent
-   browser profile, and open the official internet-certificate page:
+3. On Windows, macOS, or Linux, run the environment check, reuse the student's
+   persistent browser profile, and open the official internet-certificate page:
 
    ```bash
    python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" doctor
    python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" open
    ```
 
-   If the official ReportX listener is absent, guide the student through the
-   university-provided installer in the official page. Select the exact
-   certificate, ask for final confirmation, print once through the native
-   ReportX window, and verify the official result. Do not start the local agent
-   by default. Then stop.
-4. On macOS or Linux, check the environment and prepare pinned official runtime
-   assets. Use the bundled, redistribution-authorized `연세제목.TTF` and
+4. Prepare pinned official runtime assets on every supported platform. On
+   Windows, the helper first reuses a verified installed `REPORTX.exe`; if it
+   is absent, install the official component once and rerun the check. Use the
+   bundled, redistribution-authorized `연세제목.TTF` and
    `연세본문.TTF` files automatically. Validate their pinned hashes before any
    live request; do not ask the student to install fonts.
 
@@ -50,11 +51,12 @@ ReportX; macOS/Linux uses the bundled compatibility agent and authorized fonts.
    python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" prepare-assets
    ```
 
-5. Start the local compatibility agent in a continuing terminal session:
+5. Start the local PDF virtual-printer compatibility agent in a continuing
+   terminal session:
 
    ```bash
    python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" \
-     agent --allow-fetch --reserve-document-number
+     agent --allow-fetch --reserve-document-number --notify-print-completion
    ```
 
 6. Reuse the student's persistent Yonsei browser profile and open the official
@@ -84,16 +86,19 @@ ReportX; macOS/Linux uses the bundled compatibility agent and authorized fonts.
     `server_pdf_saved_unverified`, inspect the PDF page count and visible
     certificate identity fields, verify that the result lists the selected
     `YonseiB`/`YonseiL` font hashes when those faces occur in the FP3, and
-    provide the local file.
+    require `completion_notified: true` before calling the official print
+    transaction complete. Then provide the local file.
 12. For physical printing on macOS/Linux, recheck the PDF digest, name the
     action-time confirmation, and run the existing `print-job ... --confirm`
-    command once.
+    command once. On Windows, an explicitly requested named physical printer
+    may instead use the official native ReportX print path.
 
 ## Boundaries
 
 - Never create, edit, substitute, or forge certificate fields.
-- Never call the compatibility PDF an official electronic original.
-- Never automate paid electronic-certificate payment in this skill.
+- The requested result is the free-print PDF virtual-print result. Do not route
+  to or charge for the separate paid electronic-certificate product.
+- Never call the virtual-print PDF a paid signed electronic-certificate file.
 - Never retry a document-number reservation or an uncertain printer submission.
 - Never substitute AppleGothic, Nanum, or another Korean font for a live
   certificate. Stop before reservation when the bundled title/body faces are

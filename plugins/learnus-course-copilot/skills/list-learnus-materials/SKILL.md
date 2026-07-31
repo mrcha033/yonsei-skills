@@ -1,6 +1,6 @@
 ---
 name: list-learnus-materials
-description: Extract the files, folders, resources, and visible media entries from an authorized LearnUs course snapshot as a structured material list. Use when the user asks for lecture slides, readings, recordings, resource links, or a per-course material inventory.
+description: Read an authorized live LearnUs course first and extract its files, folders, resources, and visible media entries as a structured material list; use a user-supplied screenshot, pasted page, export, or JSON only when the live page is unavailable or intentionally supplied. Use when the user asks for lecture slides, readings, recordings, resource links, or a per-course material inventory.
 ---
 
 # List LearnUs Materials

@@ -1,19 +1,24 @@
 ---
 name: connect-yonsei-session
-description: Connect once to the official Yonsei Portal in the student's persistent browser profile, reuse that authenticated session across Yonsei services, and resume after expiry without collecting credentials. Use when a student says 로그인, 포털 연결, 로그인 유지, 세션 만료, or asks to use an authenticated Yonsei service such as academic information, LearnUs, attendance, shuttle, space, library, counseling, student ID, or certificates.
+description: Connect once to the official Yonsei Portal in a persistent managed browser profile, reuse supported school SSO sessions, and resume after expiry without collecting credentials. Use when a student says 로그인, 포털 연결, 로그인 유지, 세션 만료, or asks to use an authenticated Yonsei service such as academic information, LearnUs, attendance, shuttle, space, library, counseling, student ID, or certificates.
 ---
 
 # Connect Yonsei Session
 
-Use the student's persistent Chrome profile when available. Keep the official
-browser session as the shared login layer for later Yonsei tasks.
+Use the persistent Yonsei-managed Chrome, Edge, or Chromium profile. Keep the
+official browser session as the shared login layer for later Yonsei tasks.
+
+## Preferred command path
+
+Call `yonsei_bridge_connect`. It opens or reuses the managed browser and
+reports the exact official login page. Let the student finish authentication in
+that page, then call it again before resuming the original request.
 
 ## Workflow
 
-1. Check the student's ordinary persistent desktop browser first. Reuse an
-   already authenticated Chrome, Edge, or Chromium profile and an already open
-   official Yonsei tab when one exists. Do not assume an in-app browser is
-   authenticated merely because the ordinary browser is. Otherwise open:
+1. Reuse the Yonsei-managed browser profile. On a host that explicitly exposes
+   an already open official tab to the bridge, it may attach to that tab;
+   otherwise it opens its own persistent profile at:
 
    `https://portal.yonsei.ac.kr/ui/index.html`
 
@@ -39,10 +44,11 @@ browser session as the shared login layer for later Yonsei tasks.
 6. After the student finishes, resume in the same browser profile and open the
    requested service again. Treat visible service content, not a portal HTTP
    response or a stored-cookie claim, as proof that login worked.
-7. Keep using the same browser profile for academic information, LearnUs,
-   attendance, shuttle, space, library, counseling, student ID, and
+7. Keep using the same managed browser profile for academic information,
+   LearnUs, attendance, shuttle, library, counseling, student ID, and
    certificates. Do not start a separate headless browser for each service.
-8. If a downstream service has a separate institutional login, group the
+8. If a downstream service has a separate institutional login, such as the
+   current space-reservation service, group the
    remaining login screens together, let the student complete each official
    screen once, then continue the original task.
 9. On expiry, record the requested service and last confirmed read-only step,

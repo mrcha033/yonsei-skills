@@ -1,6 +1,6 @@
 ---
 name: check-yonsei-shuttle-seats
-description: Classify seats, waitlist-only status, sold-out status, or unknown status for one trip in a user-supplied Yonsei shuttle screenshot, pasted row, export, or JSON using official client fields. Use after selecting an exact trip from a dated screen snapshot; never use for live polling or booking.
+description: Read one selected trip on the authorized live Yonsei shuttle page first and classify seats, waitlist-only, sold-out, or unknown status using official client fields; use a user-supplied screenshot, pasted row, export, or JSON only when the live page is unavailable or intentionally supplied. Use after selecting an exact trip; never use for aggressive polling or booking.
 ---
 
 # Check Yonsei Shuttle Seats

@@ -11,6 +11,8 @@ import re
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -25,8 +27,11 @@ else:
 
 PORTAL = "https://portal.yonsei.ac.kr/ui/index.html"
 UNDERWOOD = "https://underwood1.yonsei.ac.kr/com/lgin/SsoCtr/initPageWork.do"
+COURSE_CATALOG = (
+    "https://underwood1.yonsei.ac.kr/com/lgin/SsoCtr/"
+    "initExtPageWork.do?link=handbList&locale=ko"
+)
 SPACE = "https://space.yonsei.ac.kr/"
-ICERT = "https://icert.yonsei.ac.kr/"
 LEARNUS = "https://ys.learnus.org/my/"
 ATTENDANCE = "https://ysrollbook.yonsei.ac.kr/"
 
@@ -77,10 +82,37 @@ DOCUMENT_LABELS = {
 }
 
 
+def _normalized_value(value: Any) -> str:
+    return re.sub(r"\s+", " ", str(value or "")).strip().casefold()
+
+
+def _requested_value_matches(requested: Any, actual: Any) -> bool:
+    wanted = _normalized_value(requested)
+    observed = _normalized_value(actual)
+    if not wanted or not observed:
+        return False
+    wanted_digits = re.sub(r"\D", "", wanted)
+    observed_digits = re.sub(r"\D", "", observed)
+    if len(wanted_digits) == 8 and len(observed_digits) == 8:
+        return wanted_digits == observed_digits
+    if re.fullmatch(r"\d{1,2}:\d{2}", wanted) and re.fullmatch(
+        r"\d{1,2}:\d{2}", observed
+    ):
+        wanted_hour, wanted_minute = (int(part) for part in wanted.split(":"))
+        observed_hour, observed_minute = (int(part) for part in observed.split(":"))
+        return (wanted_hour, wanted_minute) == (observed_hour, observed_minute)
+    return wanted == observed or wanted in observed or observed in wanted
+
+
 def _redact(text: str) -> str:
     text = re.sub(r"\b\d{8,12}\b", "[redacted]", text)
     text = re.sub(r"학생\([^)]*\)\s*[^\n]*", "학생", text)
     text = re.sub(r"(?m)^[^\n]{1,24}\s+님\s*$", "[student]", text)
+    text = re.sub(
+        r"(?m)^[^\n]{1,24}\s+님이\s+로그인(?:\s+하셨습니다\.?)?",
+        "[student] 로그인",
+        text,
+    )
     text = re.sub(r"\b01[016789][-\s]?\d{3,4}[-\s]?\d{4}\b", "[redacted]", text)
     text = re.sub(r"\b[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}\b", "[redacted]", text)
     return text
@@ -236,6 +268,21 @@ class BrowserPage:
             """
         )
 
+    def click_href_fragment(self, fragment: str) -> bool:
+        """Click one official link whose literal href contains a safe fragment."""
+        return self._evaluate_until_true(
+            f"""
+                (() => {{
+                  const fragment = {json.dumps(fragment, ensure_ascii=False)};
+                  const link = [...document.querySelectorAll('a[href]')]
+                    .find(el => (el.getAttribute('href') || '').includes(fragment));
+                  if (!link) return false;
+                  link.click();
+                  return true;
+                }})()
+            """
+        )
+
     def _click_point(self, x: float, y: float) -> None:
         for event_type in ("mousePressed", "mouseReleased"):
             self.connection.command(
@@ -255,6 +302,20 @@ class BrowserPage:
             (() => {{
               const wanted = {json.dumps(label, ensure_ascii=False)};
               const index = {index};
+              const topPoint = rect => {{
+                let x = rect.x + rect.width / 2;
+                let y = rect.y + rect.height / 2;
+                let current = window;
+                try {{
+                  while (current.frameElement) {{
+                    const frameRect = current.frameElement.getBoundingClientRect();
+                    x += frameRect.x;
+                    y += frameRect.y;
+                    current = current.parent;
+                  }}
+                }} catch (_) {{}}
+                return {{x, y}};
+              }};
               const labels = [...document.querySelectorAll('.label_search,.cl-output')]
                 .filter(el => (el.innerText || el.textContent || '').trim() === wanted);
               for (const label of labels) {{
@@ -269,7 +330,7 @@ class BrowserPage:
                 if (!button) continue;
                 const rect = button.getBoundingClientRect();
                 if (rect.width > 0 && rect.height > 0) {{
-                  return {{x: rect.x + rect.width / 2, y: rect.y + rect.height / 2}};
+                  return topPoint(rect);
                 }}
               }}
               return null;
@@ -291,6 +352,20 @@ class BrowserPage:
             (() => {{
               const wanted = {json.dumps(value, ensure_ascii=False)};
               const norm = text => String(text || '').replace(/\\s+/g, ' ').trim();
+              const topPoint = rect => {{
+                let x = rect.x + rect.width / 2;
+                let y = rect.y + rect.height / 2;
+                let current = window;
+                try {{
+                  while (current.frameElement) {{
+                    const frameRect = current.frameElement.getBoundingClientRect();
+                    x += frameRect.x;
+                    y += frameRect.y;
+                    current = current.parent;
+                  }}
+                }} catch (_) {{}}
+                return {{x, y}};
+              }};
               const visible = el => {{
                 const style = getComputedStyle(el);
                 const rect = el.getBoundingClientRect();
@@ -305,7 +380,7 @@ class BrowserPage:
                 || options.find(el => norm(wanted).includes(norm(el.innerText)));
               if (!option) return null;
               const rect = option.getBoundingClientRect();
-              return {{x: rect.x + rect.width / 2, y: rect.y + rect.height / 2}};
+              return topPoint(rect);
             }})()
         """
         option = next(
@@ -386,6 +461,51 @@ class BrowserPage:
                 }
         return {}
 
+    def field_value_matches(self, label: str, requested: Any) -> bool:
+        """Verify that a requested value survived the page component's own state."""
+        payloads = self._evaluate_frames(
+            f"""
+                (() => {{
+                  const wanted = {json.dumps(label, ensure_ascii=False)};
+                  const norm = value => String(value || '').replace(/\\s+/g, ' ').trim();
+                  const result = [];
+                  const add = element => {{
+                    if (!element) return;
+                    if (element.tagName === 'SELECT') {{
+                      result.push(element.value);
+                      for (const option of element.selectedOptions || []) {{
+                        result.push(option.textContent);
+                      }}
+                    }} else {{
+                      result.push(element.value);
+                    }}
+                  }};
+                  for (const element of document.querySelectorAll('input,textarea,select')) {{
+                    const labels = [
+                      element.getAttribute('aria-label'), element.getAttribute('placeholder'),
+                      element.getAttribute('name'), element.getAttribute('id'), element.title
+                    ];
+                    if (labels.some(value => norm(value).includes(wanted))) add(element);
+                  }}
+                  for (const visibleLabel of document.querySelectorAll('.label_search,.cl-output')) {{
+                    const text = norm(visibleLabel.innerText || visibleLabel.textContent);
+                    if (text !== wanted && !text.includes(wanted)) continue;
+                    for (const element of visibleLabel.nextElementSibling?.querySelectorAll(
+                      'input,textarea,select'
+                    ) || []) add(element);
+                  }}
+                  return [...new Set(result.map(norm).filter(Boolean))];
+                }})()
+            """
+        )
+        values = [
+            value
+            for payload in payloads
+            if isinstance(payload, list)
+            for value in payload
+        ]
+        return any(_requested_value_matches(requested, value) for value in values)
+
     def fill_label(self, label: str, value: str) -> bool:
         return self._evaluate_until_true(
             f"""
@@ -416,6 +536,145 @@ class BrowserPage:
                   }}
                   for (const type of ['input','change','blur']) el.dispatchEvent(new Event(type, {{bubbles:true}}));
                   return true;
+                }})()
+            """
+        )
+
+    def select_radio(self, name: str, value: str) -> bool:
+        """Select one exact radio option and verify the browser-owned state."""
+        return self._evaluate_until_true(
+            f"""
+                (() => {{
+                  const name = {json.dumps(name, ensure_ascii=False)};
+                  const value = {json.dumps(value, ensure_ascii=False)};
+                  const radio = [...document.querySelectorAll('input[type="radio"]')]
+                    .find(el => el.name === name && el.value === value);
+                  if (!radio || radio.disabled) return false;
+                  radio.click();
+                  radio.dispatchEvent(new Event('change', {{bubbles: true}}));
+                  return radio.checked === true;
+                }})()
+            """
+        )
+
+    def select_radio_in_row(
+        self,
+        *,
+        name: str,
+        contains: list[str],
+        skip: int = 0,
+    ) -> bool:
+        """Select the first matching official table row without reading values."""
+        return self._evaluate_until_true(
+            f"""
+                (() => {{
+                  const name = {json.dumps(name, ensure_ascii=False)};
+                  const terms = {json.dumps(contains, ensure_ascii=False)};
+                  const skip = {int(skip)};
+                  const normalize = value => String(value || '')
+                    .replace(/\\s+/g, ' ').trim();
+                  const radios = [...document.querySelectorAll('input[type="radio"]')]
+                    .filter(el => el.name === name && !el.disabled);
+                  const matches = radios.filter(el => {{
+                    const row = normalize(el.closest('tr')?.innerText);
+                    return terms.every(term => row.includes(normalize(term)));
+                  }});
+                  const radio = matches[skip];
+                  if (!radio) return false;
+                  radio.click();
+                  radio.dispatchEvent(new Event('change', {{bubbles: true}}));
+                  return radio.checked === true;
+                }})()
+            """
+        )
+
+    def set_certificate_count(
+        self,
+        *,
+        document_label: str,
+        language_label: str,
+        copies: int,
+    ) -> bool:
+        """Set one certificate count and clear every other count on YSCT."""
+        focused = self._evaluate_until_true(
+            f"""
+                (() => {{
+                  const documentLabel = {json.dumps(document_label, ensure_ascii=False)};
+                  const languageLabel = {json.dumps(language_label, ensure_ascii=False)};
+                  const copies = {int(copies)};
+                  const normalize = value => String(value || '')
+                    .replace(/\\s+/g, ' ').trim();
+                  const counts = [...document.querySelectorAll(
+                    'input[type="text"][name^="min_cnt"]'
+                  )];
+                  const target = counts.find(input => {{
+                    const row = normalize(input.closest('tr')?.innerText);
+                    return row.includes(documentLabel) && row.includes(languageLabel);
+                  }});
+                  if (!target) return false;
+                  const setter = Object.getOwnPropertyDescriptor(
+                    HTMLInputElement.prototype, 'value'
+                  )?.set;
+                  for (const input of counts) {{
+                    if (setter) setter.call(input, '');
+                    else input.value = '';
+                    for (const type of ['input','change','blur']) {{
+                      input.dispatchEvent(new Event(type, {{bubbles: true}}));
+                    }}
+                  }}
+                  target.focus();
+                  if (typeof target.select === 'function') target.select();
+                  return document.activeElement === target;
+                }})()
+            """
+        )
+        if not focused:
+            return False
+        self.connection.command("Input.insertText", {"text": str(copies)})
+        return self._evaluate_until_true(
+            f"""
+                (() => {{
+                  const documentLabel = {json.dumps(document_label, ensure_ascii=False)};
+                  const languageLabel = {json.dumps(language_label, ensure_ascii=False)};
+                  const copies = {int(copies)};
+                  const normalize = value => String(value || '')
+                    .replace(/\\s+/g, ' ').trim();
+                  const counts = [...document.querySelectorAll(
+                    'input[type="text"][name^="min_cnt"]'
+                  )];
+                  const target = counts.find(input => {{
+                    const row = normalize(input.closest('tr')?.innerText);
+                    return row.includes(documentLabel) && row.includes(languageLabel);
+                  }});
+                  if (!target) return false;
+                  target.dispatchEvent(new KeyboardEvent(
+                    'keyup', {{key: String(copies), bubbles: true}}
+                  ));
+                  target.dispatchEvent(new Event('input', {{bubbles: true}}));
+                  target.dispatchEvent(new Event('change', {{bubbles: true}}));
+                  target.blur();
+                  return target.value === String(copies)
+                    && counts.filter(input => input !== target)
+                      .every(input => input.value === '');
+                }})()
+            """
+        )
+
+    def select_only_nonempty_option(self, name: str) -> bool:
+        """Select a sole official option, otherwise leave the choice to the user."""
+        return self._evaluate_until_true(
+            f"""
+                (() => {{
+                  const select = [...document.querySelectorAll('select')]
+                    .find(el => el.name === {json.dumps(name, ensure_ascii=False)});
+                  if (!select) return false;
+                  const options = [...select.options].filter(option => option.value);
+                  if (options.length !== 1) return false;
+                  select.value = options[0].value;
+                  for (const type of ['input','change','blur']) {{
+                    select.dispatchEvent(new Event(type, {{bubbles: true}}));
+                  }}
+                  return select.value === options[0].value;
                 }})()
             """
         )
@@ -455,10 +714,14 @@ class BrowserPage:
         for key, value in request.items():
             if value in (None, "") or key not in mapping:
                 continue
-            matched = next(
-                (label for label in mapping[key] if self.fill_label(label, str(value))),
-                None,
-            )
+            matched = None
+            for label in mapping[key]:
+                if not self.fill_label(label, str(value)):
+                    continue
+                if hasattr(self, "connection") and not self.field_value_matches(label, value):
+                    continue
+                matched = label
+                break
             result[key] = {"filled": matched is not None, "matched_label": matched}
         return result
 
@@ -587,11 +850,48 @@ class BrowserPage:
     def login_state(self) -> str:
         snapshot = self.snapshot()
         lowered = snapshot.text.casefold()
+        host = urlsplit(snapshot.url).hostname
+        password_input = any(
+            str(field.get("type", "")).casefold() == "password"
+            for field in snapshot.inputs
+            if isinstance(field, dict)
+        )
+        if password_input or (
+            host == "infra.yonsei.ac.kr"
+            and "로그인" in snapshot.title
+        ):
+            return "login_required"
+        if (
+            host in {"portal.yonsei.ac.kr", "underwood1.yonsei.ac.kr"}
+            and not snapshot.text.strip()
+            and not snapshot.buttons
+            and not snapshot.inputs
+        ):
+            return "login_required"
         if any(marker in lowered for marker in ("로그아웃", "학사행정", "my courses", "대시보드")):
             return "connected"
         if any(marker in lowered for marker in ("portal login", "로그인", "password", "비밀번호")):
             return "login_required"
         return "unknown"
+
+    def wait_for_login_state(self, *, timeout: float = 6.0) -> str:
+        """Allow SSO frames to settle before classifying the saved session."""
+        deadline = time.monotonic() + timeout
+        login_required_since: float | None = None
+        last_state = "unknown"
+        while time.monotonic() < deadline:
+            last_state = self.login_state()
+            if last_state == "connected":
+                return last_state
+            if last_state == "login_required":
+                if login_required_since is None:
+                    login_required_since = time.monotonic()
+                elif time.monotonic() - login_required_since >= 1.5:
+                    return last_state
+            else:
+                login_required_since = None
+            time.sleep(0.2)
+        return last_state
 
 
 class YonseiBridge:
@@ -610,11 +910,25 @@ class YonseiBridge:
         *,
         context: str = "",
     ) -> list[dict[str, Any]]:
+        self.selections = {
+            selection_id: selected
+            for selection_id, selected in self.selections.items()
+            if selected.get("kind") != kind
+        }
         remembered: list[dict[str, Any]] = []
         for row in rows:
             raw = f"{kind}|{context}|{row.get('text', '')}"
             selection_id = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
-            terms = [
+            stable_terms = [
+                str(value)
+                for label, value in row.get("fields", {}).items()
+                if str(value).strip()
+                and not any(
+                    marker in str(label)
+                    for marker in ("잔여", "좌석", "대기", "예약가능", "상태", "인원")
+                )
+            ]
+            terms = stable_terms or [
                 str(value)
                 for value in row.get("fields", {}).values()
                 if str(value).strip()
@@ -623,17 +937,92 @@ class YonseiBridge:
                 "kind": kind,
                 "terms": terms,
                 "text": row.get("text", ""),
+                "context": context,
             }
             remembered.append({**row, "selection_id": selection_id})
         return remembered
 
-    def _selection_terms(self, selection_id: str | None, kind: str) -> list[str] | None:
+    def _selection(
+        self,
+        selection_id: str | None,
+        kind: str,
+        *,
+        context: str | None = None,
+        consume: bool = False,
+    ) -> dict[str, Any] | None:
         if not selection_id:
             return None
         selected = self.selections.get(selection_id)
-        if not selected or selected.get("kind") != kind:
+        if (
+            not selected
+            or selected.get("kind") != kind
+            or (context is not None and selected.get("context") != context)
+        ):
             raise BridgeError("selection_not_found")
-        return list(selected.get("terms", []))
+        if consume:
+            self.selections.pop(selection_id, None)
+        return dict(selected)
+
+    def _selection_terms(
+        self,
+        selection_id: str | None,
+        kind: str,
+        *,
+        context: str | None = None,
+        consume: bool = False,
+    ) -> list[str] | None:
+        selected = self._selection(
+            selection_id,
+            kind,
+            context=context,
+            consume=consume,
+        )
+        return list(selected.get("terms", [])) if selected else None
+
+    @staticmethod
+    def _rows_match_terms(
+        rows: list[dict[str, Any]],
+        terms: list[str],
+    ) -> bool:
+        normalized_terms = [_normalized_value(term) for term in terms if str(term).strip()]
+        return bool(normalized_terms) and any(
+            all(term in _normalized_value(row.get("text", "")) for term in normalized_terms)
+            for row in rows
+        )
+
+    @staticmethod
+    def _success_marker(action: str, snapshot: PageSnapshot) -> bool:
+        text = _normalized_value(snapshot.text)
+        markers = {
+            "reserve": ("예약 완료", "예약되었습니다", "정상적으로 예약"),
+            "waitlist": ("대기 신청 완료", "대기신청되었습니다", "정상적으로 대기"),
+            "apply": ("신청 완료", "신청되었습니다", "정상적으로 신청"),
+            "submit": ("제출 완료", "제출되었습니다", "정상적으로 제출"),
+            "cancel": ("취소 완료", "취소되었습니다", "정상적으로 취소"),
+        }.get(action, ())
+        return any(_normalized_value(marker) in text for marker in markers)
+
+    @staticmethod
+    def _fill_verified(page: BrowserPage, label: str, value: Any) -> bool:
+        if not page.fill_label(label, str(value)):
+            return False
+        verifier = getattr(page, "field_value_matches", None)
+        return bool(verifier(label, value)) if callable(verifier) else True
+
+    @staticmethod
+    def _clock_minutes(value: str) -> int:
+        match = re.fullmatch(r"\s*(\d{1,2}):(\d{2})\s*", value)
+        if not match:
+            raise BridgeError(f"Invalid time: {value}. Use HH:MM.")
+        hour, minute = (int(part) for part in match.groups())
+        if hour > 23 or minute > 59:
+            raise BridgeError(f"Invalid time: {value}. Use HH:MM.")
+        return hour * 60 + minute
+
+    @classmethod
+    def _row_clock_minutes(cls, row: dict[str, Any]) -> int | None:
+        match = re.search(r"\b\d{1,2}:\d{2}\b", str(row.get("text", "")))
+        return cls._clock_minutes(match.group()) if match else None
 
     @staticmethod
     def _rows(snapshot: PageSnapshot) -> list[dict[str, Any]]:
@@ -673,8 +1062,73 @@ class YonseiBridge:
         return matches[0]
 
     @staticmethod
-    def _reportx_process_status() -> dict[str, Any]:
+    def _reportx_request(
+        path: str,
+        *,
+        data: dict[str, Any] | None = None,
+        timeout: float = 3.0,
+    ) -> dict[str, Any]:
         cache = bridge_home() / "reportx"
+        token_path = cache / "agent.token"
+        try:
+            token = token_path.read_text(encoding="utf-8").strip()
+        except OSError as error:
+            raise BridgeError("certificate_agent_token_missing") from error
+        if not token:
+            raise BridgeError("certificate_agent_token_missing")
+        headers = {
+            "User-Agent": "yonsei-student-companion/0.6",
+            "X-Agent-Token": token,
+        }
+        body = None
+        method = "GET"
+        if data is not None:
+            body = json.dumps(data).encode("utf-8")
+            headers["Content-Type"] = "application/json"
+            method = "POST"
+        request = urllib.request.Request(
+            f"http://127.0.0.1:65432{path}",
+            data=body,
+            headers=headers,
+            method=method,
+        )
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        try:
+            with opener.open(request, timeout=timeout) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except (
+            OSError,
+            TimeoutError,
+            urllib.error.URLError,
+            json.JSONDecodeError,
+        ) as error:
+            raise BridgeError("certificate_agent_unavailable") from error
+        if not isinstance(payload, dict):
+            raise BridgeError("certificate_agent_invalid_response")
+        return payload
+
+    @classmethod
+    def _reportx_process_status(cls) -> dict[str, Any]:
+        cache = bridge_home() / "reportx"
+        try:
+            health = cls._reportx_request("/health")
+            if health.get("ok"):
+                status = cls._reportx_request("/status")
+                return {
+                    "running": True,
+                    "cache": str(cache),
+                    "endpoint": "http://127.0.0.1:65432",
+                    "health_verified": True,
+                    "allow_fetch": status.get("allow_fetch") is True,
+                    "allow_document_reservation": (
+                        status.get("allow_document_reservation") is True
+                    ),
+                    "allow_completion_notification": (
+                        status.get("allow_completion_notification") is True
+                    ),
+                }
+        except BridgeError:
+            pass
         pid_file = cache / "bridge-agent.pid"
         try:
             pid = int(pid_file.read_text(encoding="utf-8"))
@@ -685,8 +1139,25 @@ class YonseiBridge:
 
     def _start_reportx_agent(self) -> dict[str, Any]:
         current = self._reportx_process_status()
+        if current["running"] and current.get("health_verified"):
+            if all(
+                current.get(key) is True
+                for key in (
+                    "allow_fetch",
+                    "allow_document_reservation",
+                    "allow_completion_notification",
+                )
+            ):
+                return current
+            raise BridgeError(
+                "The running certificate listener lacks the confirmed PDF "
+                "completion capabilities. Close it, then run the request once."
+            )
         if current["running"]:
-            return current
+            raise BridgeError(
+                "A certificate listener process exists but its authenticated "
+                "health check failed. Close it before starting the PDF printer."
+            )
         script = self._find_script("icert_print.py")
         cache = bridge_home() / "reportx"
         cache.mkdir(parents=True, exist_ok=True)
@@ -701,6 +1172,7 @@ class YonseiBridge:
                 "agent",
                 "--allow-fetch",
                 "--reserve-document-number",
+                "--notify-print-completion",
             ],
             cwd=str(script.parent),
             stdin=subprocess.DEVNULL,
@@ -709,11 +1181,25 @@ class YonseiBridge:
             start_new_session=True,
         )
         (cache / "bridge-agent.pid").write_text(str(process.pid), encoding="utf-8")
-        time.sleep(0.7)
+        deadline = time.monotonic() + 8.0
+        verified: dict[str, Any] | None = None
+        while time.monotonic() < deadline and process.poll() is None:
+            try:
+                verified = self._reportx_process_status()
+            except BridgeError:
+                verified = None
+            if verified and verified.get("health_verified"):
+                break
+            time.sleep(0.2)
         if process.poll() is not None:
             raise BridgeError(
                 "The certificate compatibility agent did not start. "
                 f"Review {log_path} and reinstall if a bundled font is missing."
+            )
+        if not verified or not verified.get("health_verified"):
+            raise BridgeError(
+                "The certificate compatibility agent started but did not pass "
+                "its authenticated health check."
             )
         return {
             "running": True,
@@ -721,6 +1207,143 @@ class YonseiBridge:
             "cache": str(cache),
             "log": str(log_path),
             "endpoint": "http://127.0.0.1:65432",
+            "health_verified": True,
+        }
+
+    @classmethod
+    def _arm_reportx_agent(cls) -> list[str]:
+        before = cls._reportx_request("/status")
+        previous_ids = [
+            str(job.get("id"))
+            for job in before.get("jobs", [])
+            if isinstance(job, dict) and job.get("id")
+        ]
+        armed = cls._reportx_request("/arm", data={})
+        if not armed.get("armed"):
+            raise BridgeError("certificate_agent_arm_failed")
+        return previous_ids
+
+    @classmethod
+    def _wait_reportx_result(
+        cls,
+        previous_ids: list[str],
+        *,
+        timeout: float = 120.0,
+    ) -> dict[str, Any]:
+        success = {
+            "server_report_rendered_pdf_unverified",
+            "server_pdf_saved_unverified",
+        }
+        terminal_failure = {
+            "server_report_fonts_required",
+            "server_report_render_failed",
+            "server_pdf_integrity_failed",
+            "document_number_failed",
+            "document_number_reservation_unknown",
+            "network_failed",
+            "invalid_ticket",
+        }
+        deadline = time.monotonic() + timeout
+        previous = set(previous_ids)
+        last: dict[str, Any] | None = None
+        while time.monotonic() < deadline:
+            status = cls._reportx_request("/status")
+            new_jobs = [
+                job
+                for job in status.get("jobs", [])
+                if isinstance(job, dict) and str(job.get("id", "")) not in previous
+            ]
+            if new_jobs:
+                last = new_jobs[-1]
+                state = str(last.get("status", ""))
+                if state in success:
+                    document_number = last.get("document_number", {})
+                    if document_number.get("status") == "reserved":
+                        completion = document_number.get("completion_status")
+                        if completion in {
+                            "not_requested",
+                            "request_started_unknown",
+                        }:
+                            time.sleep(0.5)
+                            continue
+                    return cls._verify_reportx_result(last)
+                if state in terminal_failure:
+                    return {
+                        "verified": False,
+                        "status": state,
+                        "job_id": last.get("id"),
+                        "document_number_status": last.get(
+                            "document_number", {}
+                        ).get("status"),
+                    }
+            time.sleep(0.5)
+        return {
+            "verified": False,
+            "status": "timeout_unknown_do_not_retry",
+            "job_id": last.get("id") if last else None,
+        }
+
+    @staticmethod
+    def _verify_reportx_result(job: dict[str, Any]) -> dict[str, Any]:
+        cache = bridge_home() / "reportx"
+        rendered = job.get("rendered_pdf", {})
+        artifact = job.get("artifact", {})
+        source = (
+            rendered
+            if rendered.get("path") and rendered.get("sha256")
+            else artifact
+        )
+        filename = Path(str(source.get("path", ""))).name
+        expected = str(source.get("sha256", ""))
+        candidate = (cache / "output" / filename).resolve()
+        output_root = (cache / "output").resolve()
+        try:
+            candidate.relative_to(output_root)
+            body = candidate.read_bytes()
+        except (OSError, ValueError):
+            return {
+                "verified": False,
+                "status": "pdf_file_missing",
+                "job_id": job.get("id"),
+            }
+        actual = hashlib.sha256(body).hexdigest()
+        is_pdf = body.startswith(b"%PDF-") and b"%%EOF" in body[-4096:]
+        fonts = rendered.get("fonts", [])
+        allowed_fonts = {
+            "d38160cc6767e3f35f81b15c2fd9ca1c7fc11a20fcb9fa7f603c8c1b5d2f4d82",
+            "b85573c700a42b1045f4563bb9d08bb21d22b03403db922d41f26e4d5e55cbf9",
+        }
+        observed_font_hashes = {
+            str(item.get("sha256"))
+            for item in fonts
+            if isinstance(item, dict) and item.get("sha256")
+        }
+        verified = (
+            bool(expected)
+            and actual == expected
+            and is_pdf
+            and bool(observed_font_hashes)
+            and observed_font_hashes.issubset(allowed_fonts)
+            and int(rendered.get("page_count") or 0) > 0
+            and job.get("document_number", {}).get("completion_notified") is True
+        )
+        return {
+            "verified": verified,
+            "status": (
+                "completed"
+                if verified
+                else "pdf_or_font_verification_failed"
+            ),
+            "job_id": job.get("id"),
+            "pdf_path": str(candidate),
+            "sha256": actual,
+            "page_count": rendered.get("page_count"),
+            "fonts": fonts,
+            "completion_notified": job.get(
+                "document_number", {}
+            ).get("completion_notified"),
+            "official_free_print": True,
+            "paid_electronic_certificate": False,
         }
 
     def connect(self, *, visible: bool = True) -> dict[str, Any]:
@@ -737,14 +1360,15 @@ class YonseiBridge:
             )
             self.page = BrowserPage(self.connection)
         assert self.page is not None
+        state = self.page.wait_for_login_state()
         snapshot = self.page.snapshot()
         return {
             "schema": "yonsei-bridge-status/v1",
-            "state": self.page.login_state(),
+            "state": state,
             "service": urlsplit(snapshot.url).hostname,
             "browser_profile": "managed-persistent",
             "credentials_collected": False,
-            "next_step": "run-command" if self.page.login_state() == "connected" else "complete-login-in-open-browser",
+            "next_step": "run-command" if state == "connected" else "complete-login-in-open-browser",
         }
 
     def _page(self) -> BrowserPage:
@@ -763,7 +1387,7 @@ class YonseiBridge:
             raise BridgeError(f"Unknown Underwood route: {route}.")
         category, item = MENU_ROUTES[route]
         page = self._underwood()
-        if page.login_state() != "connected":
+        if page.wait_for_login_state() != "connected":
             raise BridgeError("login_required")
         if not page.click_text(category):
             raise BridgeError(f"Could not open Underwood category: {category}.")
@@ -779,6 +1403,7 @@ class YonseiBridge:
     def today(self, *, full: bool = False) -> dict[str, Any]:
         page = self._page()
         page.navigate(PORTAL, wait=2.5)
+        login_state = page.wait_for_login_state()
         dashboard = page.snapshot()
         result: dict[str, Any] = {
             "schema": "yonsei-today-command/v1",
@@ -786,7 +1411,7 @@ class YonseiBridge:
             "sources": ["portal"],
             "read_only": True,
         }
-        if full and page.login_state() == "connected":
+        if full and login_state == "connected":
             source_results: dict[str, Any] = {}
             for route in ("scholarships", "mileage", "classes", "graduation", "teaching"):
                 try:
@@ -854,8 +1479,10 @@ class YonseiBridge:
         keyword: str | None = None,
     ) -> dict[str, Any]:
         """Query the authenticated Underwood handbook independently of registration."""
-        self._open_menu("handbook")
         page = self._page()
+        page.navigate(COURSE_CATALOG, wait=2.5)
+        if page.wait_for_login_state() == "login_required":
+            raise BridgeError("login_required")
         applied: dict[str, bool] = {}
         if year:
             applied["year"] = page.type_after_label("학년도/학기", str(year), index=0)
@@ -873,6 +1500,42 @@ class YonseiBridge:
             applied["department"] = page.select_after_label("개설학과", str(department))
         if keyword:
             applied["keyword"] = page.type_after_label("통합검색", str(keyword))
+        filters = page.values_after_labels(
+            ["학년도/학기", "구분", "대학(원)/분류", "개설학과", "통합검색"]
+        )
+        requested = {
+            "year": ("학년도/학기", year),
+            "semester": ("학년도/학기", semester),
+            "campus": ("구분", campus),
+            "course_type": ("대학(원)/분류", course_type),
+            "department": ("개설학과", department),
+            "keyword": ("통합검색", keyword),
+        }
+        for key, (label, value) in requested.items():
+            if value in (None, ""):
+                continue
+            applied[key] = any(
+                _requested_value_matches(value, observed)
+                for observed in filters.get(label, [])
+            )
+        unmatched_filters = [
+            key
+            for key, (_, value) in requested.items()
+            if value not in (None, "") and not applied.get(key, False)
+        ]
+        if unmatched_filters:
+            snapshot = page.snapshot(text_after="수강편람")
+            return {
+                "schema": "yonsei-course-catalog-command/v1",
+                "state": "field_mapping_required",
+                "source": "underwood-course-handbook",
+                "registration_period_required": False,
+                "snapshot": snapshot.as_dict(),
+                "filters": filters,
+                "requested_filters_applied": applied,
+                "unmatched_filters": unmatched_filters,
+                "rows": [],
+            }
         if not page.click_text("조회"):
             raise BridgeError("The official course-handbook query button was not available.")
         time.sleep(1.8)
@@ -882,9 +1545,6 @@ class YonseiBridge:
             for row in self._rows(snapshot)
             if "조회된 내역이 없습니다" not in row.get("text", "")
         ]
-        if keyword and not applied.get("keyword"):
-            folded = keyword.casefold()
-            rows = [row for row in rows if folded in row.get("text", "").casefold()]
         no_results = "조회된 내역이 없습니다" in snapshot.text and not rows
         return {
             "schema": "yonsei-course-catalog-command/v1",
@@ -892,10 +1552,9 @@ class YonseiBridge:
             "source": "underwood-course-handbook",
             "registration_period_required": False,
             "snapshot": snapshot.as_dict(),
-            "filters": page.values_after_labels(
-                ["학년도/학기", "구분", "대학(원)/분류", "개설학과", "통합검색"]
-            ),
+            "filters": filters,
             "requested_filters_applied": applied,
+            "unmatched_filters": [],
             "rows": rows,
         }
 
@@ -917,6 +1576,17 @@ class YonseiBridge:
             department=department,
             keyword=keyword,
         )
+        if catalog.get("state") == "field_mapping_required":
+            return {
+                "schema": "yonsei-mileage-history-command/v1",
+                "state": "field_mapping_required",
+                "catalog": catalog,
+                "history": {"state": "not_queried", "rows": []},
+                "current_registration": {"state": "not_queried", "rows": []},
+                "planning_inputs_ready": False,
+                "planning_performed": False,
+                "registration_performed": False,
+            }
         try:
             history_snapshot = self._open_menu("mileage")
             history = {
@@ -945,6 +1615,7 @@ class YonseiBridge:
             }
         return {
             "schema": "yonsei-mileage-history-command/v1",
+            "state": "available",
             "catalog": catalog,
             "history": history,
             "current_registration": current,
@@ -999,40 +1670,118 @@ class YonseiBridge:
         reason: str | None = None,
         confirmed: bool = False,
     ) -> dict[str, Any]:
+        if action not in {"search", "reserve", "waitlist", "cancel"}:
+            raise BridgeError("Shuttle action must be search, reserve, waitlist, or cancel.")
+        view = "cancel" if action == "cancel" else "booking"
+        selection_context = json.dumps(
+            {
+                "view": view,
+                "origin": origin,
+                "destination": destination or "",
+                "date": date,
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        selected = None
+        if confirmed:
+            selected = self._selection(
+                selection_id,
+                "shuttle",
+                context=selection_context,
+                consume=True,
+            )
+            if selected is None:
+                raise BridgeError("selection_not_found")
         snapshot = self._open_menu("shuttle")
         page = self._page()
+        history_opened = action == "cancel"
         if action == "cancel":
             if not page.click_text("내역/취소"):
                 raise BridgeError("The official shuttle history tab was not available.")
             time.sleep(1.5)
             snapshot = page.snapshot(text_after="셔틀버스예약")
         else:
-            page.click_text("예약")
-            page.fill_label("출발지역", origin)
-            page.fill_label("예약일자", date)
-            if destination:
-                page.fill_label("도착지역", destination)
+            if not page.click_text("예약"):
+                raise BridgeError("The official shuttle reservation tab was not available.")
+            applied = {
+                "origin": self._fill_verified(page, "출발지역", origin),
+                "date": self._fill_verified(page, "예약일자", date),
+            }
+            unmatched_fields = [
+                field for field, was_applied in applied.items() if not was_applied
+            ]
+            if unmatched_fields:
+                return {
+                    "schema": "yonsei-shuttle-command/v1",
+                    "action": action,
+                    "state": "field_mapping_required",
+                    "unmatched_fields": unmatched_fields,
+                    "requested_filters_applied": applied,
+                    "snapshot": page.snapshot(text_after="셔틀버스예약").as_dict(),
+                    "candidates": [],
+                    "reservation_performed": False,
+                    "retry_allowed": False if confirmed else True,
+                }
             for search_label in ("조회", "검색"):
                 if page.click_text(search_label):
                     break
             time.sleep(2.0)
             snapshot = page.snapshot(text_after="셔틀버스예약")
         rows = self._rows(snapshot)
+        if action == "cancel":
+            date_digits = re.sub(r"\D", "", date)
+            rows = [
+                row
+                for row in rows
+                if _requested_value_matches(origin, row.get("text", ""))
+                and (
+                    not date_digits
+                    or date_digits in re.sub(r"\D", "", row.get("text", ""))
+                )
+            ]
         wanted_terms = [term for term in (destination,) if term]
-        if preferred_time:
-            wanted_terms.append(preferred_time)
         if wanted_terms:
             rows = [
                 row for row in rows
-                if all(term in row["text"] for term in wanted_terms)
+                if all(
+                    _requested_value_matches(term, row.get("text", ""))
+                    for term in wanted_terms
+                )
             ]
         if depart_after:
-            rows = [row for row in rows if not re.search(r"\b\d{1,2}:\d{2}\b", row["text"])
-                    or re.search(r"\b\d{1,2}:\d{2}\b", row["text"]).group() >= depart_after]
+            after_minutes = self._clock_minutes(depart_after)
+            rows = [
+                row
+                for row in rows
+                if self._row_clock_minutes(row) is not None
+                and self._row_clock_minutes(row) >= after_minutes
+            ]
         if depart_before:
-            rows = [row for row in rows if not re.search(r"\b\d{1,2}:\d{2}\b", row["text"])
-                    or re.search(r"\b\d{1,2}:\d{2}\b", row["text"]).group() <= depart_before]
-        rows = self._remember_rows("shuttle", rows, context=f"{date}|{origin}|{destination or ''}")
+            before_minutes = self._clock_minutes(depart_before)
+            rows = [
+                row
+                for row in rows
+                if self._row_clock_minutes(row) is not None
+                and self._row_clock_minutes(row) <= before_minutes
+            ]
+        if preferred_time:
+            preferred_minutes = self._clock_minutes(preferred_time)
+            rows.sort(
+                key=lambda row: (
+                    abs((self._row_clock_minutes(row) or 0) - preferred_minutes)
+                    if self._row_clock_minutes(row) is not None
+                    else 24 * 60,
+                    self._row_clock_minutes(row) or 24 * 60,
+                )
+            )
+        if selected is None:
+            rows = self._remember_rows(
+                "shuttle",
+                rows,
+                context=selection_context,
+            )
         if action == "search":
             return {
                 "schema": "yonsei-shuttle-command/v1",
@@ -1041,8 +1790,6 @@ class YonseiBridge:
                 "candidates": rows,
                 "reservation_performed": False,
             }
-        if action not in {"reserve", "waitlist", "cancel"}:
-            raise BridgeError("Shuttle action must be search, reserve, waitlist, or cancel.")
         if not confirmed:
             return {
                 "schema": "yonsei-shuttle-command/v1",
@@ -1052,13 +1799,28 @@ class YonseiBridge:
                 "candidates": rows,
                 "reservation_performed": False,
             }
-        selected_terms = self._selection_terms(selection_id, "shuttle") or row_terms
-        if not selected_terms or not page.click_grid_row(selected_terms):
+        assert selected is not None
+        selected_terms = list(selected.get("terms", []))
+        if (
+            not selected_terms
+            or not any(row.get("text") == selected.get("text") for row in rows)
+            or not page.click_grid_row(selected_terms)
+        ):
             raise BridgeError("The exact shuttle row could not be matched.")
         if action in {"reserve", "waitlist"}:
             if not reason:
                 raise BridgeError("A reservation reason is required.")
-            page.fill_label("사유", reason)
+            if not self._fill_verified(page, "사유", reason):
+                return {
+                    "schema": "yonsei-shuttle-command/v1",
+                    "action": action,
+                    "state": "field_mapping_required",
+                    "unmatched_fields": ["reason"],
+                    "snapshot": page.snapshot(text_after="셔틀버스예약").as_dict(),
+                    "reservation_performed": False,
+                    "write_attempted_once": False,
+                    "retry_allowed": False,
+                }
             button = "예약신청" if action == "reserve" else "대기신청"
         else:
             button = "예약취소"
@@ -1067,16 +1829,32 @@ class YonseiBridge:
         time.sleep(2.0)
         verified = page.snapshot(text_after="셔틀버스예약")
         if action in {"reserve", "waitlist"}:
-            page.click_text("내역/취소")
-            time.sleep(1.5)
-            verified = page.snapshot(text_after="셔틀버스예약")
+            history_opened = page.click_text("내역/취소")
+            if history_opened:
+                time.sleep(1.5)
+                verified = page.snapshot(text_after="셔틀버스예약")
+        official_rows = self._rows(verified)
+        selected_present = self._rows_match_terms(official_rows, selected_terms)
+        completed = (
+            history_opened and selected_present
+            if action in {"reserve", "waitlist"}
+            else self._success_marker(action, verified) and not selected_present
+        )
         return {
             "schema": "yonsei-shuttle-command/v1",
             "action": action,
-            "state": "verification_required",
+            "state": "completed" if completed else "verification_required",
             "official_result": verified.as_dict(),
-            "official_rows": self._rows(verified),
+            "official_rows": official_rows,
+            "official_result_verified": completed,
+            "reservation_performed": completed and action in {"reserve", "waitlist"},
             "write_attempted_once": True,
+            "retry_allowed": False,
+            "next_step": (
+                "done"
+                if completed
+                else "review-official-history-do-not-retry"
+            ),
         }
 
     def space_dorm(
@@ -1093,12 +1871,34 @@ class YonseiBridge:
         submit_button: str | None = None,
         confirmed: bool = False,
     ) -> dict[str, Any]:
+        if service not in {"space", "dorm"}:
+            raise BridgeError("service must be space or dorm.")
+        if action not in {"status", "search", "apply", "reserve", "submit", "cancel"}:
+            raise BridgeError(
+                "Space or dorm action must be status, search, apply, reserve, submit, or cancel."
+            )
+        if fields or row_terms or submit_button:
+            raise BridgeError(
+                "Legacy selector overrides are not supported. Use a reviewed selection_id."
+            )
+        selected = None
+        if action not in {"status", "search"}:
+            selected = self._selection(
+                selection_id,
+                service,
+                consume=confirmed,
+            )
+            if selected is None:
+                raise BridgeError("selection_not_found")
         if service == "space":
             page = self._page()
             page.navigate(SPACE, wait=2.5)
             snapshot = page.snapshot()
-        elif service == "dorm":
+        else:
             page = self._underwood()
+            login_checker = getattr(page, "login_state", None)
+            if callable(login_checker) and login_checker() != "connected":
+                raise BridgeError("login_required")
             if not page.click_text(category):
                 raise BridgeError(f"Could not open Underwood category: {category}.")
             time.sleep(0.5)
@@ -1107,11 +1907,22 @@ class YonseiBridge:
                     raise BridgeError(f"Could not open dorm menu: {menu}.")
                 time.sleep(2.0)
             snapshot = page.snapshot(text_after=menu)
-        else:
-            raise BridgeError("service must be space or dorm.")
+        login_checker = getattr(page, "login_state", None)
+        login_state = login_checker() if callable(login_checker) else "connected"
+        if login_state == "login_required":
+            return {
+                "schema": "yonsei-space-dorm-command/v1",
+                "service": service,
+                "action": action,
+                "state": "login_required",
+                "snapshot": snapshot.as_dict(),
+                "rows": [],
+                "action_performed": False,
+                "retry_allowed": False if confirmed else True,
+            }
         request = request or {}
         mapping = SPACE_REQUEST_FIELDS if service == "space" else DORM_REQUEST_FIELDS
-        if action == "status":
+        if action in {"status", "search"}:
             search_keys = {
                 "date",
                 "start_time",
@@ -1127,51 +1938,90 @@ class YonseiBridge:
                 key: value for key, value in request.items() if key in search_keys
             }
             student_filled = page.fill_student_request(search_request, mapping)
+            accepted_input = {
+                key: value.get("filled", False)
+                for key, value in student_filled.items()
+            }
+            unmatched_fields = [
+                key for key, accepted in accepted_input.items() if not accepted
+            ]
+            if unmatched_fields:
+                return {
+                    "schema": "yonsei-space-dorm-command/v1",
+                    "service": service,
+                    "action": action,
+                    "state": "field_mapping_required",
+                    "snapshot": page.snapshot(text_after=menu).as_dict(),
+                    "rows": [],
+                    "accepted_input": accepted_input,
+                    "unmatched_fields": unmatched_fields,
+                    "action_performed": False,
+                }
+            search_clicked = False
             for label in ("조회", "검색"):
                 if page.click_text(label):
+                    search_clicked = True
                     time.sleep(1.5)
                     break
+            if search_request and not search_clicked:
+                return {
+                    "schema": "yonsei-space-dorm-command/v1",
+                    "service": service,
+                    "action": action,
+                    "state": "page_changed",
+                    "snapshot": page.snapshot(text_after=menu).as_dict(),
+                    "rows": [],
+                    "accepted_input": accepted_input,
+                    "unmatched_fields": ["search_button"],
+                    "action_performed": False,
+                }
             snapshot = page.snapshot(text_after=menu)
-            rows = self._remember_rows(service, self._rows(snapshot))
+            rows = self._remember_rows(
+                service,
+                self._rows(snapshot),
+                context=json.dumps(
+                    search_request,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
+            )
             return {
                 "schema": "yonsei-space-dorm-command/v1",
                 "service": service,
+                "action": action,
+                "state": "available" if rows else "no_results",
                 "snapshot": snapshot.as_dict(),
                 "rows": rows,
-                "accepted_input": {
-                    key: value.get("filled", False)
-                    for key, value in student_filled.items()
-                },
+                "accepted_input": accepted_input,
+                "unmatched_fields": [],
                 "action_performed": False,
             }
-        selected_terms = self._selection_terms(selection_id, service) or row_terms
-        if not selected_terms:
-            selected_terms = [
-                str(request[key])
-                for key in ("space_name", "building", "dorm", "facility")
-                if request.get(key)
-            ]
-        if selected_terms and not page.click_grid_row(selected_terms):
+        assert selected is not None
+        selected_terms = list(selected.get("terms", []))
+        current_rows = self._rows(snapshot)
+        if (
+            not selected_terms
+            or not any(row.get("text") == selected.get("text") for row in current_rows)
+            or not page.click_grid_row(selected_terms)
+        ):
             raise BridgeError("The exact reviewed space or dorm row could not be matched.")
-        if selected_terms:
-            time.sleep(0.5)
+        time.sleep(0.5)
         student_filled = page.fill_student_request(request, mapping)
-        advanced_filled = page.fill_fields(fields or {})
         failed_student_fields = [
             key for key, value in student_filled.items() if not value.get("filled")
         ]
-        failed_advanced_fields = [
-            key for key, value in advanced_filled.items() if not value
-        ]
-        if failed_student_fields or failed_advanced_fields:
+        if failed_student_fields:
             return {
                 "schema": "yonsei-space-dorm-command/v1",
                 "service": service,
                 "action": action,
                 "state": "field_mapping_required",
-                "unmatched_fields": failed_student_fields + failed_advanced_fields,
+                "unmatched_fields": failed_student_fields,
                 "snapshot": page.snapshot(text_after=menu).as_dict(),
                 "action_performed": False,
+                "write_attempted_once": False,
+                "retry_allowed": False if confirmed else True,
             }
         prepared = page.snapshot(text_after=menu)
         if not confirmed:
@@ -1188,26 +2038,168 @@ class YonseiBridge:
                 "snapshot": prepared.as_dict(),
                 "action_performed": False,
             }
-        button = submit_button or {
+        button = {
             "apply": "신청",
             "reserve": "예약",
             "submit": "제출",
             "cancel": "취소",
-        }.get(action, action)
+        }[action]
         if not page.click_text(button):
             raise BridgeError(f"The exact official action button was not available: {button}.")
         time.sleep(2.0)
-        verified = page.snapshot(text_after=menu)
+        submitted = page.snapshot(text_after=menu)
+        verified = submitted
+        history_opened = False
+        for history_label in (
+            "신청내역",
+            "예약내역",
+            "나의 예약",
+            "이용내역",
+            "내역조회",
+        ):
+            if page.click_text(history_label):
+                history_opened = True
+                time.sleep(1.5)
+                verified = page.snapshot(text_after=menu)
+                break
+        official_rows = self._rows(verified)
+        selected_present = self._rows_match_terms(official_rows, selected_terms)
+        completed = (
+            history_opened and selected_present
+            if action in {"apply", "reserve", "submit"}
+            else (
+                history_opened
+                and self._success_marker(action, submitted)
+                and not selected_present
+            )
+        )
         return {
             "schema": "yonsei-space-dorm-command/v1",
             "service": service,
             "action": action,
-            "state": "official_result_returned",
+            "state": "completed" if completed else "verification_required",
             "official_result": verified.as_dict(),
-            "official_rows": self._rows(verified),
-            "action_performed": True,
+            "official_rows": official_rows,
+            "official_result_verified": completed,
+            "action_performed": completed,
             "write_attempted_once": True,
+            "retry_allowed": False,
+            "next_step": (
+                "done"
+                if completed
+                else "review-official-history-do-not-retry"
+            ),
         }
+
+    @staticmethod
+    def _select_certificate_for_free_print(
+        page: BrowserPage,
+        *,
+        document_label: str,
+        language_label: str,
+        copies: int,
+    ) -> dict[str, Any]:
+        """Reach the official basket and select one matching free-print row."""
+        requested_new = False
+        checked_basket = False
+        basket_waits = 0
+        for _ in range(30):
+            snapshot = page.snapshot()
+            title = snapshot.title
+            text = snapshot.text
+
+            if page.select_radio("agree2", "agr"):
+                if not page.select_radio("agree", "disagr"):
+                    raise BridgeError("certificate_optional_consent_mapping_changed")
+                if not page.click_href_fragment("submitok"):
+                    raise BridgeError("certificate_consent_submit_missing")
+                time.sleep(2.0)
+                continue
+
+            if page.select_radio_in_row(
+                name="RB",
+                contains=[document_label, language_label],
+            ):
+                return {
+                    "selected": True,
+                    "source": (
+                        "new_request"
+                        if requested_new
+                        else "existing_unprinted_basket"
+                    ),
+                    "document_label": document_label,
+                    "language_label": language_label,
+                    "copies": copies,
+                }
+
+            if "메인" in title and "증명서 무료 출력/전송" in text:
+                if not page.click_href_fragment("Service('INTERNET')"):
+                    raise BridgeError("certificate_free_print_service_missing")
+                time.sleep(2.0)
+                continue
+
+            if (
+                not checked_basket
+                and "증명서 보관함" in text
+                and "증명서 선택" not in title
+                and "신청증명서함" not in title
+            ):
+                checked_basket = True
+                if not page.click_href_fragment("Basket"):
+                    raise BridgeError("certificate_basket_link_missing")
+                time.sleep(2.0)
+                continue
+
+            if checked_basket and "증명서 보관함" in title:
+                if basket_waits < 5:
+                    basket_waits += 1
+                    time.sleep(1.0)
+                    continue
+                if not page.click_href_fragment("Request"):
+                    raise BridgeError("certificate_request_link_missing")
+                time.sleep(2.0)
+                continue
+
+            if "학위선택" in title:
+                if not page.select_only_nonempty_option("sel_hakwi"):
+                    raise BridgeError("certificate_degree_selection_required")
+                if not page.click_text("다음"):
+                    raise BridgeError("certificate_degree_next_missing")
+                time.sleep(2.0)
+                continue
+
+            if "증명서 선택" in title:
+                if not page.set_certificate_count(
+                    document_label=document_label,
+                    language_label=language_label,
+                    copies=copies,
+                ):
+                    raise BridgeError("certificate_type_or_language_unavailable")
+                time.sleep(0.6)
+                if not page.click_text("다음"):
+                    raise BridgeError("certificate_selection_next_missing")
+                requested_new = True
+                time.sleep(2.0)
+                continue
+
+            if "신청증명서함" in title:
+                if not page.click_href_fragment("goReq"):
+                    if not page.click_href_fragment("Request"):
+                        raise BridgeError("certificate_request_submit_missing")
+                    time.sleep(2.0)
+                    continue
+                requested_new = True
+                time.sleep(3.0)
+                continue
+
+            if "증명서 신청" in text:
+                if not page.click_href_fragment("Request"):
+                    raise BridgeError("certificate_request_link_missing")
+                time.sleep(2.0)
+                continue
+
+            raise BridgeError("certificate_page_changed")
+        raise BridgeError("certificate_navigation_timeout")
 
     def documents(
         self,
@@ -1220,16 +2212,23 @@ class YonseiBridge:
         purpose: str | None = None,
         confirmed: bool = False,
     ) -> dict[str, Any]:
+        if action not in {"open", "issue"}:
+            raise BridgeError("Document action must be open or issue.")
+        if output_format not in {"pdf", "print"}:
+            raise BridgeError("Document output format must be pdf or print.")
         page = self._page()
-        if document_type in {"certificate", "enrollment", "transcript"}:
-            page.navigate(ICERT, wait=2.5)
-        elif document_type in {"education_practicum", "teaching"}:
+        if document_type in {"education_practicum", "teaching"}:
             snapshot = self.academic_applications(category="교직", application="교육실습참가확인서출력")
             runtime = (
                 self._start_reportx_agent()
-                if action == "issue" and confirmed and platform.system() in {"Darwin", "Linux"}
+                if action == "issue" and confirmed and output_format == "pdf"
                 else {
-                    "mode": "official-reportx" if platform.system() == "Windows" else "open-only"
+                    "mode": (
+                        "official-reportx-physical"
+                        if platform.system() == "Windows"
+                        and output_format == "print"
+                        else "open-only"
+                    )
                 }
             )
             return {
@@ -1245,24 +2244,46 @@ class YonseiBridge:
                 "issuance_performed": False,
                 "font_verification_required": action == "issue",
             }
-        else:
-            page.navigate(PORTAL, wait=2.5)
+        page.navigate(PORTAL, wait=2.5)
+        if page.login_state() != "connected":
+            raise BridgeError("login_required")
+        previous_targets = self.runtime.target_ids()
+        if not page.click_text("인터넷증명서"):
+            raise BridgeError("The official internet-certificate portal menu was not available.")
+        time.sleep(2.0)
+        route_snapshot = page.snapshot()
+        if urlsplit(route_snapshot.url).hostname != "icert.yonsei.ac.kr":
+            connection = self.runtime.connection_for_host(
+                "icert.yonsei.ac.kr",
+                previous_target_ids=previous_targets,
+            )
+            if connection is None:
+                raise BridgeError(
+                    "The official internet-certificate page did not open from Portal."
+                )
+            self.connection = connection
+            self.page = BrowserPage(connection)
+            page = self.page
+            route_snapshot = page.snapshot()
+        if (
+            "원본대조확인" in route_snapshot.title
+            or "증명서 원본확인 문서번호" in route_snapshot.text
+        ):
+            raise BridgeError(
+                "The Portal opened certificate original verification instead of issuance."
+            )
         visible_document = DOCUMENT_LABELS.get(document_type)
-        if visible_document:
-            page.click_text(visible_document, exact=False)
-        if language:
-            normalized_language = {
-                "ko": "국문",
-                "korean": "국문",
-                "en": "영문",
-                "english": "영문",
-            }.get(language.casefold(), language)
-            if not page.fill_label("언어", normalized_language):
-                page.click_text(normalized_language, exact=False)
-        if copies is not None:
-            page.fill_label("매수", str(copies))
-        if purpose:
-            page.fill_label("용도", purpose)
+        if not visible_document:
+            raise BridgeError("unsupported_certificate_type")
+        normalized_language = {
+            "ko": "국문",
+            "korean": "국문",
+            "en": "영문",
+            "english": "영문",
+        }.get((language or "ko").casefold(), language or "국문")
+        requested_copies = copies if copies is not None else 1
+        if requested_copies != 1:
+            raise BridgeError("certificate_single_copy_only")
         snapshot = page.snapshot()
         if action == "issue" and not confirmed:
             return {
@@ -1280,46 +2301,105 @@ class YonseiBridge:
                 "issuance_performed": False,
                 "font_verification_required": True,
             }
+        if action != "issue":
+            return {
+                "schema": "yonsei-document-command/v1",
+                "document_type": document_type,
+                "state": "official_page_ready",
+                "snapshot": snapshot.as_dict(),
+                "output_format": output_format,
+                "issuance_performed": False,
+                "next_step": "review-the-official-document-route",
+            }
+
+        review = {
+            "document_type": document_type,
+            "language": normalized_language,
+            "copies": requested_copies,
+            "purpose": purpose,
+            "output_format": output_format,
+        }
+        selection = self._select_certificate_for_free_print(
+            page,
+            document_label=visible_document,
+            language_label=normalized_language,
+            copies=requested_copies,
+        )
         system = platform.system()
-        runtime: dict[str, Any]
-        if action == "issue" and system in {"Darwin", "Linux"}:
-            runtime = self._start_reportx_agent()
-            state = "reportx_agent_ready"
-        elif action == "issue" and system == "Windows":
-            runtime = {"mode": "official-reportx", "running": None}
-            state = "official_reportx_ready"
-        else:
-            runtime = {"mode": "open-only"}
-            state = "official_page_ready"
+        if output_format == "print" and system == "Windows":
+            return {
+                "schema": "yonsei-document-command/v1",
+                "document_type": document_type,
+                "state": "official_reportx_physical_ready",
+                "review": review,
+                "selection": selection,
+                "runtime": {"mode": "official-reportx-physical"},
+                "issuance_performed": False,
+                "next_step": "choose-the-named-physical-printer",
+                "font_verification_required": False,
+            }
+
+        runtime = self._start_reportx_agent()
+        result: dict[str, Any] = {
+            "verified": False,
+            "status": "no_print_attempt",
+        }
+        official_attempts = 0
+        for offset in range(10):
+            if offset and not page.select_radio_in_row(
+                name="RB",
+                contains=[visible_document, normalized_language],
+                skip=offset,
+            ):
+                break
+            previous_job_ids = self._arm_reportx_agent()
+            if not page.click_href_fragment("goPrint"):
+                raise BridgeError("certificate_printer_output_missing")
+            official_attempts += 1
+            result = self._wait_reportx_result(previous_job_ids)
+            if result.get("verified") is True:
+                break
+            if (
+                result.get("document_number_status")
+                != "blocked_by_existing_no_retry_guard"
+            ):
+                break
+        completed = result.get("verified") is True
         return {
             "schema": "yonsei-document-command/v1",
             "document_type": document_type,
-            "state": state,
-            "review": {
-                "document_type": document_type,
-                "language": language,
-                "copies": copies,
-                "purpose": purpose,
-                "output_format": output_format,
-            },
-            "snapshot": snapshot.as_dict(),
+            "state": "completed" if completed else "verification_required",
+            "review": review,
+            "selection": selection,
+            "official_result": result,
+            "official_result_verified": completed,
             "runtime": runtime,
             "output_format": output_format,
-            "issuance_performed": False,
+            "issuance_performed": completed,
+            "write_attempted_once": True,
+            "official_output_clicks": official_attempts,
+            "retry_allowed": False,
             "next_step": (
-                "choose-the-document-in-the-open-official-page"
-                if action == "issue"
-                else "review-the-official-document-route"
+                "done"
+                if completed
+                else "review-agent-status-and-official-basket-do-not-retry"
             ),
-            "font_verification_required": action == "issue",
+            "font_verification_required": True,
         }
 
     def learnus_attendance(self, *, service: str) -> dict[str, Any]:
         page = self._page()
+        sso_attempted = False
         if service == "learnus":
             page.navigate(LEARNUS, wait=3.0)
+            state = page.wait_for_login_state()
+            if state != "connected" and page.click_text("Portal Login"):
+                sso_attempted = True
+                time.sleep(2.0)
+                state = page.wait_for_login_state(timeout=8.0)
         elif service == "attendance":
             page.navigate(ATTENDANCE, wait=3.0)
+            state = page.wait_for_login_state()
         else:
             raise BridgeError("service must be learnus or attendance.")
         snapshot = page.snapshot()
@@ -1331,10 +2411,11 @@ class YonseiBridge:
         return {
             "schema": "yonsei-learning-attendance-command/v1",
             "service": service,
-            "state": page.login_state(),
+            "state": state,
             "snapshot": snapshot.as_dict(),
             "courses": courses,
             "rows": rows,
+            "portal_sso_attempted": sso_attempted,
             "read_only": True,
             "attendance_check_in_performed": False,
         }

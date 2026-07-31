@@ -150,7 +150,16 @@ def run(payload: Any) -> dict[str, Any]:
     }
 
 
+def configure_utf8_stdio() -> None:
+    """Keep Korean space search results lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 def main() -> int:
+    configure_utf8_stdio()
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=Path, required=True)
     args = parser.parse_args()

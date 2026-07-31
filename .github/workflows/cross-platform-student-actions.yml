@@ -2,6 +2,8 @@ name: Cross-platform student actions
 
 on:
   push:
+    branches:
+      - main
   pull_request:
 
 permissions:
@@ -9,6 +11,7 @@ permissions:
 
 jobs:
   student-actions:
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -23,7 +26,17 @@ jobs:
         with:
           python-version: "3.12"
       - name: Check shuttle, space, and certificate paths
-        run: python -m unittest discover -s tests -p "test_cross_platform_student_actions.py" -v
+        run: >-
+          python -m unittest -v
+          tests.test_cross_platform_student_actions
+          tests.test_certificate_issue_plan
+          tests.test_yonsei_bridge
+          tests.test_reportx_agent_startup
+          tests.test_reportx_mac_agent
+          tests.test_reportx_document_v1
+          tests.test_reportx_protocol_v1
+          tests.test_reportx_runtime_profile
+          tests.test_fp3_pdf
       - name: Compile student action scripts
         run: >-
           python -m compileall -q

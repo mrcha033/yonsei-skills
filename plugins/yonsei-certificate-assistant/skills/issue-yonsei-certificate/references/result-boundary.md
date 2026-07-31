@@ -6,7 +6,7 @@ accepts that ticket, retrieves only the prepared report authorized by it,
 reserves one verification number when explicitly enabled, and renders the
 observed FP3 document.
 
-The resulting PDF is suitable for the student's review and optional physical
-printing. It is not the paid electronic-certificate file and must not be
-described as cryptographically signed, officially verified, or byte-identical
-to Windows GDI output.
+The resulting file is the requested **무료 인터넷즉시발급 PDF 가상 인쇄
+결과** and is suitable for the student's review and optional physical printing.
+It is not the separate paid electronic-certificate file and must not be
+described as cryptographically signed or byte-identical to Windows GDI output.

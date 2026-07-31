@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-space-reservation",
   "displayName": "연세 공간 검색·신청",
-  "version": "0.4.0",
-  "description": "Windows·macOS·Linux에서 조건에 맞는 공식 공간을 찾고, 검토한 대관 신청을 확인받아 제출합니다.",
+  "version": "0.4.1",
+  "description": "‘오늘의 연세·포털 연결’과 함께 Windows·macOS·Linux에서 조건에 맞는 공식 공간을 찾고, 검토한 대관 신청을 확인받아 제출합니다.",
   "author": {
     "name": "mrcha033",
     "url": "https://github.com/mrcha033"

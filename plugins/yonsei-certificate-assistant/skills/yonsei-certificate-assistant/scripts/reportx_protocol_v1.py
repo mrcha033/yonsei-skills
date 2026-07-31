@@ -21,6 +21,7 @@ from __future__ import annotations
 import base64
 import binascii
 import hashlib
+import ipaddress
 import re
 import urllib.parse
 from dataclasses import dataclass
@@ -49,6 +50,11 @@ ALLOWED_URLFILE_HOSTS = frozenset(
 ALLOWED_URLCHECK_PATHS = frozenset(
     {
         "/ys1.0/jsp/report/senddocno.jsp",
+    }
+)
+ALLOWED_URLPOST_PATHS = frozenset(
+    {
+        "/ys1.0/jsp/report/printcomplete.jsp",
     }
 )
 _SAFE_COMPONENT_RE = re.compile(r"^[A-Za-z0-9._~:@%+\-/]{1,1024}$")
@@ -442,6 +448,61 @@ def parse_document_number_response(response: NetworkResponse) -> str:
     if len(value) != 16 or re.fullmatch(r"[0-9A-Za-z]{16}", value) is None:
         raise TicketDecodeError("URLCheck response is not one document number")
     return value
+
+
+def build_print_completion_action(
+    parsed: ParsedReportXTicket,
+    *,
+    document_number: str,
+    system_ip: str,
+    printer_model: str,
+) -> RequestAction:
+    """Build the vendor print-completion GET after a durable PDF save."""
+
+    endpoint = _safe_request_value(parsed, "URLPost", maximum=2048)
+    host, path = _parse_urlfile(endpoint)
+    if path not in ALLOWED_URLPOST_PATHS:
+        raise TicketDecodeError("URLPost path is outside policy")
+    tpid = _safe_request_value(parsed, "TPID")
+    receive_type = _safe_request_value(parsed, "RECEIVE_TYPE", maximum=64)
+    if re.fullmatch(r"[0-9A-Za-z]{16}", document_number) is None:
+        raise TicketDecodeError("document number is outside policy")
+    try:
+        address = ipaddress.ip_address(system_ip)
+    except ValueError as error:
+        raise TicketDecodeError("system IP is outside policy") from error
+    if address.version != 4:
+        raise TicketDecodeError("system IP must be IPv4")
+    if (
+        not printer_model
+        or len(printer_model) > 64
+        or not printer_model.isascii()
+        or any(ord(char) < 0x20 for char in printer_model)
+    ):
+        raise TicketDecodeError("printer model is outside policy")
+    url = urllib.parse.urlunsplit(
+        (
+            "https",
+            host,
+            path,
+            urllib.parse.urlencode(
+                (
+                    ("TPID", tpid),
+                    ("SYSTEM_IP", str(address)),
+                    ("P_MODEL", printer_model),
+                    ("MIN_DOC_NO", document_number),
+                    ("RECEIVE_TYPE", receive_type),
+                )
+            ),
+            "",
+        )
+    )
+    return RequestAction(
+        request_id="reportx-print-completion",
+        method="GET",
+        url=url,
+        headers=(("Accept", "text/plain, */*"),),
+    )
 
 
 def _parse_urlfile(value: str) -> tuple[str, str]:

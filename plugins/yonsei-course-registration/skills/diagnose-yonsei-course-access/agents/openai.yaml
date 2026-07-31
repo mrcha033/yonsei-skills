@@ -1,4 +1,6 @@
 interface:
-  display_name: "연세 수강 페이지 진단"
-  short_description: "수강편람·수강신청 페이지의 접속 문제를 안전하게 진단합니다"
-  default_prompt: "Use $diagnose-yonsei-course-access to 연세 수강편람 페이지가 열리지 않는 이유를 진단해 줘."
+  display_name: "내부 수강 페이지 진단"
+  short_description: "수강편람 조회가 실패했을 때만 접속 상태를 점검합니다"
+  default_prompt: "Use $diagnose-yonsei-course-access to 수강편람 조회가 실패한 경우에만 공식 수강 페이지의 접속 상태를 내부 점검해 줘."
+policy:
+  allow_implicit_invocation: false

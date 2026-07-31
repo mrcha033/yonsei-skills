@@ -117,8 +117,12 @@ class StudentRouter:
             return "login_required"
         if state == "confirmation_required":
             return "confirmation_required"
-        if result.get("write_attempted_once") or result.get("action_performed"):
+        if state in {"field_mapping_required", "page_changed", "verification_required"}:
+            return state
+        if state == "completed" and result.get("official_result_verified") is True:
             return "completed"
+        if result.get("write_attempted_once"):
+            return "verification_required"
         if state in {"reportx_agent_ready", "official_reportx_ready", "official_document_route_ready"}:
             return "ready_for_official_finish"
         return "ready"
@@ -157,12 +161,20 @@ class StudentRouter:
             catalog_rows = catalog.get("rows", [])
             history = result.get("history", {}).get("rows", [])
             current = result.get("current_registration", {}).get("rows", [])
+            filters_applied = catalog.get("requested_filters_applied", {})
+            unmatched_filters = catalog.get("unmatched_filters", [])
             return {
-                "title": "공식 수강편람과 개인 수강 자료를 확인했습니다.",
+                "title": (
+                    "수강편람 검색 조건을 적용하지 못했습니다."
+                    if catalog.get("state") == "field_mapping_required"
+                    else "공식 수강편람과 개인 수강 자료를 확인했습니다."
+                ),
                 "course_count": len(catalog_rows),
                 "history_count": len(history),
                 "current_course_count": len(current),
                 "catalog_state": catalog.get("state"),
+                "requested_filters_applied": filters_applied,
+                "unmatched_filters": unmatched_filters,
                 "registration_period_required_for_catalog": False,
                 "courses": catalog_rows,
                 "history": history,
@@ -182,36 +194,76 @@ class StudentRouter:
             }
         if intent == "shuttle":
             candidates = result.get("candidates", [])
+            state = result.get("state")
             return {
                 "title": (
-                    "셔틀 처리 결과를 확인했습니다."
-                    if result.get("write_attempted_once")
-                    else f"조건에 맞는 셔틀 {len(candidates)}개를 찾았습니다."
+                    "공식 셔틀 내역에서 처리를 확인했습니다."
+                    if state == "completed"
+                    else (
+                        "셔틀 검색 조건을 적용하지 못했습니다."
+                        if state in {"field_mapping_required", "page_changed"}
+                        else (
+                            "셔틀 처리는 시도됐지만 공식 내역에서 결과를 확정하지 못했습니다."
+                            if state == "verification_required"
+                            else f"조건에 맞는 셔틀 {len(candidates)}개를 찾았습니다."
+                        )
+                    )
                 ),
+                "state": state,
                 "candidates": candidates,
                 "official_rows": result.get("official_rows", []),
+                "unmatched_fields": result.get("unmatched_fields", []),
+                "retry_allowed": result.get("retry_allowed"),
                 "action": result.get("action"),
             }
         if intent in {"space", "dorm"}:
             rows = result.get("rows", [])
+            state = result.get("state")
             return {
                 "title": (
-                    "공식 신청 결과를 확인했습니다."
-                    if result.get("action_performed")
-                    else f"이용 가능한 항목 {len(rows)}개를 확인했습니다."
+                    "공식 신청 내역에서 처리를 확인했습니다."
+                    if state == "completed"
+                    else (
+                        "검색 또는 입력 조건을 적용하지 못했습니다."
+                        if state in {"field_mapping_required", "page_changed"}
+                        else (
+                            "신청은 시도됐지만 공식 내역에서 결과를 확정하지 못했습니다."
+                            if state == "verification_required"
+                            else f"이용 가능한 항목 {len(rows)}개를 확인했습니다."
+                        )
+                    )
                 ),
+                "state": state,
                 "candidates": rows,
                 "review": result.get("review"),
                 "official_rows": result.get("official_rows", []),
+                "unmatched_fields": result.get("unmatched_fields", []),
+                "accepted_input": result.get("accepted_input", {}),
+                "retry_allowed": result.get("retry_allowed"),
                 "action": result.get("action", "status"),
             }
         if intent == "documents":
+            official = result.get("official_result", {})
+            completed = (
+                result.get("state") == "completed"
+                and result.get("official_result_verified") is True
+            )
             return {
-                "title": "증명서 발급 경로를 준비했습니다.",
+                "title": (
+                    "증명서 무료 출력 PDF를 발급했습니다."
+                    if completed
+                    else "증명서 발급 경로를 준비했습니다."
+                ),
                 "document_type": result.get("document_type"),
                 "state": result.get("state"),
                 "output_format": result.get("output_format", "pdf"),
                 "review": result.get("review"),
+                "pdf_path": official.get("pdf_path") if completed else None,
+                "sha256": official.get("sha256") if completed else None,
+                "page_count": official.get("page_count") if completed else None,
+                "completion_notified": (
+                    official.get("completion_notified") if completed else None
+                ),
                 "next_step": result.get("next_step"),
             }
         if intent == "learnus":
@@ -287,10 +339,16 @@ class StudentRouter:
             )
         elif intent == "documents":
             self._required(request, ("document_type",))
+            output_format = str(
+                request.get(
+                    "output_format",
+                    "print" if action == "print" else "pdf",
+                )
+            )
             result = self.bridge.documents(
                 document_type=str(request["document_type"]),
                 action="issue" if action in {"issue", "print"} else "open",
-                output_format=str(request.get("output_format", "pdf")),
+                output_format=output_format,
                 language=request.get("language"),
                 copies=request.get("copies"),
                 purpose=request.get("purpose"),

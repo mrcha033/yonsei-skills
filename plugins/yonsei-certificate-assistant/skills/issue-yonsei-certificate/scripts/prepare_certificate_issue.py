@@ -88,14 +88,18 @@ def run(payload: Any, *, system: str | None = None) -> dict[str, Any]:
             "Certificate issuance supports Windows, macOS, and Linux.",
             "$.platform",
         )
-    if host_platform == "windows":
-        issuance_path = "official-windows-reportx"
-        next_step = "doctor-official-reportx-then-open-browser"
-        result_scope = "official-reportx-print-or-capture"
-    else:
-        issuance_path = "local-compatibility-reportx"
+    if desired_result == "reviewed_pdf":
+        issuance_path = "local-reportx-compatible-virtual-pdf-print"
         next_step = "doctor-and-prepare-official-assets"
-        result_scope = "unverified-compatibility-pdf"
+        result_scope = "free-print-pdf-virtual-print"
+    elif host_platform == "windows":
+        issuance_path = "official-windows-reportx-physical-print"
+        next_step = "doctor-official-reportx-and-physical-printer-then-open-browser"
+        result_scope = "free-print-physical-print"
+    else:
+        issuance_path = "local-reportx-compatible-pdf-then-physical-print"
+        next_step = "doctor-prepare-assets-save-pdf-then-print-named-printer"
+        result_scope = "free-print-pdf-then-physical-print"
 
     return {
         "schema": "yonsei-certificate-issue-plan/v1",
@@ -109,6 +113,11 @@ def run(payload: Any, *, system: str | None = None) -> dict[str, Any]:
         "desired_result": desired_result,
         "printer": printer,
         "official_free_print_required": True,
+        "print_target": (
+            "named-physical-printer"
+            if desired_result == "physical_print"
+            else "pdf-virtual-printer"
+        ),
         "document_number_reservation": "one-shot-after-confirmation",
         "certificate_content_source": "official-authorized-report-only",
         "paid_electronic_certificate": False,
@@ -118,7 +127,16 @@ def run(payload: Any, *, system: str | None = None) -> dict[str, Any]:
     }
 
 
+def configure_utf8_stdio() -> None:
+    """Keep Korean JSON input and output lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 def main() -> int:
+    configure_utf8_stdio()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", default="-")
     parser.add_argument(

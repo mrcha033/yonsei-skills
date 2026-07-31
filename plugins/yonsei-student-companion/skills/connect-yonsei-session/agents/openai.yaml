@@ -1,4 +1,4 @@
 interface:
   display_name: "연세 포털 한 번 로그인"
   short_description: "한 번 로그인하고 학생 서비스 세션을 이어 씁니다"
-  default_prompt: "Use $connect-yonsei-session to 연세 포털에 한 번 로그인하고 필요한 학생 서비스를 이어서 열어 줘."
+  default_prompt: "Use $connect-yonsei-session to 연세 전용 브라우저에서 포털 로그인을 연결하고 필요한 학생 서비스를 계속 열어 줘."

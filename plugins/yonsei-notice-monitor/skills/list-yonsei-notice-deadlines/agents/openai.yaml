@@ -1,4 +1,4 @@
 interface:
   display_name: "연세 공지 마감일"
   short_description: "최근 공식 공지에서 신청·납부·행사 날짜를 추려 줍니다"
-  default_prompt: "Use $list-yonsei-notice-deadlines to 최근 장학 공지의 다가오는 마감일을 정리해 줘."
+  default_prompt: "Use $list-yonsei-notice-deadlines to 최근 공식 장학 공지에서 다가오는 신청 마감일을 정리해 줘."

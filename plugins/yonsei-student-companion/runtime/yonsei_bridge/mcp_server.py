@@ -104,7 +104,19 @@ TOOLS = [
                         "roommate": {"type": "string"},
                         "issue": {"type": "string"},
                         "menu": {"type": "string"},
-                        "document_type": {"type": "string"},
+                        "document_type": {
+                            "type": "string",
+                            "enum": [
+                                "enrollment",
+                                "transcript",
+                                "graduation",
+                                "expected_graduation",
+                                "leave",
+                                "completion",
+                                "education_practicum",
+                                "teaching"
+                            ]
+                        },
                         "language": {"type": "string"},
                         "copies": {"type": "integer"},
                         "output_format": {"type": "string", "enum": ["pdf", "print"]}
@@ -120,6 +132,14 @@ TOOLS = [
         },
     },
 ]
+
+
+def configure_utf8_stdio() -> None:
+    """Keep Korean MCP requests and responses lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
 
 
 class Server:
@@ -159,6 +179,7 @@ def response(request_id: Any, result: Any = None, error: dict[str, Any] | None =
 
 
 def main() -> int:
+    configure_utf8_stdio()
     server = Server()
     for line in sys.stdin:
         try:
@@ -176,7 +197,7 @@ def main() -> int:
                     {
                         "protocolVersion": message.get("params", {}).get("protocolVersion", "2025-06-18"),
                         "capabilities": {"tools": {"listChanged": False}},
-                        "serverInfo": {"name": "yonsei-bridge", "version": "0.5.0"},
+                        "serverInfo": {"name": "yonsei-bridge", "version": "0.6.0"},
                     },
                 )
             elif method == "ping":

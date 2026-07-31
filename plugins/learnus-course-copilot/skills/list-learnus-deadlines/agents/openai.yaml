@@ -1,4 +1,4 @@
 interface:
   display_name: "LearnUs 과제 마감일"
   short_description: "강의별 과제와 학습활동 마감일을 빠른 날짜순으로 정리"
-  default_prompt: "Use $list-learnus-deadlines to list my upcoming LearnUs deadlines."
+  default_prompt: "Use $list-learnus-deadlines to 로그인된 LearnUs에서 이번 주 과제 마감일을 정리하고, 열 수 없으면 첨부한 강의 자료를 사용해 줘."

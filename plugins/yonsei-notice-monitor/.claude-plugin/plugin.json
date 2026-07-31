@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-notice-monitor",
   "displayName": "연세 공지·마감일 찾기",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "연세대학교와 신촌 IT 공식 공지를 검색하고, 신청·납부·행사 마감일과 지난 확인 이후 달라진 공지를 찾습니다.",
   "author": {
     "name": "mrcha033",

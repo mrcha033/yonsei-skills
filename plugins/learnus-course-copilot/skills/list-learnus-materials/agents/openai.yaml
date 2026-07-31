@@ -1,4 +1,4 @@
 interface:
   display_name: "LearnUs 학습자료"
   short_description: "강의의 문서·영상·링크 학습자료를 한 번에 정리"
-  default_prompt: "Use $list-learnus-materials to list the materials in this LearnUs course."
+  default_prompt: "Use $list-learnus-materials to 로그인된 LearnUs 강의에서 문서·영상·링크 자료를 정리하고, 열 수 없으면 첨부한 강의 자료를 사용해 줘."

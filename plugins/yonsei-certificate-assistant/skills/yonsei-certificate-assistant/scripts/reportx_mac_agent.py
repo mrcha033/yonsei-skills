@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Loopback ReportX compatibility agent for macOS and Linux.
+"""Loopback ReportX compatibility agent for Windows, macOS, and Linux.
 
 The agent accepts the official ``dzreportx:`` handoff on 127.0.0.1, decodes
 the ticket with a bundled clean-room decoder, and optionally obtains the exact
@@ -19,6 +19,7 @@ import os
 import re
 import secrets
 import shutil
+import socket
 import stat
 import subprocess
 import sys
@@ -33,6 +34,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from socketserver import TCPServer
 from typing import Any
 
 FP3_RENDERER_DIR = (
@@ -60,6 +62,7 @@ from reportx_document_v1 import ReportXDocumentError, decode_reportx_document
 from reportx_protocol_v1 import (
     TicketDecodeError,
     build_document_number_action,
+    build_print_completion_action,
     parse_document_number_response,
 )
 from reportx_runtime_profile import (
@@ -196,7 +199,27 @@ def secure_mkdir(path: Path) -> None:
         info = path.lstat()
     if not stat.S_ISDIR(info.st_mode):
         raise ValueError(f"private path is not a directory: {path}")
-    os.chmod(path, 0o700)
+    _private_chmod(path, 0o700)
+
+
+def _private_chmod(path: Path, mode: int) -> None:
+    """Apply POSIX privacy modes where the host supports them."""
+    try:
+        os.chmod(path, mode)
+    except (NotImplementedError, OSError):
+        if os.name != "nt":
+            raise
+
+
+def _private_fchmod(fd: int, mode: int) -> None:
+    operation = getattr(os, "fchmod", None)
+    if operation is None:
+        return
+    try:
+        operation(fd, mode)
+    except (NotImplementedError, OSError):
+        if os.name != "nt":
+            raise
 
 
 def harden_private_tree(root: Path) -> None:
@@ -213,7 +236,7 @@ def harden_private_tree(root: Path) -> None:
         for entry in directory.iterdir():
             info = entry.lstat()
             if stat.S_ISREG(info.st_mode):
-                os.chmod(entry, 0o600)
+                _private_chmod(entry, 0o600)
 
 
 def _atomic_write(path: Path, data: bytes) -> None:
@@ -221,13 +244,13 @@ def _atomic_write(path: Path, data: bytes) -> None:
     fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
     temporary_path = Path(temporary)
     try:
-        os.fchmod(fd, 0o600)
+        _private_fchmod(fd, 0o600)
         with os.fdopen(fd, "wb") as handle:
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary_path, path)
-        os.chmod(path, 0o600)
+        _private_chmod(path, 0o600)
     finally:
         try:
             temporary_path.unlink()
@@ -362,6 +385,10 @@ class Job:
     document_number_response_status: int | None = None
     document_number_response_length: int | None = None
     document_number_response_shape: str | None = None
+    completion_attempted: bool = False
+    completion_notified: bool = False
+    completion_status: str = "not_requested"
+    completion_response_status: int | None = None
     verification: str = "not_performed"
     print_attempted: bool = False
     printed: bool = False
@@ -432,7 +459,10 @@ class Job:
                 "response_length": self.document_number_response_length,
                 "response_shape": self.document_number_response_shape,
                 "value_persisted": False,
-                "completion_notified": False,
+                "completion_attempted": self.completion_attempted,
+                "completion_notified": self.completion_notified,
+                "completion_status": self.completion_status,
+                "completion_response_status": self.completion_response_status,
             },
             "verification": self.verification,
             "print": {
@@ -451,6 +481,7 @@ class AgentState:
         *,
         allow_fetch: bool,
         allow_document_reservation: bool = False,
+        allow_completion_notification: bool = False,
         token: str,
         font_map: dict[str, Path] | None = None,
         require_original_fonts: bool = False,
@@ -458,6 +489,7 @@ class AgentState:
         self.root = root
         self.allow_fetch = allow_fetch
         self.allow_document_reservation = allow_document_reservation
+        self.allow_completion_notification = allow_completion_notification
         self.token = token
         self.font_map = dict(font_map or {})
         self.require_original_fonts = require_original_fonts
@@ -737,6 +769,20 @@ def perform_request(
         response.close()
 
 
+def local_ipv4_for(host: str) -> str:
+    """Return the route-selected IPv4 without sending application data."""
+    connection = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        connection.settimeout(2)
+        connection.connect((host, 443))
+        value = str(connection.getsockname()[0])
+    except OSError:
+        value = "127.0.0.1"
+    finally:
+        connection.close()
+    return value
+
+
 def _finish_failure(job: Job, state: AgentState, status: str, code: str) -> None:
     job.status = status
     job.note(code)
@@ -843,6 +889,7 @@ def process_job(job: Job, state: AgentState) -> None:
 
     artifact = broker.accepted_artifact
     rendered_pdf: bytes | None = None
+    reserved_document_number: str | None = None
     if is_pdf_container(artifact.body):
         suffix = ".pdf"
         job.artifact_kind = "server_pdf_unverified"
@@ -967,6 +1014,16 @@ def process_job(job: Job, state: AgentState) -> None:
                             reservation_action = build_document_number_action(
                                 parsed
                             )
+                            if state.allow_completion_notification:
+                                build_print_completion_action(
+                                    parsed,
+                                    document_number="0000000000000000",
+                                    system_ip=local_ipv4_for(
+                                        job.request_host
+                                        or "icert.yonsei.ac.kr"
+                                    ),
+                                    printer_model="YonseiSkills PDF",
+                                )
                         except (
                             TypeError,
                             ReportXProfileError,
@@ -1070,6 +1127,7 @@ def process_job(job: Job, state: AgentState) -> None:
                                     )
                                 else:
                                     job.document_number_status = "reserved"
+                                    reserved_document_number = document_number
                                     job.document_number_length = len(
                                         document_number
                                     )
@@ -1135,8 +1193,7 @@ def process_job(job: Job, state: AgentState) -> None:
                         )
                         job.note(
                             "rendered the decoded FP3 with the pinned runtime "
-                            "logo and reserved verification number; no "
-                            "printcomplete request was made"
+                            "logo and reserved verification number"
                         )
     destination = state.out_dir / f"{job.id}{suffix}"
     if not state.write_artifact(destination, artifact.body):
@@ -1179,6 +1236,66 @@ def process_job(job: Job, state: AgentState) -> None:
             )
             return
         job.rendered_pdf_path = str(rendered_destination)
+    if reserved_document_number is not None and job.rendered_pdf_path:
+        if not state.allow_completion_notification:
+            job.completion_status = "explicit_opt_in_required"
+        else:
+            assert parsed is not None
+            completion_action = build_print_completion_action(
+                parsed,
+                document_number=reserved_document_number,
+                system_ip=local_ipv4_for(
+                    job.request_host or "icert.yonsei.ac.kr"
+                ),
+                printer_model="YonseiSkills PDF",
+            )
+            job.completion_attempted = True
+            job.completion_status = "request_started_unknown"
+            state.save_job(job)
+            try:
+                completion_response = perform_request(
+                    completion_action,
+                    opener=transport_opener,
+                    maximum_body_bytes=4096,
+                )
+            except (
+                OSError,
+                TimeoutError,
+                urllib.error.URLError,
+                ValueError,
+            ) as error:
+                job.completion_status = "unknown_after_request"
+                job.note(
+                    "print completion may have reached the server; retry refused "
+                    f"({type(error).__name__})"
+                )
+                state.finish_document_reservation(
+                    job,
+                    "completion_unknown_after_request",
+                )
+            else:
+                job.completion_response_status = completion_response.status
+                if 200 <= completion_response.status < 300:
+                    job.completion_notified = True
+                    job.completion_status = "notified"
+                    job.note(
+                        "official print completion endpoint acknowledged the "
+                        "durably saved PDF"
+                    )
+                    state.finish_document_reservation(
+                        job,
+                        "completion_notified",
+                    )
+                else:
+                    job.completion_status = "non_success_response"
+                    job.note(
+                        "print completion returned a non-success status; "
+                        "retry refused"
+                    )
+                    state.finish_document_reservation(
+                        job,
+                        "completion_non_success",
+                    )
     job.note(
         f"saved unchanged server response ({len(artifact.body)} bytes); "
         "official verification not performed"
@@ -1313,7 +1430,7 @@ def load_or_create_token(root: Path, explicit: str | None) -> str:
     if info is not None:
         if not stat.S_ISREG(info.st_mode):
             raise ValueError("agent.token must be a regular file")
-        os.chmod(path, 0o600)
+        _private_chmod(path, 0o600)
         value = path.read_text(encoding="utf-8").strip()
         if value:
             return value
@@ -1360,6 +1477,16 @@ def _protocol_submission_authorized(
         state.clear_protocol_arm()
         return True
     return state.consume_protocol_arm()
+
+
+class LoopbackHTTPServer(ThreadingHTTPServer):
+    """HTTP server that never performs a reverse-DNS lookup at startup."""
+
+    def server_bind(self) -> None:
+        TCPServer.server_bind(self)
+        host, port = self.server_address[:2]
+        self.server_name = str(host)
+        self.server_port = int(port)
 
 
 class ReportXHandler(BaseHTTPRequestHandler):
@@ -1488,7 +1615,7 @@ class ReportXHandler(BaseHTTPRequestHandler):
                     200,
                     {
                         "ok": True,
-                        "agent": "reportx-mac",
+                        "agent": "reportx-local",
                         "protocol": "cleanroom-v1",
                     },
                 )
@@ -1499,17 +1626,20 @@ class ReportXHandler(BaseHTTPRequestHandler):
                 200,
                 {
                     "ok": True,
-                        "agent": "reportx-mac",
-                        "allow_fetch": STATE.allow_fetch,
-                        "allow_document_reservation": (
-                            STATE.allow_document_reservation
-                        ),
-                        "official_assets": (
-                            "ready"
-                            if STATE.official_assets is not None
-                            else "not_prepared"
-                        ),
-                        "output_dir": STATE.out_dir.name,
+                    "agent": "reportx-local",
+                    "allow_fetch": STATE.allow_fetch,
+                    "allow_document_reservation": (
+                        STATE.allow_document_reservation
+                    ),
+                    "allow_completion_notification": (
+                        STATE.allow_completion_notification
+                    ),
+                    "official_assets": (
+                        "ready"
+                        if STATE.official_assets is not None
+                        else "not_prepared"
+                    ),
+                    "output_dir": STATE.out_dir.name,
                     "jobs": jobs,
                     "printers": list_cups_printers() if path == "/status" else [],
                 },
@@ -1581,7 +1711,7 @@ class ReportXHandler(BaseHTTPRequestHandler):
 def serve(host: str, port: int, state: AgentState) -> None:
     global STATE
     STATE = state
-    server = ThreadingHTTPServer((host, port), ReportXHandler)
+    server = LoopbackHTTPServer((host, port), ReportXHandler)
     state.log(f"listening on http://{host}:{port}")
     state.log(f"network={'enabled' if state.allow_fetch else 'disabled'}")
     state.log(
@@ -1589,6 +1719,14 @@ def serve(host: str, port: int, state: AgentState) -> None:
         + (
             "explicitly enabled"
             if state.allow_document_reservation
+            else "disabled"
+        )
+    )
+    state.log(
+        "print completion notification="
+        + (
+            "explicitly enabled"
+            if state.allow_completion_notification
             else "disabled"
         )
     )
@@ -1606,8 +1744,18 @@ def serve(host: str, port: int, state: AgentState) -> None:
         state.close()
 
 
+def configure_utf8_stdio() -> None:
+    """Keep Korean agent logs and diagnostics lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 def main() -> int:
-    os.umask(0o077)
+    configure_utf8_stdio()
+    if hasattr(os, "umask"):
+        os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default=DEFAULT_HOST)
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
@@ -1636,6 +1784,14 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--notify-print-completion",
+        action="store_true",
+        help=(
+            "After a verified durable PDF save, send the official one-shot "
+            "print-completion GET; never retry an uncertain request"
+        ),
+    )
+    parser.add_argument(
         "--token",
         default=None,
         help="Control-plane token (default: load/create agent.token)",
@@ -1647,6 +1803,12 @@ def main() -> int:
     if args.reserve_document_number and not args.allow_fetch:
         print(
             "--reserve-document-number requires --allow-fetch.",
+            file=sys.stderr,
+        )
+        return 2
+    if args.notify_print_completion and not args.reserve_document_number:
+        print(
+            "--notify-print-completion requires --reserve-document-number.",
             file=sys.stderr,
         )
         return 2
@@ -1673,6 +1835,9 @@ def main() -> int:
             root,
             allow_fetch=bool(args.allow_fetch),
             allow_document_reservation=bool(args.reserve_document_number),
+            allow_completion_notification=bool(
+                args.notify_print_completion
+            ),
             token=token,
             font_map=font_map,
             require_original_fonts=bool(args.allow_fetch),

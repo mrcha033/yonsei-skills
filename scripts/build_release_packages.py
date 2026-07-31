@@ -142,7 +142,7 @@ def wrapper_skill_markdown(skills: list[Path]) -> str:
     routes = "\n".join(rows)
     return f"""---
 name: yonsei-student-life
-description: Help Yonsei University students reuse one official browser login and manage a daily briefing, notices, courses, attendance, shuttle trips, space requests, academic records, graduation requirements, certificates, and LearnUs. Use when a student asks for any recurring Yonsei student-life workflow.
+description: 연세대학교 학생이 전용 관리 브라우저 로그인을 재사용해 오늘의 학사 현황, 공지, 수강계획, 출결, 셔틀, 공간, 졸업, 교직, 생활관, 장학금, 교환학생, 증명서, LearnUs를 처리하도록 돕습니다. Use when a student asks "오늘 학교 일정 정리해 줘", "졸업요건 계산해 줘", "셔틀 예약해 줘", or another recurring Yonsei student-life request.
 ---
 
 # Yonsei Student Life
@@ -160,8 +160,9 @@ student to continue in Codex desktop. Never request a password, OTP, or session
 cookie in chat.
 
 When the `yonsei_bridge_*` tools are available, use them before manual browser
-navigation. One visible official login is reused across Portal, Underwood,
-LearnUs, attendance, shuttle, spaces, dorms, and documents.
+navigation. The managed browser profile reuses one visible official login
+across SSO-supported Portal, Underwood, LearnUs, attendance, shuttle, dorm, and
+document routes. Space reservation can require its own one-time official login.
 """
 
 
@@ -169,7 +170,7 @@ def wrapper_openai_yaml() -> bytes:
     return """interface:
   display_name: "연세 학생생활 도우미"
   short_description: "공지부터 수강·셔틀·졸업·LearnUs까지 한 번에"
-  default_prompt: "Use $yonsei-student-life to help with my Yonsei student-life task."
+  default_prompt: "Use $yonsei-student-life to 연세 포털에 연결하고 오늘 수업·마감·출결과 다음 할 일을 정리해 줘."
 """.encode("utf-8")
 
 
@@ -229,7 +230,7 @@ def universal_manifest(version: str) -> dict:
         "interface": {
             "displayName": "연세 학생생활 도우미",
             "shortDescription": "한 번 로그인하고 오늘 할 일부터 졸업까지",
-            "longDescription": "이미 인증된 연세 브라우저 프로필을 이어 사용하고, 오늘의 수업·마감·출결·예약과 공지, 수강계획, 셔틀, 공간대관, 학사신청·졸업·교직, 생활관·장학금·교환학생, 증명서·학생활동 문서, LearnUs 업무를 자연어로 처리합니다.",
+            "longDescription": "연세 전용 관리 브라우저에서 학생이 직접 로그인한 프로필을 이어 사용하고, 오늘의 수업·마감·출결과 공지, 수강계획, 셔틀, 공간대관, 학사신청·졸업·교직, 생활관·장학금·교환학생, 증명서·학생활동 문서, LearnUs 업무를 자연어로 처리합니다.",
             "developerName": "mrcha033",
             "category": "Education",
             "capabilities": [
@@ -249,7 +250,7 @@ def universal_manifest(version: str) -> dict:
                 "연세 포털에 한 번 로그인하고 오늘 할 일을 정리해 줘.",
                 "이번 주에 놓치면 안 되는 연세대 공지를 찾아 줘.",
                 "내 성적표와 전공 졸업요건을 비교해 줘.",
-                "정원과 지난 컷을 고려해 수강 마일리지를 나눠 줘.",
+                "내 마일리지 이력과 현재 정원을 고려해 수강 마일리지를 나눠 줘.",
             ],
             "brandColor": "#183B66",
             "composerIcon": "./assets/logo.svg",

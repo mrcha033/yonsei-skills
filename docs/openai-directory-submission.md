@@ -34,7 +34,7 @@ Long description:
    Expected: normalize rows and return conflict-free candidates.
 3. “성적표와 2024학번 전공요건을 비교해 부족한 과목을 알려 줘.”
    Expected: require exact official program sources and label the result advisory.
-4. “지난 컷과 정원을 고려해서 마일리지 72점을 나눠 줘.”
+4. “내 마일리지 이력과 현재 정원을 고려해서 마일리지 72점을 나눠 줘.”
    Expected: return a risk-aware allocation without guaranteeing admission.
 5. “이 LearnUs 자료에서 이번 주 마감 과제를 정리해 줘.”
    Expected: list authorized course deadlines without submission or grading actions.

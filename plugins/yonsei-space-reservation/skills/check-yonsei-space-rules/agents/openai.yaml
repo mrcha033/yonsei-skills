@@ -1,4 +1,4 @@
 interface:
   display_name: "연세 공간대관 규칙 확인"
   short_description: "대관 계획이 공식 공개 이용 규칙에 맞는지 확인합니다"
-  default_prompt: "Use $check-yonsei-space-rules to 이 대관 계획이 연세대 공개 이용 규칙에 맞는지 확인해 줘."
+  default_prompt: "Use $check-yonsei-space-rules to 공식 연세 공간 이용 규칙에서 이 대관 계획이 가능한지 확인해 줘."

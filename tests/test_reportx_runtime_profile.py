@@ -17,6 +17,9 @@ SCRIPTS = (
     / "yonsei-certificate-assistant"
     / "scripts"
 )
+YONSEI_BODY_FONT = (
+    SCRIPTS.parent / "assets" / "fonts" / "연세본문.TTF"
+)
 sys.path.insert(0, str(SCRIPTS))
 
 import reportx_runtime_profile as profile  # noqa: E402
@@ -110,6 +113,7 @@ class ReportXRuntimeProfileTests(unittest.TestCase):
         )
         rendered = render_fp3_pdf(
             fp3,
+            font_map={"Arial": YONSEI_BODY_FONT},
             runtime_pictures=bindings.pictures,
             runtime_text=bindings.text,
             official_empty_pictures=bindings.official_empty_pictures,

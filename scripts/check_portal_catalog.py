@@ -47,7 +47,8 @@ def main() -> int:
             problems.append(f"{service_id}: missing portal key {portal_key}")
             continue
         packaged_url = (
-            service.get("portal_url")
+            service.get("portal_catalog_url")
+            or service.get("portal_url")
             or service.get("direct_url")
             or service["entry_url"]
         )

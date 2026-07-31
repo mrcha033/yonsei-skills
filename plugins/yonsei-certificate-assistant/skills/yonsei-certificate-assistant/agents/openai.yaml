@@ -1,4 +1,6 @@
 interface:
-  display_name: "연세 증명서 출력 도우미"
-  short_description: "Windows·Mac·Linux ReportX 경로를 자동으로 진단"
-  default_prompt: "Use $yonsei-certificate-assistant to diagnose and continue my Yonsei certificate print on this computer."
+  display_name: "내부 증명서 출력 진단"
+  short_description: "증명서 발급 실패 시 ReportX 호환 경로를 점검합니다"
+  default_prompt: "Use $yonsei-certificate-assistant to 증명서 발급 흐름이 실패한 경우에만 ReportX 환경과 호환 경로를 내부 진단해 줘."
+policy:
+  allow_implicit_invocation: false

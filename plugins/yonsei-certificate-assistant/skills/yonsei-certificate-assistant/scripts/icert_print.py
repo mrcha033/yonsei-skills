@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Operate the clean-room macOS/Linux ReportX compatibility agent.
+"""Operate the clean-room Windows/macOS/Linux ReportX compatibility agent.
 
 Examples:
   python3 icert_print.py doctor
@@ -38,7 +38,6 @@ DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 65432
 DEFAULT_DIR = Path.home() / ".cache" / "yonsei-certificate-assistant"
 PORTAL = "https://portal.yonsei.ac.kr/ui/index.html"
-ICERT = "https://icert.yonsei.ac.kr/"
 SCRIPT_DIR = Path(__file__).resolve().parent
 AGENT_SCRIPT = SCRIPT_DIR / "reportx_mac_agent.py"
 DIAGNOSE = SCRIPT_DIR / "diagnose_print_env.py"
@@ -79,7 +78,9 @@ def read_token(cache_dir: Path) -> str | None:
         info = path.lstat()
     except FileNotFoundError:
         return None
-    if not stat.S_ISREG(info.st_mode) or stat.S_IMODE(info.st_mode) & 0o077:
+    if not stat.S_ISREG(info.st_mode):
+        return None
+    if os.name != "nt" and stat.S_IMODE(info.st_mode) & 0o077:
         return None
     return path.read_text(encoding="utf-8").strip() or None
 
@@ -210,6 +211,8 @@ def cmd_agent(args: argparse.Namespace) -> int:
         command.append("--allow-fetch")
     if args.reserve_document_number:
         command.append("--reserve-document-number")
+    if args.notify_print_completion:
+        command.append("--notify-print-completion")
     title_font = (
         Path(args.title_font).expanduser().resolve()
         if args.title_font
@@ -257,8 +260,17 @@ def cmd_prepare_assets(args: argparse.Namespace) -> int:
         if args.installer is not None
         else None
     )
+    reportx_exe = (
+        Path(args.reportx_exe).expanduser()
+        if args.reportx_exe is not None
+        else None
+    )
     try:
-        prepare_official_assets(cache, installer_path=installer)
+        prepare_official_assets(
+            cache,
+            installer_path=installer,
+            reportx_exe_path=reportx_exe,
+        )
     except (OSError, ReportXProfileError) as error:
         print(
             json.dumps(
@@ -277,9 +289,13 @@ def cmd_prepare_assets(args: argparse.Namespace) -> int:
                 "ok": True,
                 "status": "official_assets_ready",
                 "source": (
-                    "verified_local_installer"
-                    if installer is not None
-                    else "verified_official_download"
+                    "verified_installed_reportx"
+                    if reportx_exe is not None
+                    else (
+                        "verified_local_installer"
+                        if installer is not None
+                        else "verified_installed_runtime_or_official_download"
+                    )
                 ),
                 "vendor_bytes_bundled": False,
             },
@@ -360,19 +376,19 @@ def open_url(url: str) -> bool:
 
 
 def cmd_open(_: argparse.Namespace) -> int:
-    for url in (PORTAL, ICERT):
-        if not open_url(url):
-            print(url)
+    if not open_url(PORTAL):
+        print(PORTAL)
     print(
         "\n다음 순서:\n"
         "1) 최초 1회: python3 icert_print.py prepare-assets\n"
         "2) 별도 터미널: python3 icert_print.py agent --allow-fetch "
-        "--reserve-document-number\n"
-        "3) 로그인하고 발급할 증명서를 선택\n"
-        "4) 클릭 직전: python3 icert_print.py arm\n"
-        "5) 120초 안에 프린터 출력을 선택\n"
-        "6) 브라우저가 공식 /SSO handoff를 자동으로 로컬 agent에 전달\n"
-        "7) python3 icert_print.py wait-job\n"
+        "--reserve-document-number --notify-print-completion\n"
+        "3) 포털에 로그인하고 인터넷증명서 → 인터넷즉시발급을 선택\n"
+        "4) 발급할 증명서를 선택\n"
+        "5) 클릭 직전: python3 icert_print.py arm\n"
+        "6) 120초 안에 프린터 출력을 선택\n"
+        "7) 브라우저가 공식 /SSO handoff를 자동으로 로컬 agent에 전달\n"
+        "8) python3 icert_print.py wait-job\n"
         "\nDevTools bridge나 캡처 스크립트는 사용하지 않습니다."
     )
     return 0
@@ -412,6 +428,17 @@ def cmd_wait_job(args: argparse.Namespace) -> int:
                 last_marker = marker
             state = last.get("status")
             if state in SUCCESS_STATES:
+                document_number = last.get("document_number") or {}
+                if document_number.get("status") == "reserved":
+                    completion = document_number.get("completion_status")
+                    if completion in {
+                        "not_requested",
+                        "request_started_unknown",
+                    }:
+                        time.sleep(0.5)
+                        continue
+                    if document_number.get("completion_notified") is not True:
+                        return 2
                 return 0
             if state in FAILURE_STATES:
                 return 2
@@ -485,7 +512,16 @@ def cmd_print_job(args: argparse.Namespace) -> int:
     return 0 if result.get("ok") else 1
 
 
+def configure_utf8_stdio() -> None:
+    """Keep Korean certificate status and errors lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 def main() -> int:
+    configure_utf8_stdio()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dir", default=str(DEFAULT_DIR))
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
@@ -517,6 +553,14 @@ def main() -> int:
             "the request starts"
         ),
     )
+    agent_parser.add_argument(
+        "--notify-print-completion",
+        action="store_true",
+        help=(
+            "After a durable verified PDF save, notify the official "
+            "print-completion endpoint once"
+        ),
+    )
     assets_parser = subparsers.add_parser(
         "prepare-assets",
         help="Extract pinned runtime assets from the official Yonsei installer",
@@ -524,6 +568,13 @@ def main() -> int:
     assets_parser.add_argument(
         "--installer",
         help="Use an existing exact-hash installer instead of downloading it",
+    )
+    assets_parser.add_argument(
+        "--reportx-exe",
+        help=(
+            "Use an installed official REPORTX.exe after its pinned hash is "
+            "verified; useful on Windows without innoextract"
+        ),
     )
     subparsers.add_parser("status", help="Show redacted job manifests")
     subparsers.add_parser(

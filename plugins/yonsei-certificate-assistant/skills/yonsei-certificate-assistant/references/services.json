@@ -3,28 +3,27 @@
   "services": {
     "certificate": {
       "access": "portal-authenticated-issuance",
-      "direct_url": "https://icert.yonsei.ac.kr/",
       "entry_url": "https://portal.yonsei.ac.kr/ui/index.html",
       "label": "Internet Certificate Issuance (icert free print)",
       "mutation_policy": "explicit-one-shot-document-number-then-local-compatibility-pdf",
       "notes": [
-        "Issuance center host is https://icert.yonsei.ac.kr/ (WebMinwon ReportX free print).",
-        "Start from portal 인터넷증명서 → 인터넷즉시발급; VERIFY URL is original-check only.",
-        "Official print hands an encrypted dzreportx ticket to a Windows-only listener on 127.0.0.1:65432.",
-        "The macOS/Linux compatibility agent decodes the current encrypted ticket, materializes the pinned ReportX runtime profile, and independently renders the returned FP3 prepared report to PDF with separately mapped authorized bundled Yonsei title and body fonts.",
-        "Document-number reservation is an explicit one-shot mutation guarded against automatic retry; PDF rendering never calls printcomplete.",
+        "The issuance center uses icert.yonsei.ac.kr (WebMinwon ReportX free print), but its bare root currently returns a not-found page.",
+        "Always start from authenticated Portal 인터넷증명서 → 인터넷즉시발급; the public portal catalogue VERIFY URL is original-check only.",
+        "Official free print hands an encrypted dzreportx ticket to a loopback listener on 127.0.0.1:65432.",
+        "The Windows/macOS/Linux compatibility agent decodes the current encrypted ticket, materializes the pinned ReportX runtime profile, and independently renders the returned FP3 prepared report to PDF with the authorized bundled Yonsei title and body fonts; only faces referenced by the report are embedded.",
+        "Document-number reservation is an explicit one-shot mutation guarded against automatic retry. After the PDF is durably saved and its digest is re-read, the agent records and sends the exact allowlisted printcomplete request once without uncertain retry.",
         "A compatibility PDF is unverified and is not automatically an official electronic certificate or paper original.",
         "Out of scope for this skill: paid 전자증명서발급 electronic PDF product."
       ],
+      "portal_catalog_url": "https://icert.yonsei.ac.kr/servlet/YSID?COMMAND=VERIFY&LANG=0",
       "portal_key": "LK011_A",
-      "portal_url": "https://icert.yonsei.ac.kr/servlet/YSID?COMMAND=VERIFY&LANG=0",
       "vpn_policy": "probe-direct-first"
     }
   },
   "sources": {
     "portal": "https://portal.yonsei.ac.kr/ui/index.html",
-    "portal_link_map": "https://portal.yonsei.ac.kr/ui/thirdparty/portal/lib/js/linkAddress.js",
+    "portal_link_map": "https://portal.yonsei.ac.kr/portal/MainCtr/findLinkInfo.do",
     "vpn_guide": "https://yis.yonsei.ac.kr/ics/service/PolicyApplyInfo.do"
   },
-  "updated_at": "2026-07-27"
+  "updated_at": "2026-07-30"
 }

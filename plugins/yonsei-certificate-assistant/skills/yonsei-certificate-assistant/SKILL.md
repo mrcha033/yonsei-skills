@@ -1,6 +1,6 @@
 ---
 name: yonsei-certificate-assistant
-description: Cross-platform Yonsei icert support that diagnoses the official Windows ReportX path or runs clean-room macOS/Linux free-print interoperability to decode dzreportx tickets and render a local compatibility PDF. Use for 인터넷즉시발급, localhost 65432 failures, ReportX ticket diagnosis, or an FP3/PDF result. Do not use for paid 전자증명서, forged or modified certificates, automatic printing, password collection, or claims that a compatibility PDF is an officially verified original.
+description: Cross-platform Yonsei icert support that runs a local Windows/macOS/Linux free-print compatibility printer to decode the student's authenticated dzreportx ticket and render a PDF, or diagnoses native Windows ReportX for an explicitly requested physical print. Use for 인터넷즉시발급, localhost 65432 failures, ReportX ticket diagnosis, or an FP3/PDF result. Do not use for paid 전자증명서, forged or modified certificates, automatic printing, password collection, or claims that a compatibility PDF is an officially verified original.
 ---
 
 # Yonsei Certificate Assistant
@@ -70,8 +70,10 @@ Before rendering a printable page, ReportX performs two extra mutations:
 
 `URLCheck` can allocate state even though it is a GET. The agent writes a
 durable no-retry guard before the request. `URLPost`/`printcomplete.jsp` is a
-separate completion boundary and is never called merely because a PDF was
-rendered.
+separate completion boundary. With `--notify-print-completion`, it is recorded
+and called exactly once only after the PDF has been durably saved, re-read, and
+matched to the expected digest. A timeout or uncertain response is never
+retried.
 
 ## Run
 
@@ -89,7 +91,7 @@ python3 "$SKILL_DIR/scripts/icert_print.py" agent
 # The command automatically uses the bundled redistribution-authorized
 # 연세제목/연세본문 TTF files.
 python3 "$SKILL_DIR/scripts/icert_print.py" agent \
-  --allow-fetch --reserve-document-number
+  --allow-fetch --reserve-document-number --notify-print-completion
 ```
 
 If either bundled file is missing or its pinned hash differs, stop before a
@@ -107,9 +109,9 @@ python3 "$SKILL_DIR/scripts/icert_print.py" wait-job
 python3 "$SKILL_DIR/scripts/icert_print.py" status
 ```
 
-The macOS/Linux compatibility path needs no DevTools bridge, cookie export,
-Windows process, VM, or extra Windows machine. On Windows, prefer the official
-native ReportX component.
+The cross-platform compatibility path needs no DevTools bridge, cookie export,
+VM, or extra Windows machine. For a PDF on Windows, use this local path; use
+the official native ReportX component only for a named physical printer.
 
 Private state is under:
 
@@ -126,7 +128,7 @@ Private state is under:
 | `document_number_reservation_unknown` | URLCheck started but no valid response was retained; retry is blocked |
 | `server_report_saved_unrendered` | Exact server response saved as `.reportx`, but its outer container was not decoded |
 | `server_report_decoded_unrendered` | Outer container decoded, but profile or renderer rejected unsupported semantics |
-| `server_report_rendered_pdf_unverified` | Runtime placeholders were materialized and a compatibility PDF was rendered; `printcomplete` was not called |
+| `server_report_rendered_pdf_unverified` | Runtime placeholders were materialized and a compatibility PDF was rendered; inspect `document_number.completion_notified` separately |
 | `server_pdf_saved_unverified` | Exact server response is a complete PDF container; official document verification was not performed |
 | `decode_failed` | Ticket failed a strict framing, cipher, URL, command, or host check |
 | `transport_failed` | Allowlisted request did not complete |
@@ -146,10 +148,11 @@ python3 "$SKILL_DIR/scripts/icert_print.py" \
   print-job JOB_ID --printer "PRINTER_NAME" --confirm
 ```
 
-On successful CUPS submission the current implementation still does not call
-`printcomplete`; completion acknowledgement remains intentionally separate
-until printer-job completion can be established without ambiguity. An
-unrendered `.reportx` response is not printable through this command.
+The authenticated free-print transaction's completion acknowledgement is sent
+after the durable PDF save, before any optional physical printing. CUPS
+submission is therefore a separate local action and never sends a second
+`printcomplete`. An unrendered `.reportx` response is not printable through
+this command.
 
 ## Security invariants
 

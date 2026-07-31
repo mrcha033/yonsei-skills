@@ -1,6 +1,6 @@
 ---
 name: open-yonsei-service
-description: Find and open the correct current Yonsei Portal service from a plain-language request while preserving the student's existing browser login. Use when a student asks 어디서 해, 포털에서 찾아 줘, 바로 열어 줘, or names academic information, registration, grades, LearnUs, attendance, certificates, mail, shuttle, space, library, career, counseling, student ID, dormitory, chapel, IT help, or another Yonsei portal function.
+description: Find and open the correct current Yonsei Portal service from a plain-language request while preserving the managed browser login. Use when a student asks 어디서 해, 포털에서 찾아 줘, 바로 열어 줘, or names academic information, registration, grades, LearnUs, attendance, certificates, mail, shuttle, space, library, career, counseling, student ID, dormitory, chapel, IT help, or another Yonsei portal function.
 ---
 
 # Open Yonsei Service

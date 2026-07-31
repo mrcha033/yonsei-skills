@@ -83,7 +83,16 @@ def analyze(entry: dict[str, Any], module: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def configure_utf8_stdio() -> None:
+    """Keep Korean shuttle diagnostics lossless on every desktop OS."""
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 def main() -> int:
+    configure_utf8_stdio()
     parser = argparse.ArgumentParser()
     parser.add_argument("--module-file", type=Path)
     args = parser.parse_args()

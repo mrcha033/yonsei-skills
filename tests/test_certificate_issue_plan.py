@@ -14,6 +14,7 @@ class CertificateIssuePlanTests(unittest.TestCase):
             [sys.executable, str(SCRIPT), "--platform", platform],
             input=json.dumps(payload, ensure_ascii=False),
             text=True,
+            encoding="utf-8",
             capture_output=True,
             check=False,
         )
@@ -32,11 +33,16 @@ class CertificateIssuePlanTests(unittest.TestCase):
         output = json.loads(result.stdout)
         self.assertTrue(output["ready"])
         self.assertEqual(output["platform"], "macos")
-        self.assertEqual(output["issuance_path"], "local-compatibility-reportx")
+        self.assertEqual(
+            output["issuance_path"],
+            "local-reportx-compatible-virtual-pdf-print",
+        )
+        self.assertEqual(output["print_target"], "pdf-virtual-printer")
+        self.assertEqual(output["result_scope"], "free-print-pdf-virtual-print")
         self.assertEqual(output["document_number_reservation"], "one-shot-after-confirmation")
         self.assertFalse(output["paid_electronic_certificate"])
 
-    def test_windows_uses_official_native_reportx(self):
+    def test_windows_physical_print_uses_official_native_reportx(self):
         result = self.run_script(
             {
                 "certificate_type": "재학증명서",
@@ -50,8 +56,30 @@ class CertificateIssuePlanTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
-        self.assertEqual(output["issuance_path"], "official-windows-reportx")
-        self.assertEqual(output["result_scope"], "official-reportx-print-or-capture")
+        self.assertEqual(
+            output["issuance_path"],
+            "official-windows-reportx-physical-print",
+        )
+        self.assertEqual(output["result_scope"], "free-print-physical-print")
+
+    def test_windows_pdf_uses_local_compatibility_printer(self):
+        result = self.run_script(
+            {
+                "certificate_type": "재학증명서",
+                "language": "ko",
+                "copies": 1,
+                "purpose": "개인 보관",
+                "desired_result": "reviewed_pdf",
+            },
+            platform="windows",
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(
+            output["issuance_path"],
+            "local-reportx-compatible-virtual-pdf-print",
+        )
+        self.assertEqual(output["result_scope"], "free-print-pdf-virtual-print")
 
     def test_rejects_user_supplied_certificate_identity(self):
         result = self.run_script(
