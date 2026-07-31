@@ -50,7 +50,11 @@ class ReportXAgentStartupTests(unittest.TestCase):
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
                 text=True,
+                encoding="utf-8",
             )
+            failure = ""
+            stderr = ""
+            last_error: Exception | None = None
             try:
                 deadline = time.monotonic() + 12
                 token = ""
@@ -74,7 +78,8 @@ class ReportXAgentStartupTests(unittest.TestCase):
                                 health = json.loads(
                                     response.read().decode("utf-8")
                                 )
-                        except OSError:
+                        except OSError as error:
+                            last_error = error
                             time.sleep(0.1)
                             continue
                         self.assertTrue(health["ok"])
@@ -83,8 +88,12 @@ class ReportXAgentStartupTests(unittest.TestCase):
                     if process.poll() is not None:
                         break
                     time.sleep(0.1)
-                stderr = process.stderr.read() if process.stderr else ""
-                self.fail(f"agent did not become healthy: {stderr}")
+                failure = (
+                    "agent did not become healthy; "
+                    f"returncode={process.poll()!r}; "
+                    f"token_created={bool(token)}; "
+                    f"last_error={last_error!r}"
+                )
             finally:
                 process.terminate()
                 try:
@@ -93,4 +102,7 @@ class ReportXAgentStartupTests(unittest.TestCase):
                     process.kill()
                     process.wait(timeout=5)
                 if process.stderr is not None:
+                    stderr = process.stderr.read()
                     process.stderr.close()
+            if failure:
+                self.fail(f"{failure}; stderr={stderr}")

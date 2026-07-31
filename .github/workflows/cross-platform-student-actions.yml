@@ -2,6 +2,8 @@ name: Cross-platform student actions
 
 on:
   push:
+    branches:
+      - main
   pull_request:
 
 permissions:
@@ -9,6 +11,7 @@ permissions:
 
 jobs:
   student-actions:
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
