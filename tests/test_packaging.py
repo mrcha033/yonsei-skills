@@ -61,6 +61,8 @@ class PackagingTests(unittest.TestCase):
             for path in plugin.rglob("*"):
                 if not path.is_file():
                     continue
+                if "__pycache__" in path.parts or path.suffix == ".pyc":
+                    continue
                 text = path.read_text(encoding="utf-8", errors="ignore")
                 self.assertNotIn("/Users/", text)
                 self.assertNotIn("../plugins/", text)
