@@ -34,6 +34,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from socketserver import TCPServer
 from typing import Any
 
 FP3_RENDERER_DIR = (
@@ -1478,6 +1479,16 @@ def _protocol_submission_authorized(
     return state.consume_protocol_arm()
 
 
+class LoopbackHTTPServer(ThreadingHTTPServer):
+    """HTTP server that never performs a reverse-DNS lookup at startup."""
+
+    def server_bind(self) -> None:
+        TCPServer.server_bind(self)
+        host, port = self.server_address[:2]
+        self.server_name = str(host)
+        self.server_port = int(port)
+
+
 class ReportXHandler(BaseHTTPRequestHandler):
     server_version = "YonseiReportXLocal/0.6"
 
@@ -1700,7 +1711,7 @@ class ReportXHandler(BaseHTTPRequestHandler):
 def serve(host: str, port: int, state: AgentState) -> None:
     global STATE
     STATE = state
-    server = ThreadingHTTPServer((host, port), ReportXHandler)
+    server = LoopbackHTTPServer((host, port), ReportXHandler)
     state.log(f"listening on http://{host}:{port}")
     state.log(f"network={'enabled' if state.allow_fetch else 'disabled'}")
     state.log(

@@ -144,6 +144,23 @@ def http(
         return error.code, payload, response_headers
 
 
+class LoopbackServerStartupTests(unittest.TestCase):
+    def test_startup_never_depends_on_reverse_dns(self) -> None:
+        with mock.patch(
+            "socket.getfqdn",
+            side_effect=AssertionError("reverse DNS must not run"),
+        ):
+            server = agent.LoopbackHTTPServer(
+                ("127.0.0.1", 0),
+                agent.ReportXHandler,
+            )
+        try:
+            self.assertEqual("127.0.0.1", server.server_name)
+            self.assertGreater(server.server_port, 0)
+        finally:
+            server.server_close()
+
+
 class ReportXMacAgentHTTPTests(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory(prefix="yonsei-agent-")
