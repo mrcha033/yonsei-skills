@@ -1,6 +1,6 @@
 # End-to-end validation
 
-Last checked: 2026-07-30
+Last checked: 2026-07-31
 
 This page separates an actual official-service run from local implementation
 and cross-platform checks. It contains no student name, student number,
@@ -22,7 +22,7 @@ document contents, browser cookie, or certificate file.
 | Check | Result |
 | --- | --- |
 | Windows/macOS/Linux action routing | Certificate PDF, Windows named physical-printer routing, shuttle, and space paths covered by the three-OS CI matrix |
-| Repository tests | All 151 tests pass locally, including the strict `pypdf` parse in an isolated environment |
+| Repository tests | All 152 tests pass locally, including the strict `pypdf` parse in an isolated environment |
 | Plugin-local tests | All 14 discovered plugin test directories pass |
 | Skill structure | All 52 skill folders pass the official `quick_validate.py`; all 52 UI metadata files contain a matching invocation prompt |
 | Student downloads | Four deterministic archives build successfully; all 40 student workflows and both authorized Yonsei fonts are present; published checksums are verified |
