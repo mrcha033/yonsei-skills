@@ -1,4 +1,4 @@
 interface:
   display_name: "연세 증명서 발급"
-  short_description: "원본 연세체를 유지해 증명서 발급을 끝까지 진행"
-  default_prompt: "Use $issue-yonsei-certificate to 이 컴퓨터에 맞는 공식 연세 증명서 발급 경로로 필요한 증명서를 발급해 줘."
+  short_description: "처음 한 번 확인하고 증명서 PDF 발급까지 진행"
+  default_prompt: "Use $issue-yonsei-certificate to 필요한 선택과 로그인을 처음에 한 번 확인하고 Codex Computer Use로 연세 증명서 PDF 발급까지 진행해 줘."

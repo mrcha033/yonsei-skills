@@ -36,8 +36,38 @@ The default and advertised outcome is the free-print PDF virtual-print result.
 The separate paid **전자증명서발급** product is out of scope; never switch to it
 unless the student explicitly changes the request.
 
+## Startup and one-minute hot path
+
+Run `icert_print.py start` immediately when the skill is invoked. It emits the
+official Portal URL and the complete one-batch intake shape, then validates the
+cached pinned assets or prepares them and starts the local agent. It does not
+open or manipulate any browser window. Codex Computer Use must reuse the
+student's current browser for the visible official login and portal route; do
+not use a CLI-launched profile, Orca, AppleScript, JXA, or coordinate clicks.
+
+While cold setup runs, settle certificate type, language, one-copy output,
+transcript rank inclusion, transcript 4.5 conversion inclusion, and any named
+physical printer. Purpose is optional. Ask for login completion and issuance
+authorization in the same initial pause when the visible official page requires
+login. A fully specified prompt that already commands issuance is the
+authorization. Validate the resulting review internally without asking for a
+second reply. After that, use only
+`icert_print.py issue --request ... --output ... --confirm`; there are no
+routine mid-flow questions or separate doctor/open/arm/wait/copy steps.
+
+The one-minute objective starts only after the student is visibly logged in,
+the complete request is confirmed, and pinned assets are cached. The issue
+command binds the browser handoff to its returned `arm_id`, follows only the
+matching job, accepts a newly completed or digest-backed safely reused PDF,
+verifies the private and exported digests, and refuses to overwrite a different
+destination file.
+It performs no cold download and uses one command-start deadline capped at 55
+seconds so PDF export retains margin. Treat this as the implementation budget,
+not live performance evidence until measured on a representative issuance.
+
 ## Browser-only products
 
 If the current chat product cannot control the student's desktop browser, leave
-the exact official page open when possible and stop after the reviewed issuance
-summary. Do not ask for a password, OTP, cookie, or exported browser session.
+the official Portal URL in the handoff and stop after the reviewed issuance
+summary. Do not launch another browser profile and do not ask for a password,
+OTP, cookie, or exported browser session.

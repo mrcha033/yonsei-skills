@@ -70,6 +70,19 @@ def main() -> int:
     documents.add_argument("document_type")
     documents.add_argument("--issue", action="store_true")
     documents.add_argument("--output-format", choices=("pdf", "print"), default="pdf")
+    documents.add_argument("--language", choices=("ko", "en", "국문", "영문"))
+    documents.add_argument("--copies", type=int)
+    documents.add_argument(
+        "--include-rank",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    documents.add_argument(
+        "--gpa-conversion",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    documents.add_argument("--gpa-scale", choices=("4.5",))
     documents.add_argument("--confirmed", action="store_true")
     args = parser.parse_args()
     bridge = YonseiBridge()
@@ -128,6 +141,11 @@ def main() -> int:
                 document_type=args.document_type,
                 action="issue" if args.issue else "open",
                 output_format=args.output_format,
+                language=args.language,
+                copies=args.copies,
+                include_rank=args.include_rank,
+                gpa_conversion=args.gpa_conversion,
+                gpa_scale=args.gpa_scale,
                 confirmed=args.confirmed,
             )
     except (BridgeError, json.JSONDecodeError) as error:

@@ -159,7 +159,7 @@ Windows·macOS·Linux 모두 학교의 무료 인터넷즉시발급 결과를 �
 | 스킬 | 상세 기능 | 이렇게 요청해 보세요 |
 | --- | --- | --- |
 | [내부 복구: 증명서 환경 진단](plugins/yonsei-certificate-assistant/skills/yonsei-certificate-assistant/SKILL.md) `yonsei-certificate-assistant` | 정상 발급 흐름이 실패했을 때만 운영체제, ReportX 연결, 발급 티켓, 런타임과 글꼴을 점검합니다. 일반 사용자는 E2E 발급만 요청하면 됩니다. | “이 컴퓨터에서 연세 증명서를 발급해 줘.” |
-| [증명서 E2E 발급](plugins/yonsei-certificate-assistant/skills/issue-yonsei-certificate/SKILL.md) `issue-yonsei-certificate` | 재학·성적·졸업 등 문서 종류, 국·영문, 매수, 용도, PDF·프린터를 확인한 뒤 공식 iCert 인증부터 결과 확인까지 진행합니다. 문서번호가 필요한 요청은 한 번만 예약합니다. | “국문 재학증명서를 PDF로 발급해 줘.” |
+| [증명서 E2E 발급](plugins/yonsei-certificate-assistant/skills/issue-yonsei-certificate/SKILL.md) `issue-yonsei-certificate` | 시작 즉시 문서 종류·국영문·매수와 성적증명서의 석차·4.5 환산 여부를 한 번에 확인하고 로그인도 함께 요청합니다. 이후 현재 브라우저를 Codex Computer Use로 이어 문서번호 1회 예약과 PDF 저장까지 중간 질문 없이 진행합니다. | “영문 성적증명서를 4.5 환산만 표기해 PDF로 발급해 줘.” |
 | [내부 처리: ReportX FP3 호환 PDF](plugins/yonsei-certificate-assistant/skills/render-reportx-fp3-pdf/SKILL.md) `render-reportx-fp3-pdf` | Windows·macOS·Linux E2E 발급 중 이미 복호화된 FP3 준비 보고서를 로컬 PDF로 렌더링하고 글꼴·페이지를 검사합니다. 일반 사용자가 직접 고를 필요가 없으며 증명서 내용을 만들거나 바꾸지 않습니다. | “국문 재학증명서를 PDF로 발급해 줘.” |
 | [학생활동·실습 확인서](plugins/yonsei-certificate-assistant/skills/issue-yonsei-student-activity-documents/SKILL.md) `issue-yonsei-student-activity-documents` | 학생홍보대사, RA, 교육실습, 등록금 납부, 생활관 등 성적·재학증명서가 아닌 교내 활동 문서를 공식 메뉴에서 찾고 발급 결과 파일과 글꼴을 확인합니다. | “교육실습 참가확인서를 찾아 PDF로 발급해 줘.” |
 

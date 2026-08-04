@@ -61,8 +61,14 @@ The remaining live Yonsei placeholders have distinct contracts:
   `Tag=3`, non-empty `TagStr`, and a same-page resolved `__MARK__` with the
   same in-memory `TagStr`. Any other unresolved seal fails closed.
 
-Runtime bindings are exact-name and one-to-one. Their values and opaque
-`TagStr` metadata are never logged.
+Runtime bindings preserve prepared-page identity. A single-occurrence legacy
+binding may use an exact name, but repeated names use an exact
+`(page_index, object_index, Name)` target for every occurrence. The complete
+target set for that name must equal the objects in the prepared report; a
+missing target, an unexpected extra occurrence, or a mismatched name fails
+closed. This permits two pages to use different logo orientations or serial
+templates without applying one page's value to the other. Binding values and
+opaque `TagStr` metadata are never logged.
 
 This distinction is visually load-bearing. Treating indices as zero-based
 causes a full-page institutional mark to cover the certificate.

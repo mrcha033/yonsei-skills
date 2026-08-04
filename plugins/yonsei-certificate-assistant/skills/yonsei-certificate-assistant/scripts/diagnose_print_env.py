@@ -157,10 +157,16 @@ def recommended_path(
     }
 
 
-def diagnose() -> dict[str, Any]:
+def diagnose(*, include_printers: bool = False) -> dict[str, Any]:
+    """Return the fast PDF-path diagnosis.
+
+    Physical-printer discovery is deliberately opt-in.  It can invoke a slow
+    platform command and is irrelevant to the default compatibility-PDF path.
+    """
+
     system = platform.system()
     ports = {str(port): port_open(port) for port in REPORTX_PORTS}
-    printers = list_printers(system)
+    printers = list_printers(system) if include_printers else []
     classified = classify_printers(printers)
     reportx_listening = any(ports.values())
     recommendation = recommended_path(
@@ -191,6 +197,7 @@ def diagnose() -> dict[str, Any]:
             "compatibility_supported_os": system in {"Windows", "Darwin", "Linux"},
         },
         "printers": {
+            "checked": include_printers,
             "all": printers,
             **classified,
             "lpstat_available": shutil.which("lpstat") is not None,
@@ -224,8 +231,13 @@ def main() -> int:
         action="store_true",
         help="Emit a short human-readable summary instead of JSON.",
     )
+    parser.add_argument(
+        "--include-printers",
+        action="store_true",
+        help="Also enumerate physical printers (not needed for PDF issuance).",
+    )
     args = parser.parse_args()
-    payload = diagnose()
+    payload = diagnose(include_printers=args.include_printers)
     if args.text and not args.json:
         rec = payload["recommendation"]
         print(f"platform: {payload['platform']['system']}")

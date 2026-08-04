@@ -34,7 +34,7 @@ import tempfile
 import zlib
 from dataclasses import dataclass, field, replace
 from pathlib import Path
-from typing import Iterable, Iterator, Mapping, Sequence
+from typing import Iterable, Iterator, Mapping, Sequence, Union
 from xml.etree import ElementTree as ET
 
 
@@ -2580,23 +2580,53 @@ def _render_page_content(
     return b"".join(commands)
 
 
+RuntimeObjectTarget = tuple[int, int, str]
+RuntimeBindingKey = Union[str, RuntimeObjectTarget]
+
+
+def _runtime_binding_key(
+    value: object,
+    *,
+    label: str,
+) -> tuple[RuntimeBindingKey, str, bool]:
+    if isinstance(value, str):
+        if not value or len(value) > 256:
+            raise FP3RenderError(f"{label} runtime binding is outside policy")
+        return value, value, False
+    if (
+        not isinstance(value, tuple)
+        or len(value) != 3
+        or type(value[0]) is not int
+        or type(value[1]) is not int
+        or value[0] < 0
+        or value[1] < 0
+        or not isinstance(value[2], str)
+        or not value[2]
+        or len(value[2]) > 256
+    ):
+        raise FP3RenderError(f"{label} runtime binding is outside policy")
+    target = (value[0], value[1], value[2])
+    return target, value[2], True
+
+
 def render_fp3_pdf(
     data: bytes,
     sidecars: Sequence[bytes] = (),
     *,
     font_path: Path | None = None,
     font_map: Mapping[str, Path] | None = None,
-    runtime_pictures: Mapping[str, bytes] | None = None,
-    runtime_text: Mapping[str, str] | None = None,
-    official_empty_pictures: frozenset[str] = frozenset(),
+    runtime_pictures: Mapping[RuntimeBindingKey, bytes] | None = None,
+    runtime_text: Mapping[RuntimeBindingKey, str] | None = None,
+    official_empty_pictures: frozenset[RuntimeBindingKey] = frozenset(),
 ) -> RenderedFP3:
     """Render one FP3 stream and return a deterministic PDF byte container.
 
-    ``runtime_pictures`` and ``runtime_text`` materialize named placeholders
-    that the Windows ReportX client mutates after loading a prepared report.
-    Every supplied binding must resolve exactly one object.  Empty picture
-    placeholders are accepted only when their exact names have been approved
-    by a caller-side, source-specific resolver.
+    ``runtime_pictures`` and ``runtime_text`` materialize placeholders that
+    the Windows ReportX client mutates after loading a prepared report.  A
+    legacy string key is accepted only when its name resolves exactly once.
+    Multipage callers use ``(page_index, object_index, exact_name)`` keys; for
+    every targeted name the supplied target set must exactly equal the objects
+    in the document.  Empty picture placeholders follow the same rule.
     """
 
     if len(sidecars) > MAX_SIDECARS:
@@ -2609,70 +2639,122 @@ def render_fp3_pdf(
         if total_sidecar_bytes > MAX_TOTAL_SIDECAR_BYTES:
             raise FP3RenderError("aggregate image sidecars exceed policy")
     model = parse_fp3(data)
-    picture_bindings = dict(runtime_pictures or {})
-    text_bindings = dict(runtime_text or {})
-    if len(picture_bindings) + len(text_bindings) > MAX_SIDECARS:
+    raw_picture_bindings = dict(runtime_pictures or {})
+    raw_text_bindings = dict(runtime_text or {})
+    if not isinstance(official_empty_pictures, frozenset):
+        raise FP3RenderError("empty-picture approval is outside policy")
+    if (
+        len(raw_picture_bindings)
+        + len(raw_text_bindings)
+        + len(official_empty_pictures)
+        > MAX_SIDECARS
+    ):
         raise FP3RenderError("too many ReportX runtime bindings")
-    for name, raw in picture_bindings.items():
+    picture_bindings: dict[RuntimeBindingKey, bytes] = {}
+    text_bindings: dict[RuntimeBindingKey, str] = {}
+    empty_bindings: set[RuntimeBindingKey] = set()
+    locator_mode_by_name: dict[str, bool] = {}
+    expected_targets_by_name: dict[str, set[RuntimeObjectTarget]] = {}
+    claimed_keys: dict[RuntimeBindingKey, str] = {}
+
+    def register_key(raw_key: object, *, label: str) -> RuntimeBindingKey:
+        key, name, uses_locator = _runtime_binding_key(raw_key, label=label)
+        previous = claimed_keys.get(key)
+        if previous is not None:
+            raise FP3RenderError(
+                f"runtime target is claimed by both {previous} and {label}"
+            )
+        previous_mode = locator_mode_by_name.get(name)
+        if previous_mode is not None and previous_mode != uses_locator:
+            raise FP3RenderError(
+                "runtime binding mixes named and page-specific targets"
+            )
+        locator_mode_by_name[name] = uses_locator
+        if uses_locator:
+            assert isinstance(key, tuple)
+            expected_targets_by_name.setdefault(name, set()).add(key)
+        claimed_keys[key] = label
+        return key
+
+    for raw_key, raw in raw_picture_bindings.items():
+        key = register_key(raw_key, label="picture")
         if (
-            not isinstance(name, str)
-            or not name
-            or len(name) > 256
-            or not isinstance(raw, bytes)
+            not isinstance(raw, bytes)
             or not raw
             or len(raw) > MAX_SIDECAR_BYTES
         ):
             raise FP3RenderError("picture runtime binding is outside policy")
-    for name, value in text_bindings.items():
+        picture_bindings[key] = raw
+    for raw_key, value in raw_text_bindings.items():
+        key = register_key(raw_key, label="text")
         if (
-            not isinstance(name, str)
-            or not name
-            or len(name) > 256
-            or not isinstance(value, str)
+            not isinstance(value, str)
             or len(value) > MAX_CLEAR_TEXT_CHARS
         ):
             raise FP3RenderError("text runtime binding is outside policy")
-    if (
-        not isinstance(official_empty_pictures, frozenset)
-        or any(
-            not isinstance(name, str) or not name or len(name) > 256
-            for name in official_empty_pictures
-        )
-    ):
-        raise FP3RenderError("empty-picture approval is outside policy")
+        text_bindings[key] = value
+    for raw_key in official_empty_pictures:
+        empty_bindings.add(register_key(raw_key, label="empty picture"))
 
-    picture_matches = {name: 0 for name in picture_bindings}
-    text_matches = {name: 0 for name in text_bindings}
-    empty_matches = {name: 0 for name in official_empty_pictures}
-    for page in model.pages:
-        for item in page.objects:
+    objects_by_target: dict[RuntimeObjectTarget, DrawObject] = {}
+    actual_targets_by_name: dict[str, set[RuntimeObjectTarget]] = {}
+    for page_number, page in enumerate(model.pages):
+        for object_number, item in enumerate(page.objects):
             name = item.attrs.get("Name", "")
-            if name in text_bindings:
-                if item.class_name not in _MEMO_TYPES:
-                    raise FP3RenderError(
-                        "text runtime binding targets a non-memo object"
-                    )
-                item.text = text_bindings[name]
-                item.attrs["Text"] = text_bindings[name]
-                text_matches[name] += 1
-            if name in picture_bindings:
-                if item.class_name not in _PICTURE_TYPES | _BARCODE_TYPES:
-                    raise FP3RenderError(
-                        "picture runtime binding targets a non-picture object"
-                    )
-                picture_matches[name] += 1
-            if name in official_empty_pictures:
-                if item.class_name not in _PICTURE_TYPES | _BARCODE_TYPES:
-                    raise FP3RenderError(
-                        "empty-picture approval targets a non-picture object"
-                    )
-                empty_matches[name] += 1
-    if any(count != 1 for count in picture_matches.values()):
-        raise FP3RenderError("picture runtime binding is not one-to-one")
-    if any(count != 1 for count in text_matches.values()):
-        raise FP3RenderError("text runtime binding is not one-to-one")
-    if any(count != 1 for count in empty_matches.values()):
-        raise FP3RenderError("empty-picture approval is not one-to-one")
+            target = (page_number, object_number, name)
+            objects_by_target[target] = item
+            actual_targets_by_name.setdefault(name, set()).add(target)
+
+    for name, uses_locator in locator_mode_by_name.items():
+        actual = actual_targets_by_name.get(name, set())
+        if uses_locator:
+            expected = expected_targets_by_name[name]
+            if actual != expected:
+                raise FP3RenderError(
+                    "page-specific runtime binding multiplicity does not match"
+                )
+        elif len(actual) != 1:
+            raise FP3RenderError("named runtime binding is not one-to-one")
+
+    picture_by_item: dict[int, bytes] = {}
+    text_by_item: dict[int, str] = {}
+    empty_picture_items: set[int] = set()
+    for target, item in objects_by_target.items():
+        name = target[2]
+        picture_key = target if target in picture_bindings else name
+        text_key = target if target in text_bindings else name
+        empty_key = target if target in empty_bindings else name
+        if picture_key in picture_bindings:
+            if item.class_name not in _PICTURE_TYPES | _BARCODE_TYPES:
+                raise FP3RenderError(
+                    "picture runtime binding targets a non-picture object"
+                )
+            picture_by_item[id(item)] = picture_bindings[picture_key]
+        if text_key in text_bindings:
+            if item.class_name not in _MEMO_TYPES:
+                raise FP3RenderError(
+                    "text runtime binding targets a non-memo object"
+                )
+            value = text_bindings[text_key]
+            text_by_item[id(item)] = value
+            item.text = value
+            item.attrs["Text"] = value
+        if empty_key in empty_bindings:
+            if item.class_name not in _PICTURE_TYPES | _BARCODE_TYPES:
+                raise FP3RenderError(
+                    "empty-picture approval targets a non-picture object"
+                )
+            empty_picture_items.add(id(item))
+
+    # Every declared key has already been included in the exact name-level
+    # multiplicity check.  This assertion protects future changes to the
+    # object walk without weakening the fail-closed behavior.
+    if len(picture_by_item) != len(picture_bindings):
+        raise FP3RenderError("picture runtime binding did not resolve exactly")
+    if len(text_by_item) != len(text_bindings):
+        raise FP3RenderError("text runtime binding did not resolve exactly")
+    if len(empty_picture_items) != len(empty_bindings):
+        raise FP3RenderError("empty-picture approval did not resolve exactly")
 
     if (
         len(model.picture_cache)
@@ -2702,8 +2784,8 @@ def render_fp3_pdf(
         if (
             item.class_name in _PICTURE_TYPES | _BARCODE_TYPES
             and item.image_index == 0
-            and item.attrs.get("Name", "") not in picture_bindings
-            and item.attrs.get("Name", "") not in official_empty_pictures
+            and id(item) not in picture_by_item
+            and id(item) not in empty_picture_items
             and (
                 not model.picture_cache
                 or item.attrs.get("Name", "").upper() == "__2DBARCODE__"
@@ -2724,7 +2806,7 @@ def render_fp3_pdf(
                 continue
             name = item.attrs.get("Name", "")
             raw = _embedded_picture(item.attrs)
-            runtime_raw = picture_bindings.get(name)
+            runtime_raw = picture_by_item.get(id(item))
             if runtime_raw is not None:
                 if raw is not None:
                     raise FP3RenderError(
@@ -2736,7 +2818,7 @@ def render_fp3_pdf(
             if raw is None and item.image_index is not None:
                 index = item.image_index
                 if index == 0:
-                    if name in official_empty_pictures:
+                    if id(item) in empty_picture_items:
                         suppressed_picture_items.add(id(item))
                         continue
                     raise FP3RenderError(

@@ -12,6 +12,7 @@ import subprocess
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
@@ -20,9 +21,9 @@ from urllib.parse import urlsplit
 
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    from yonsei_bridge.cdp import BridgeError, CdpConnection, ChromeRuntime, bridge_home
+    from yonsei_bridge.cdp import BridgeError, CdpConnection, ChromeRuntime
 else:
-    from .cdp import BridgeError, CdpConnection, ChromeRuntime, bridge_home
+    from .cdp import BridgeError, CdpConnection, ChromeRuntime
 
 
 PORTAL = "https://portal.yonsei.ac.kr/ui/index.html"
@@ -34,6 +35,12 @@ COURSE_CATALOG = (
 SPACE = "https://space.yonsei.ac.kr/"
 LEARNUS = "https://ys.learnus.org/my/"
 ATTENDANCE = "https://ysrollbook.yonsei.ac.kr/"
+
+
+def certificate_cache() -> Path:
+    """Return the one cache shared with the bundled certificate runtime."""
+
+    return Path.home() / ".cache" / "yonsei-certificate-assistant"
 
 
 MENU_ROUTES = {
@@ -588,6 +595,126 @@ class BrowserPage:
             """
         )
 
+    def certificate_basket_rows(
+        self,
+        *,
+        document_label: str,
+        language_label: str,
+        copies: int,
+    ) -> list[dict[str, Any]]:
+        """Return only exact, currently printable certificate basket rows."""
+
+        payloads = self._evaluate_frames(
+            f"""
+                (() => {{
+                  const documentLabel = {json.dumps(document_label, ensure_ascii=False)};
+                  const languageLabel = {json.dumps(language_label, ensure_ascii=False)};
+                  const copies = {int(copies)};
+                  const normalize = value => String(value || '')
+                    .replace(/\\s+/g, ' ').trim();
+                  const identityFor = (radio, row) => {{
+                    const actions = [...row.querySelectorAll('a[href]')]
+                      .map(link => link.getAttribute('href') || '')
+                      .filter(href => /detail_del|goPrint|Basket|Request/i.test(href))
+                      .sort();
+                    return JSON.stringify({{
+                      id: radio.id || '',
+                      name: radio.name || '',
+                      value: radio.value || '',
+                      onclick: radio.getAttribute('onclick') || '',
+                      actions,
+                      text: normalize(row.innerText || row.textContent),
+                    }});
+                  }};
+                  return [...document.querySelectorAll('input[type="radio"][name="RB"]')]
+                    .map((radio, index) => {{
+                      const row = radio.closest('tr');
+                      if (!row || radio.disabled) return null;
+                      const text = normalize(row.innerText || row.textContent);
+                      if (!text.includes(documentLabel) || !text.includes(languageLabel)) return null;
+                      if (text.includes('출력불가')) return null;
+                      const count = text.match(/(\\d+)\\s*매(?:\\s*\\/\\s*(\\d+)\\s*매)?/);
+                      const requested = count ? Number(count[1]) : null;
+                      if (requested !== null && requested !== copies) return null;
+                      return {{
+                        portal_key: identityFor(radio, row),
+                        requested_copies: requested,
+                        output_available: text.includes('출력가능') || !text.includes('출력불가'),
+                      }};
+                    }})
+                    .filter(Boolean);
+                }})()
+            """
+        )
+        rows = [
+            row
+            for payload in payloads
+            if isinstance(payload, list)
+            for row in payload
+            if isinstance(row, dict)
+            and isinstance(row.get("portal_key"), str)
+            and row.get("portal_key")
+        ]
+        unique: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            raw_key = str(row.pop("portal_key"))
+            portal_id = hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
+            row["portal_id"] = portal_id
+            # The raw DOM locator is used only in this in-process selection.
+            # Never persist it or include it in a command result.
+            row["_portal_key"] = raw_key
+            unique[portal_id] = row
+        return list(unique.values())
+
+    def select_certificate_basket_row(
+        self,
+        *,
+        portal_key: str,
+        document_label: str,
+        language_label: str,
+    ) -> bool:
+        """Select one stable basket row and reject a non-unique identity."""
+
+        return self._evaluate_until_true(
+            f"""
+                (() => {{
+                  const wanted = {json.dumps(portal_key, ensure_ascii=False)};
+                  const documentLabel = {json.dumps(document_label, ensure_ascii=False)};
+                  const languageLabel = {json.dumps(language_label, ensure_ascii=False)};
+                  const normalize = value => String(value || '')
+                    .replace(/\\s+/g, ' ').trim();
+                  const identityFor = (radio, row) => {{
+                    const actions = [...row.querySelectorAll('a[href]')]
+                      .map(link => link.getAttribute('href') || '')
+                      .filter(href => /detail_del|goPrint|Basket|Request/i.test(href))
+                      .sort();
+                    return JSON.stringify({{
+                      id: radio.id || '',
+                      name: radio.name || '',
+                      value: radio.value || '',
+                      onclick: radio.getAttribute('onclick') || '',
+                      actions,
+                      text: normalize(row.innerText || row.textContent),
+                    }});
+                  }};
+                  const matches = [...document.querySelectorAll(
+                    'input[type="radio"][name="RB"]'
+                  )].filter((radio, index) => {{
+                    const row = radio.closest('tr');
+                    if (!row || radio.disabled) return false;
+                    const text = normalize(row.innerText || row.textContent);
+                    return text.includes(documentLabel)
+                      && text.includes(languageLabel)
+                      && identityFor(radio, row) === wanted;
+                  }});
+                  if (matches.length !== 1) return false;
+                  matches[0].click();
+                  matches[0].dispatchEvent(new Event('change', {{bubbles: true}}));
+                  return matches[0].checked === true;
+                }})()
+            """
+        )
+
     def set_certificate_count(
         self,
         *,
@@ -656,6 +783,161 @@ class BrowserPage:
                   return target.value === String(copies)
                     && counts.filter(input => input !== target)
                       .every(input => input.value === '');
+                }})()
+            """
+        )
+
+    def configure_certificate_request(
+        self,
+        *,
+        document_label: str,
+        language_label: str,
+        copies: int,
+        include_rank: bool,
+        gpa_conversion: bool,
+        gpa_scale: str | None,
+    ) -> bool:
+        """Configure one certificate row, including transcript-only options.
+
+        The certificate table uses a row-spanned document cell, so an English
+        row does not necessarily repeat the document name in ``innerText``.
+        Resolve the row from that span and change only controls owned by the
+        requested language row.  This avoids the former global first-checkbox
+        behavior that could apply a transcript option to the Korean row.
+        """
+
+        normalized_scale = str(gpa_scale or "").strip()
+        if gpa_conversion and normalized_scale != "4.5":
+            raise BridgeError("certificate_gpa_scale_must_be_4.5")
+        if not gpa_conversion and normalized_scale:
+            raise BridgeError("certificate_gpa_conversion_scale_mismatch")
+        focused = self._evaluate_until_true(
+            f"""
+                (() => {{
+                  const documentLabel = {json.dumps(document_label, ensure_ascii=False)};
+                  const languageLabel = {json.dumps(language_label, ensure_ascii=False)};
+                  const normalize = value => String(value || '')
+                    .replace(/\\s+/g, ' ').trim();
+                  const rows = [...document.querySelectorAll('table tr')];
+                  const startIndex = rows.findIndex(row =>
+                    [...row.querySelectorAll('th,td')].some(cell =>
+                      normalize(cell.innerText || cell.textContent).includes(documentLabel)
+                    ) && row.querySelector('input[type="text"][name^="min_cnt"]')
+                  );
+                  if (startIndex < 0) return false;
+                  const start = rows[startIndex];
+                  const owner = [...start.querySelectorAll('th,td')].find(cell =>
+                    normalize(cell.innerText || cell.textContent).includes(documentLabel)
+                  );
+                  const span = Math.max(1, Number(owner?.rowSpan || 1));
+                  const ownedRows = rows.slice(startIndex, startIndex + span);
+                  const targetRows = ownedRows.filter(row => {{
+                    const text = normalize(row.innerText || row.textContent);
+                    return text.includes(languageLabel)
+                      && row.querySelector('input[type="text"][name^="min_cnt"]');
+                  }});
+                  if (targetRows.length !== 1) return false;
+                  const target = targetRows[0].querySelector(
+                    'input[type="text"][name^="min_cnt"]'
+                  );
+                  if (!target || target.disabled) return false;
+                  const counts = [...document.querySelectorAll(
+                    'input[type="text"][name^="min_cnt"]'
+                  )];
+                  const setter = Object.getOwnPropertyDescriptor(
+                    HTMLInputElement.prototype, 'value'
+                  )?.set;
+                  for (const input of counts) {{
+                    if (setter) setter.call(input, '');
+                    else input.value = '';
+                    for (const type of ['input','change','blur']) {{
+                      input.dispatchEvent(new Event(type, {{bubbles: true}}));
+                    }}
+                  }}
+                  target.focus();
+                  if (typeof target.select === 'function') target.select();
+                  return document.activeElement === target;
+                }})()
+            """
+        )
+        if not focused:
+            return False
+        self.connection.command("Input.insertText", {"text": str(copies)})
+        return self._evaluate_until_true(
+            f"""
+                (() => {{
+                  const documentLabel = {json.dumps(document_label, ensure_ascii=False)};
+                  const languageLabel = {json.dumps(language_label, ensure_ascii=False)};
+                  const copies = {int(copies)};
+                  const includeRank = {json.dumps(bool(include_rank))};
+                  const includeConversion = {json.dumps(bool(gpa_conversion))};
+                  const normalize = value => String(value || '')
+                    .replace(/\\s+/g, ' ').trim();
+                  const rows = [...document.querySelectorAll('table tr')];
+                  const startIndex = rows.findIndex(row =>
+                    [...row.querySelectorAll('th,td')].some(cell =>
+                      normalize(cell.innerText || cell.textContent).includes(documentLabel)
+                    ) && row.querySelector('input[type="text"][name^="min_cnt"]')
+                  );
+                  if (startIndex < 0) return false;
+                  const start = rows[startIndex];
+                  const owner = [...start.querySelectorAll('th,td')].find(cell =>
+                    normalize(cell.innerText || cell.textContent).includes(documentLabel)
+                  );
+                  const span = Math.max(1, Number(owner?.rowSpan || 1));
+                  const targetRows = rows.slice(startIndex, startIndex + span)
+                    .filter(row => {{
+                      const text = normalize(row.innerText || row.textContent);
+                      return text.includes(languageLabel)
+                        && row.querySelector('input[type="text"][name^="min_cnt"]');
+                    }});
+                  if (targetRows.length !== 1) return false;
+                  const row = targetRows[0];
+                  const target = row.querySelector(
+                    'input[type="text"][name^="min_cnt"]'
+                  );
+                  const labelFor = box => normalize(
+                    box.getAttribute('aria-label')
+                    || box.getAttribute('title')
+                    || (box.id && document.querySelector(
+                      `label[for="${{CSS.escape(box.id)}}"]`
+                    )?.innerText)
+                    || box.closest('label')?.innerText
+                    || box.parentElement?.innerText
+                  );
+                  const boxes = [...row.querySelectorAll('input[type="checkbox"]')];
+                  const rank = boxes.filter(box => labelFor(box).includes('석차표기'));
+                  const conversion = boxes.filter(box =>
+                    labelFor(box).includes('4.5 환산 표기 추가')
+                  );
+                  if (documentLabel === '성적증명서'
+                      && (rank.length !== 1 || conversion.length !== 1)) return false;
+                  const setChecked = (box, wanted) => {{
+                    if (!box || box.disabled) return box ? box.checked === wanted : !wanted;
+                    const setter = Object.getOwnPropertyDescriptor(
+                      HTMLInputElement.prototype, 'checked'
+                    )?.set;
+                    if (setter) setter.call(box, wanted);
+                    else box.checked = wanted;
+                    for (const type of ['input','change','blur']) {{
+                      box.dispatchEvent(new Event(type, {{bubbles: true}}));
+                    }}
+                    return box.checked === wanted;
+                  }};
+                  target.dispatchEvent(new KeyboardEvent(
+                    'keyup', {{key: String(copies), bubbles: true}}
+                  ));
+                  target.dispatchEvent(new Event('input', {{bubbles: true}}));
+                  target.dispatchEvent(new Event('change', {{bubbles: true}}));
+                  target.blur();
+                  const countIsExact = target.value === String(copies)
+                    && [...document.querySelectorAll(
+                      'input[type="text"][name^="min_cnt"]'
+                    )].filter(input => input !== target)
+                      .every(input => input.value === '');
+                  return countIsExact
+                    && setChecked(rank[0], includeRank)
+                    && setChecked(conversion[0], includeConversion);
                 }})()
             """
         )
@@ -1062,13 +1344,150 @@ class YonseiBridge:
         return matches[0]
 
     @staticmethod
+    def _certificate_semantics(
+        *,
+        document_type: str,
+        language: str,
+        copies: int,
+        include_rank: bool,
+        gpa_conversion: bool,
+        gpa_scale: str | None,
+    ) -> dict[str, Any]:
+        return {
+            "document_type": document_type,
+            "language": language,
+            "copies": copies,
+            "include_rank": include_rank,
+            "gpa_conversion": gpa_conversion,
+            "gpa_scale": gpa_scale if gpa_conversion else None,
+        }
+
+    @staticmethod
+    def _certificate_semantic_key(semantics: dict[str, Any]) -> str:
+        encoded = json.dumps(
+            semantics,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        return hashlib.sha256(encoded).hexdigest()
+
+    @staticmethod
+    def _certificate_ledger_path() -> Path:
+        return certificate_cache() / "certificate-selections.json"
+
+    @classmethod
+    def _read_certificate_ledger(cls) -> dict[str, Any]:
+        path = cls._certificate_ledger_path()
+        try:
+            if path.is_symlink():
+                raise BridgeError("certificate_selection_ledger_unsafe")
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            return {
+                "schema": "yonsei-certificate-selection-ledger/v1",
+                "entries": {},
+            }
+        except (OSError, json.JSONDecodeError) as error:
+            raise BridgeError("certificate_selection_ledger_invalid") from error
+        if (
+            not isinstance(payload, dict)
+            or payload.get("schema") != "yonsei-certificate-selection-ledger/v1"
+            or not isinstance(payload.get("entries"), dict)
+        ):
+            raise BridgeError("certificate_selection_ledger_invalid")
+        return payload
+
+    @classmethod
+    def _write_certificate_ledger(cls, ledger: dict[str, Any]) -> None:
+        path = cls._certificate_ledger_path()
+        path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        os.chmod(path.parent, 0o700)
+        temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        try:
+            descriptor = os.open(temporary, flags, 0o600)
+            with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+                json.dump(
+                    ledger,
+                    handle,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    indent=2,
+                )
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temporary, path)
+            os.chmod(path, 0o600)
+        except Exception:
+            try:
+                temporary.unlink()
+            except OSError:
+                pass
+            raise
+
+    @classmethod
+    def _remember_certificate_row(
+        cls,
+        semantics: dict[str, Any],
+        portal_id: str,
+    ) -> None:
+        ledger = cls._read_certificate_ledger()
+        entries = ledger["entries"]
+        key = cls._certificate_semantic_key(semantics)
+        entries[key] = {
+            "semantics": semantics,
+            "portal_id": portal_id,
+            "updated_at": int(time.time()),
+        }
+        if len(entries) > 100:
+            ordered = sorted(
+                entries.items(),
+                key=lambda item: int(item[1].get("updated_at") or 0),
+                reverse=True,
+            )[:100]
+            ledger["entries"] = dict(ordered)
+        cls._write_certificate_ledger(ledger)
+
+    @classmethod
+    def _known_certificate_row(
+        cls,
+        semantics: dict[str, Any],
+    ) -> str | None:
+        entry = cls._read_certificate_ledger()["entries"].get(
+            cls._certificate_semantic_key(semantics)
+        )
+        if not isinstance(entry, dict):
+            return None
+        portal_id = entry.get("portal_id")
+        return portal_id if isinstance(portal_id, str) and portal_id else None
+
+    @classmethod
+    def _portal_id_has_other_semantics(
+        cls,
+        portal_id: str,
+        semantics: dict[str, Any],
+    ) -> bool:
+        wanted = cls._certificate_semantic_key(semantics)
+        for key, entry in cls._read_certificate_ledger()["entries"].items():
+            if (
+                key != wanted
+                and isinstance(entry, dict)
+                and entry.get("portal_id") == portal_id
+            ):
+                return True
+        return False
+
+    @staticmethod
     def _reportx_request(
         path: str,
         *,
         data: dict[str, Any] | None = None,
         timeout: float = 3.0,
     ) -> dict[str, Any]:
-        cache = bridge_home() / "reportx"
+        cache = certificate_cache()
         token_path = cache / "agent.token"
         try:
             token = token_path.read_text(encoding="utf-8").strip()
@@ -1109,11 +1528,12 @@ class YonseiBridge:
 
     @classmethod
     def _reportx_process_status(cls) -> dict[str, Any]:
-        cache = bridge_home() / "reportx"
+        cache = certificate_cache()
         try:
             health = cls._reportx_request("/health")
             if health.get("ok"):
                 status = cls._reportx_request("/status")
+                readiness = status.get("readiness", health.get("readiness", {}))
                 return {
                     "running": True,
                     "cache": str(cache),
@@ -1126,16 +1546,54 @@ class YonseiBridge:
                     "allow_completion_notification": (
                         status.get("allow_completion_notification") is True
                     ),
+                    "official_assets_ready": (
+                        isinstance(readiness, dict)
+                        and readiness.get("official_runtime_assets_verified") is True
+                    ),
+                    "fonts_ready": (
+                        isinstance(readiness, dict)
+                        and readiness.get("bundled_font_hashes_verified") is True
+                    ),
+                    "live_issue_ready": (
+                        isinstance(readiness, dict)
+                        and readiness.get("live_issue_ready") is True
+                    ),
                 }
         except BridgeError:
             pass
         pid_file = cache / "bridge-agent.pid"
         try:
-            pid = int(pid_file.read_text(encoding="utf-8"))
-            os.kill(pid, 0)
-            return {"running": True, "pid": pid, "cache": str(cache)}
-        except (OSError, ValueError):
-            return {"running": False, "cache": str(cache)}
+            if pid_file.is_file() and not pid_file.is_symlink():
+                pid_file.unlink()
+        except OSError:
+            pass
+        return {
+            "running": False,
+            "health_verified": False,
+            "cache": str(cache),
+        }
+
+    def _prepare_reportx_assets(self) -> None:
+        script = self._find_script("icert_print.py")
+        cache = certificate_cache()
+        cache.mkdir(parents=True, exist_ok=True, mode=0o700)
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--dir",
+                str(cache),
+                "prepare-assets",
+            ],
+            cwd=str(script.parent),
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=120,
+            check=False,
+        )
+        if completed.returncode != 0:
+            raise BridgeError("certificate_official_assets_unavailable")
 
     def _start_reportx_agent(self) -> dict[str, Any]:
         current = self._reportx_process_status()
@@ -1146,6 +1604,9 @@ class YonseiBridge:
                     "allow_fetch",
                     "allow_document_reservation",
                     "allow_completion_notification",
+                    "official_assets_ready",
+                    "fonts_ready",
+                    "live_issue_ready",
                 )
             ):
                 return current
@@ -1159,7 +1620,8 @@ class YonseiBridge:
                 "health check failed. Close it before starting the PDF printer."
             )
         script = self._find_script("icert_print.py")
-        cache = bridge_home() / "reportx"
+        self._prepare_reportx_assets()
+        cache = certificate_cache()
         cache.mkdir(parents=True, exist_ok=True)
         log_path = cache / "agent.log"
         log = log_path.open("ab")
@@ -1180,6 +1642,7 @@ class YonseiBridge:
             stderr=subprocess.STDOUT,
             start_new_session=True,
         )
+        log.close()
         (cache / "bridge-agent.pid").write_text(str(process.pid), encoding="utf-8")
         deadline = time.monotonic() + 8.0
         verified: dict[str, Any] | None = None
@@ -1188,7 +1651,18 @@ class YonseiBridge:
                 verified = self._reportx_process_status()
             except BridgeError:
                 verified = None
-            if verified and verified.get("health_verified"):
+            if verified and all(
+                verified.get(key) is True
+                for key in (
+                    "health_verified",
+                    "allow_fetch",
+                    "allow_document_reservation",
+                    "allow_completion_notification",
+                    "official_assets_ready",
+                    "fonts_ready",
+                    "live_issue_ready",
+                )
+            ):
                 break
             time.sleep(0.2)
         if process.poll() is not None:
@@ -1196,96 +1670,117 @@ class YonseiBridge:
                 "The certificate compatibility agent did not start. "
                 f"Review {log_path} and reinstall if a bundled font is missing."
             )
-        if not verified or not verified.get("health_verified"):
-            raise BridgeError(
-                "The certificate compatibility agent started but did not pass "
-                "its authenticated health check."
+        if not verified or not all(
+            verified.get(key) is True
+            for key in (
+                "health_verified",
+                "allow_fetch",
+                "allow_document_reservation",
+                "allow_completion_notification",
+                "official_assets_ready",
+                "fonts_ready",
+                "live_issue_ready",
             )
-        return {
-            "running": True,
-            "pid": process.pid,
-            "cache": str(cache),
-            "log": str(log_path),
-            "endpoint": "http://127.0.0.1:65432",
-            "health_verified": True,
-        }
+        ):
+            raise BridgeError(
+                "The certificate compatibility agent started but its assets, "
+                "fonts, or live issue capabilities are not ready."
+            )
+        return {**verified, "pid": process.pid, "log": str(log_path)}
 
     @classmethod
-    def _arm_reportx_agent(cls) -> list[str]:
-        before = cls._reportx_request("/status")
-        previous_ids = [
-            str(job.get("id"))
-            for job in before.get("jobs", [])
-            if isinstance(job, dict) and job.get("id")
-        ]
+    def _arm_reportx_agent(cls) -> str:
         armed = cls._reportx_request("/arm", data={})
-        if not armed.get("armed"):
+        arm_id = str(armed.get("arm_id") or "")
+        if (
+            not armed.get("armed")
+            or not re.fullmatch(r"[0-9a-f]{24}", arm_id)
+        ):
             raise BridgeError("certificate_agent_arm_failed")
-        return previous_ids
+        return arm_id
 
     @classmethod
     def _wait_reportx_result(
         cls,
-        previous_ids: list[str],
+        arm_id: str,
         *,
-        timeout: float = 120.0,
+        timeout: float = 55.0,
     ) -> dict[str, Any]:
         success = {
             "server_report_rendered_pdf_unverified",
             "server_pdf_saved_unverified",
-        }
-        terminal_failure = {
-            "server_report_fonts_required",
-            "server_report_render_failed",
-            "server_pdf_integrity_failed",
-            "document_number_failed",
-            "document_number_reservation_unknown",
-            "network_failed",
-            "invalid_ticket",
+            "server_document_reused_unverified",
         }
         deadline = time.monotonic() + timeout
-        previous = set(previous_ids)
+        exact_job_id: str | None = None
         last: dict[str, Any] | None = None
         while time.monotonic() < deadline:
-            status = cls._reportx_request("/status")
-            new_jobs = [
-                job
-                for job in status.get("jobs", [])
-                if isinstance(job, dict) and str(job.get("id", "")) not in previous
-            ]
-            if new_jobs:
-                last = new_jobs[-1]
-                state = str(last.get("status", ""))
-                if state in success:
-                    document_number = last.get("document_number", {})
-                    if document_number.get("status") == "reserved":
-                        completion = document_number.get("completion_status")
-                        if completion in {
-                            "not_requested",
-                            "request_started_unknown",
-                        }:
-                            time.sleep(0.5)
-                            continue
-                    return cls._verify_reportx_result(last)
-                if state in terminal_failure:
+            if exact_job_id is None:
+                correlated = cls._reportx_request(
+                    "/jobs?correlation_id="
+                    + urllib.parse.quote(arm_id, safe="")
+                )
+                jobs = [
+                    job
+                    for job in correlated.get("jobs", [])
+                    if isinstance(job, dict)
+                    and job.get("correlation_id") == arm_id
+                    and job.get("id")
+                ]
+                if len(jobs) > 1:
                     return {
                         "verified": False,
-                        "status": state,
-                        "job_id": last.get("id"),
-                        "document_number_status": last.get(
-                            "document_number", {}
-                        ).get("status"),
+                        "status": "ambiguous_correlated_jobs_do_not_retry",
+                        "job_id": None,
                     }
-            time.sleep(0.5)
+                if not jobs:
+                    time.sleep(0.1)
+                    continue
+                exact_job_id = str(jobs[0]["id"])
+            remaining = max(0.0, deadline - time.monotonic())
+            wait_seconds = min(30.0, remaining)
+            encoded_job_id = urllib.parse.quote(exact_job_id, safe="")
+            response = cls._reportx_request(
+                f"/jobs/{encoded_job_id}?wait={wait_seconds:.3f}",
+                timeout=wait_seconds + 3.0,
+            )
+            candidate = response.get("job")
+            if not isinstance(candidate, dict):
+                return {
+                    "verified": False,
+                    "status": "exact_job_response_invalid_do_not_retry",
+                    "job_id": exact_job_id,
+                }
+            if candidate.get("correlation_id") != arm_id:
+                return {
+                    "verified": False,
+                    "status": "job_correlation_mismatch_do_not_retry",
+                    "job_id": exact_job_id,
+                }
+            last = candidate
+            if response.get("terminal") is not True:
+                continue
+            state = str(last.get("status", ""))
+            if state in success:
+                return cls._verify_reportx_result(last)
+            return {
+                "verified": False,
+                "status": state or "terminal_failure_do_not_retry",
+                "reason_code": last.get("reason_code"),
+                "job_id": exact_job_id,
+                "document_number_status": last.get(
+                    "document_number", {}
+                ).get("status"),
+            }
         return {
             "verified": False,
             "status": "timeout_unknown_do_not_retry",
-            "job_id": last.get("id") if last else None,
+            "job_id": exact_job_id,
         }
 
     @staticmethod
     def _verify_reportx_result(job: dict[str, Any]) -> dict[str, Any]:
-        cache = bridge_home() / "reportx"
+        cache = certificate_cache()
         rendered = job.get("rendered_pdf", {})
         artifact = job.get("artifact", {})
         source = (
@@ -2091,18 +2586,54 @@ class YonseiBridge:
             ),
         }
 
-    @staticmethod
+    @classmethod
     def _select_certificate_for_free_print(
+        cls,
         page: BrowserPage,
         *,
+        document_type: str,
         document_label: str,
         language_label: str,
         copies: int,
+        include_rank: bool,
+        gpa_conversion: bool,
+        gpa_scale: str | None,
     ) -> dict[str, Any]:
-        """Reach the official basket and select one matching free-print row."""
+        """Select an exact basket row, creating at most one request if absent."""
+
+        semantics = cls._certificate_semantics(
+            document_type=document_type,
+            language=language_label,
+            copies=copies,
+            include_rank=include_rank,
+            gpa_conversion=gpa_conversion,
+            gpa_scale=gpa_scale,
+        )
         requested_new = False
         checked_basket = False
-        basket_waits = 0
+        baseline_ids: set[str] | None = None
+
+        def select_candidate(candidate: dict[str, Any], source: str) -> dict[str, Any]:
+            portal_id = str(candidate.get("portal_id") or "")
+            raw_key = str(candidate.get("_portal_key") or "")
+            if not portal_id or not raw_key or not page.select_certificate_basket_row(
+                portal_key=raw_key,
+                document_label=document_label,
+                language_label=language_label,
+            ):
+                raise BridgeError("certificate_exact_basket_row_unavailable")
+            cls._remember_certificate_row(semantics, portal_id)
+            return {
+                "selected": True,
+                "source": source,
+                "document_label": document_label,
+                "language_label": language_label,
+                "copies": copies,
+                "include_rank": include_rank,
+                "gpa_conversion": gpa_conversion,
+                "gpa_scale": gpa_scale if gpa_conversion else None,
+            }
+
         for _ in range(30):
             snapshot = page.snapshot()
             title = snapshot.title
@@ -2116,21 +2647,49 @@ class YonseiBridge:
                 time.sleep(2.0)
                 continue
 
-            if page.select_radio_in_row(
-                name="RB",
-                contains=[document_label, language_label],
-            ):
-                return {
-                    "selected": True,
-                    "source": (
-                        "new_request"
-                        if requested_new
-                        else "existing_unprinted_basket"
-                    ),
-                    "document_label": document_label,
-                    "language_label": language_label,
-                    "copies": copies,
-                }
+            candidates = page.certificate_basket_rows(
+                document_label=document_label,
+                language_label=language_label,
+                copies=copies,
+            )
+            if candidates:
+                if requested_new:
+                    new_candidates = [
+                        candidate
+                        for candidate in candidates
+                        if baseline_ids is None
+                        or candidate.get("portal_id") not in baseline_ids
+                    ]
+                    if len(new_candidates) == 1:
+                        return select_candidate(new_candidates[0], "new_request")
+                    if len(new_candidates) > 1:
+                        raise BridgeError("certificate_new_basket_row_ambiguous")
+                known_id = cls._known_certificate_row(semantics)
+                exact = [
+                    candidate
+                    for candidate in candidates
+                    if candidate.get("portal_id") == known_id
+                ]
+                if len(exact) == 1:
+                    return select_candidate(exact[0], "existing_exact_basket")
+                if any(
+                    cls._portal_id_has_other_semantics(
+                        str(candidate.get("portal_id") or ""),
+                        semantics,
+                    )
+                    for candidate in candidates
+                ):
+                    raise BridgeError("certificate_basket_option_mismatch_do_not_duplicate")
+                if document_type == "transcript":
+                    # Rank/conversion are not displayed in the basket.  An
+                    # unrecorded transcript cannot be proven equivalent.
+                    raise BridgeError("certificate_basket_options_unverifiable_do_not_duplicate")
+                if len(candidates) == 1:
+                    return select_candidate(
+                        candidates[0],
+                        "existing_unambiguous_basket",
+                    )
+                raise BridgeError("certificate_basket_row_ambiguous_do_not_duplicate")
 
             if "메인" in title and "증명서 무료 출력/전송" in text:
                 if not page.click_href_fragment("Service('INTERNET')"):
@@ -2151,13 +2710,15 @@ class YonseiBridge:
                 continue
 
             if checked_basket and "증명서 보관함" in title:
-                if basket_waits < 5:
-                    basket_waits += 1
-                    time.sleep(1.0)
-                    continue
+                if baseline_ids is None:
+                    baseline_ids = {
+                        str(candidate.get("portal_id"))
+                        for candidate in candidates
+                        if candidate.get("portal_id")
+                    }
                 if not page.click_href_fragment("Request"):
                     raise BridgeError("certificate_request_link_missing")
-                time.sleep(2.0)
+                time.sleep(1.0)
                 continue
 
             if "학위선택" in title:
@@ -2169,27 +2730,29 @@ class YonseiBridge:
                 continue
 
             if "증명서 선택" in title:
-                if not page.set_certificate_count(
+                if not page.configure_certificate_request(
                     document_label=document_label,
                     language_label=language_label,
                     copies=copies,
+                    include_rank=include_rank,
+                    gpa_conversion=gpa_conversion,
+                    gpa_scale=gpa_scale,
                 ):
-                    raise BridgeError("certificate_type_or_language_unavailable")
-                time.sleep(0.6)
+                    raise BridgeError("certificate_type_language_or_options_unavailable")
+                time.sleep(0.2)
                 if not page.click_text("다음"):
                     raise BridgeError("certificate_selection_next_missing")
-                requested_new = True
-                time.sleep(2.0)
+                time.sleep(1.0)
                 continue
 
             if "신청증명서함" in title:
                 if not page.click_href_fragment("goReq"):
                     if not page.click_href_fragment("Request"):
                         raise BridgeError("certificate_request_submit_missing")
-                    time.sleep(2.0)
+                    time.sleep(1.0)
                     continue
                 requested_new = True
-                time.sleep(3.0)
+                time.sleep(1.5)
                 continue
 
             if "증명서 신청" in text:
@@ -2210,13 +2773,15 @@ class YonseiBridge:
         language: str | None = None,
         copies: int | None = None,
         purpose: str | None = None,
+        include_rank: bool | None = None,
+        gpa_conversion: bool | None = None,
+        gpa_scale: str | None = None,
         confirmed: bool = False,
     ) -> dict[str, Any]:
         if action not in {"open", "issue"}:
             raise BridgeError("Document action must be open or issue.")
         if output_format not in {"pdf", "print"}:
             raise BridgeError("Document output format must be pdf or print.")
-        page = self._page()
         if document_type in {"education_practicum", "teaching"}:
             snapshot = self.academic_applications(category="교직", application="교육실습참가확인서출력")
             runtime = (
@@ -2244,8 +2809,55 @@ class YonseiBridge:
                 "issuance_performed": False,
                 "font_verification_required": action == "issue",
             }
-        page.navigate(PORTAL, wait=2.5)
-        if page.login_state() != "connected":
+        visible_document = DOCUMENT_LABELS.get(document_type)
+        if not visible_document:
+            raise BridgeError("unsupported_certificate_type")
+        if action == "issue":
+            missing = [
+                name
+                for name, value in (("language", language), ("copies", copies))
+                if value is None
+            ]
+            if document_type == "transcript":
+                if include_rank is None:
+                    missing.append("include_rank")
+                if gpa_conversion is None:
+                    missing.append("gpa_conversion")
+                if gpa_conversion is True and gpa_scale is None:
+                    missing.append("gpa_scale")
+            if missing:
+                raise BridgeError("missing:" + ",".join(missing))
+        requested_rank = bool(include_rank)
+        requested_conversion = bool(gpa_conversion)
+        normalized_scale = str(gpa_scale).strip() if gpa_scale is not None else None
+        if document_type != "transcript" and (
+            requested_rank or requested_conversion or normalized_scale
+        ):
+            raise BridgeError("certificate_transcript_options_not_applicable")
+        if requested_conversion and normalized_scale != "4.5":
+            raise BridgeError("certificate_gpa_scale_must_be_4.5")
+        if not requested_conversion and normalized_scale:
+            raise BridgeError("certificate_gpa_conversion_scale_mismatch")
+        normalized_language = {
+            "ko": "국문",
+            "korean": "국문",
+            "en": "영문",
+            "english": "영문",
+        }.get((language or "ko").casefold(), language or "국문")
+        requested_copies = copies if copies is not None else 1
+        if requested_copies != 1:
+            raise BridgeError("certificate_single_copy_only")
+
+        if self.page is None:
+            connection_status = self.connect()
+            assert self.page is not None
+            page = self.page
+            login_state = str(connection_status.get("state", "unknown"))
+        else:
+            page = self.page
+            page.navigate(PORTAL, wait=2.5)
+            login_state = page.wait_for_login_state()
+        if login_state != "connected":
             raise BridgeError("login_required")
         previous_targets = self.runtime.target_ids()
         if not page.click_text("인터넷증명서"):
@@ -2272,18 +2884,6 @@ class YonseiBridge:
             raise BridgeError(
                 "The Portal opened certificate original verification instead of issuance."
             )
-        visible_document = DOCUMENT_LABELS.get(document_type)
-        if not visible_document:
-            raise BridgeError("unsupported_certificate_type")
-        normalized_language = {
-            "ko": "국문",
-            "korean": "국문",
-            "en": "영문",
-            "english": "영문",
-        }.get((language or "ko").casefold(), language or "국문")
-        requested_copies = copies if copies is not None else 1
-        if requested_copies != 1:
-            raise BridgeError("certificate_single_copy_only")
         snapshot = page.snapshot()
         if action == "issue" and not confirmed:
             return {
@@ -2292,9 +2892,11 @@ class YonseiBridge:
                 "state": "confirmation_required",
                 "review": {
                     "document_type": document_type,
-                    "language": language,
-                    "copies": copies,
-                    "purpose": purpose,
+                    "language": normalized_language,
+                    "copies": requested_copies,
+                    "include_rank": requested_rank,
+                    "gpa_conversion": requested_conversion,
+                    "gpa_scale": normalized_scale if requested_conversion else None,
                     "output_format": output_format,
                 },
                 "snapshot": snapshot.as_dict(),
@@ -2316,16 +2918,27 @@ class YonseiBridge:
             "document_type": document_type,
             "language": normalized_language,
             "copies": requested_copies,
-            "purpose": purpose,
+            "include_rank": requested_rank,
+            "gpa_conversion": requested_conversion,
+            "gpa_scale": normalized_scale if requested_conversion else None,
             "output_format": output_format,
         }
+        system = platform.system()
+        runtime = (
+            {"mode": "official-reportx-physical"}
+            if output_format == "print" and system == "Windows"
+            else self._start_reportx_agent()
+        )
         selection = self._select_certificate_for_free_print(
             page,
+            document_type=document_type,
             document_label=visible_document,
             language_label=normalized_language,
             copies=requested_copies,
+            include_rank=requested_rank,
+            gpa_conversion=requested_conversion,
+            gpa_scale=normalized_scale,
         )
-        system = platform.system()
         if output_format == "print" and system == "Windows":
             return {
                 "schema": "yonsei-document-command/v1",
@@ -2333,37 +2946,19 @@ class YonseiBridge:
                 "state": "official_reportx_physical_ready",
                 "review": review,
                 "selection": selection,
-                "runtime": {"mode": "official-reportx-physical"},
+                "runtime": runtime,
                 "issuance_performed": False,
                 "next_step": "choose-the-named-physical-printer",
                 "font_verification_required": False,
             }
-
-        runtime = self._start_reportx_agent()
         result: dict[str, Any] = {
             "verified": False,
             "status": "no_print_attempt",
         }
-        official_attempts = 0
-        for offset in range(10):
-            if offset and not page.select_radio_in_row(
-                name="RB",
-                contains=[visible_document, normalized_language],
-                skip=offset,
-            ):
-                break
-            previous_job_ids = self._arm_reportx_agent()
-            if not page.click_href_fragment("goPrint"):
-                raise BridgeError("certificate_printer_output_missing")
-            official_attempts += 1
-            result = self._wait_reportx_result(previous_job_ids)
-            if result.get("verified") is True:
-                break
-            if (
-                result.get("document_number_status")
-                != "blocked_by_existing_no_retry_guard"
-            ):
-                break
+        arm_id = self._arm_reportx_agent()
+        if not page.click_href_fragment("goPrint"):
+            raise BridgeError("certificate_printer_output_missing")
+        result = self._wait_reportx_result(arm_id)
         completed = result.get("verified") is True
         return {
             "schema": "yonsei-document-command/v1",
@@ -2377,7 +2972,7 @@ class YonseiBridge:
             "output_format": output_format,
             "issuance_performed": completed,
             "write_attempted_once": True,
-            "official_output_clicks": official_attempts,
+            "official_output_clicks": 1,
             "retry_allowed": False,
             "next_step": (
                 "done"

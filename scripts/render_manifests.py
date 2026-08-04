@@ -20,7 +20,7 @@ INSTALLATIONS = {
 
 SPECS = {
     "yonsei-student-companion": {
-        "version": "0.5.1",
+        "version": "0.6.0",
         "display": "오늘의 연세·포털 연결",
         "description": "한 번 로그인한 전용 관리 브라우저를 이어 쓰고 포털·Underwood·LearnUs·출결과 생활관·장학금·교환학생 업무를 자연어로 처리합니다.",
         "short": "한 번 로그인하고 학교생활을 한눈에",
@@ -68,14 +68,16 @@ SPECS = {
         ],
     },
     "yonsei-certificate-assistant": {
-        "version": "0.10.1",
+        "version": "0.11.0",
         "display": "연세 증명서 발급 도우미",
-        "description": "‘오늘의 연세·포털 연결’과 함께 Windows·macOS·Linux에서 무료 인터넷즉시발급 결과를 로컬 PDF로 저장하고 증명서와 학생활동·실습 확인서의 연세 글꼴을 유지합니다.",
-        "short": "운영체제에 맞춰 증명서 발급 진행",
-        "long": "Windows·macOS·Linux 모두 학교의 인증된 인터넷즉시발급 화면과 문서번호 1회 예약을 포함한 로컬 PDF 프린터를 사용합니다. PDF를 안전하게 저장하고 해시를 다시 확인한 뒤 공식 완료 주소를 한 번만 통지합니다. 재배포 허가를 받은 연세 제목체와 본문체를 모두 검증하고 실제 서식이 참조한 글꼴만 PDF에 임베드하며, 다른 글꼴이 섞이면 발급 결과를 거부합니다. Windows 실물 인쇄를 명시한 경우에만 공식 ReportX를 사용합니다.",
+        "description": "Windows·macOS·Linux에서 필요한 발급 선택과 로그인을 처음에 한 번 확인하고, Codex Computer Use로 무료 인터넷즉시발급 결과를 로컬 PDF로 저장합니다.",
+        "short": "처음 한 번 확인하고 증명서 PDF 발급",
+        "long": "증명서 종류·언어·매수와 성적증명서의 석차·4.5 환산 여부를 처음에 함께 확인하고, 현재 브라우저의 공식 로그인 화면은 Codex Computer Use로 이어서 처리합니다. 검증된 자산을 미리 준비한 뒤 문서번호 예약 전 전체 렌더링을 점검하고, 정확히 한 번의 출력 요청만 추적해 PDF를 저장하고 해시를 다시 확인합니다. 재배포 허가를 받은 연세 제목체와 본문체를 검증하며 Windows 실물 인쇄를 명시한 경우에만 공식 ReportX를 사용합니다.",
         "keywords": ["yonsei", "certificate", "icert", "print", "pdf", "windows", "macos", "linux", "reportx"],
         "capabilities": [
             "ReportX 인계 정보 진단",
+            "발급 선택·로그인 최초 일괄 확인",
+            "Codex Computer Use 현재 브라우저 조작",
             "검증된 런타임 자산 준비",
             "FP3 호환 PDF 렌더링",
             "문서번호 1회 예약 보호",

@@ -339,6 +339,14 @@ class StudentRouter:
             )
         elif intent == "documents":
             self._required(request, ("document_type",))
+            issuing = action in {"issue", "print"}
+            if issuing:
+                required = ["language", "copies", "output_format"]
+                if request.get("document_type") == "transcript":
+                    required.extend(("include_rank", "gpa_conversion"))
+                    if request.get("gpa_conversion") is True:
+                        required.append("gpa_scale")
+                self._required(request, tuple(required))
             output_format = str(
                 request.get(
                     "output_format",
@@ -352,6 +360,9 @@ class StudentRouter:
                 language=request.get("language"),
                 copies=request.get("copies"),
                 purpose=request.get("purpose"),
+                include_rank=request.get("include_rank"),
+                gpa_conversion=request.get("gpa_conversion"),
+                gpa_scale=request.get("gpa_scale"),
                 confirmed=confirmed,
             )
         else:

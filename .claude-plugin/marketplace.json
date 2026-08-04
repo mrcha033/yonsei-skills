@@ -11,7 +11,7 @@
       "displayName": "오늘의 연세·포털 연결",
       "source": "./plugins/yonsei-student-companion",
       "description": "한 번 로그인한 전용 관리 브라우저를 이어 쓰고 포털·Underwood·LearnUs·출결과 생활관·장학금·교환학생 업무를 자연어로 처리합니다.",
-      "version": "0.5.1",
+      "version": "0.6.0",
       "author": {
         "name": "mrcha033"
       },
@@ -153,8 +153,8 @@
       "name": "yonsei-certificate-assistant",
       "displayName": "연세 증명서 발급 도우미",
       "source": "./plugins/yonsei-certificate-assistant",
-      "description": "‘오늘의 연세·포털 연결’과 함께 Windows·macOS·Linux에서 무료 인터넷즉시발급 결과를 로컬 PDF로 저장하고 증명서와 학생활동·실습 확인서의 연세 글꼴을 유지합니다.",
-      "version": "0.10.1",
+      "description": "Windows·macOS·Linux에서 필요한 발급 선택과 로그인을 처음에 한 번 확인하고, Codex Computer Use로 무료 인터넷즉시발급 결과를 로컬 PDF로 저장합니다.",
+      "version": "0.11.0",
       "author": {
         "name": "mrcha033"
       },

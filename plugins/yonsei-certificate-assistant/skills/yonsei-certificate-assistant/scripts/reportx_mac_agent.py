@@ -86,6 +86,7 @@ MAX_SUBMISSIONS_PER_MINUTE = 10
 MAX_JOB_MANIFESTS = 200
 MAX_OUTPUT_BYTES = 512 * 1024 * 1024
 PROTOCOL_ARM_TTL_SECONDS = 120
+SEMANTIC_DUPLICATE_TTL_SECONDS = 120
 REMOTE_HOSTS = frozenset(
     {
         "icert.yonsei.ac.kr",
@@ -108,6 +109,39 @@ TERMINAL_STATES = frozenset(
         "decode_failed",
         "transport_failed",
         "protocol_failed",
+        "duplicate_server_document",
+        "server_document_reused_unverified",
+    }
+)
+SAFE_REASON_CODES = frozenset(
+    {
+        "agent_restarted_during_job",
+        "artifact_hash_mismatch",
+        "completion_notification_failed",
+        "completion_notification_unknown",
+        "decode_failed",
+        "document_number_already_reserved",
+        "document_number_preflight_rejected",
+        "document_number_preflight_render_rejected",
+        "document_number_reservation_required",
+        "document_number_reservation_unknown",
+        "duplicate_server_document",
+        "fp3_render_rejected",
+        "fp3_structure_rejected",
+        "invalid_ticket",
+        "official_assets_required",
+        "original_fonts_required",
+        "output_quota_exceeded",
+        "post_reservation_materialization_failed",
+        "protocol_failed",
+        "rendered_pdf_integrity_failed",
+        "runtime_profile_rejected",
+        "transport_failed",
+        "unexpected_worker_error",
+        "unsupported_logo_policy",
+        "unsupported_protocol",
+        "worker_cancelled",
+        "worker_unavailable",
     }
 )
 YONSEI_TITLE_FONT_NAMES = (
@@ -359,6 +393,8 @@ class Job:
     created_at: str
     source: str
     param: str | None = field(default=None, repr=False)
+    correlation_id: str | None = None
+    finished_at: str | None = None
     status: str = "received"
     ticket_length: int | None = None
     ticket_sha256: str | None = None
@@ -393,6 +429,8 @@ class Job:
     print_attempted: bool = False
     printed: bool = False
     print_status: str = "not_requested"
+    reason_code: str | None = None
+    duplicate_of_job_id: str | None = None
     messages: list[str] = field(default_factory=list)
 
     def note(self, message: str) -> None:
@@ -406,7 +444,9 @@ class Job:
             "schema": "yonsei-reportx-job/v1",
             "id": self.id,
             "created_at": self.created_at,
+            "finished_at": self.finished_at,
             "source": self.source,
+            "correlation_id": self.correlation_id,
             "status": self.status,
             "ticket": {
                 "length": self.ticket_length,
@@ -470,8 +510,175 @@ class Job:
                 "printed": self.printed,
                 "status": self.print_status,
             },
+            "reason_code": self.reason_code,
+            "duplicate_of_job_id": self.duplicate_of_job_id,
             "messages": self.messages[-20:],
         }
+
+
+def set_job_reason(job: Job, code: str | None) -> None:
+    """Attach one controlled, non-sensitive reason suitable for public status."""
+
+    if code is not None and code not in SAFE_REASON_CODES:
+        code = "protocol_failed"
+    job.reason_code = code
+
+
+def job_is_settled(job: Job) -> bool:
+    """Return whether callers can stop waiting for this job."""
+
+    if job.status not in TERMINAL_STATES:
+        return False
+    return (
+        job.document_number_status != "request_started_unknown"
+        and job.completion_status != "request_started_unknown"
+    )
+
+
+def _manifest_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _manifest_str(value: Any) -> str | None:
+    return value if isinstance(value, str) else None
+
+
+def _manifest_int(value: Any) -> int | None:
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+def _manifest_bool(value: Any) -> bool:
+    return value is True
+
+
+def _restored_output_path(value: Any, output_dir: Path) -> str | None:
+    """Accept only an existing regular file inside this cache's output dir."""
+
+    raw = _manifest_str(value)
+    if not raw:
+        return None
+    try:
+        candidate = Path(raw).expanduser().resolve(strict=True)
+        root = output_dir.resolve(strict=True)
+        candidate.relative_to(root)
+        if not stat.S_ISREG(candidate.lstat().st_mode):
+            return None
+    except (OSError, RuntimeError, ValueError):
+        return None
+    return str(candidate)
+
+
+def restore_job_manifest(payload: Any, output_dir: Path) -> Job | None:
+    """Restore the bounded public/private state needed after an agent restart."""
+
+    value = _manifest_dict(payload)
+    if value.get("schema") != "yonsei-reportx-job/v1":
+        return None
+    job_id = _manifest_str(value.get("id"))
+    created_at = _manifest_str(value.get("created_at"))
+    source = _manifest_str(value.get("source"))
+    if (
+        not job_id
+        or not re.fullmatch(r"[A-Za-z0-9_.-]{1,80}", job_id)
+        or not created_at
+        or not source
+    ):
+        return None
+
+    ticket = _manifest_dict(value.get("ticket"))
+    decoder = _manifest_dict(value.get("decoder"))
+    response = _manifest_dict(value.get("response"))
+    artifact = _manifest_dict(value.get("artifact"))
+    rendered = _manifest_dict(value.get("rendered_pdf"))
+    container = _manifest_dict(value.get("reportx_container"))
+    document_number = _manifest_dict(value.get("document_number"))
+    print_state = _manifest_dict(value.get("print"))
+    fonts: list[tuple[str, str]] = []
+    raw_fonts = rendered.get("fonts")
+    if isinstance(raw_fonts, list):
+        for item in raw_fonts[:20]:
+            font = _manifest_dict(item)
+            name = _manifest_str(font.get("file"))
+            digest = _manifest_str(font.get("sha256"))
+            if name and digest and re.fullmatch(r"[0-9a-f]{64}", digest):
+                fonts.append((Path(name).name, digest))
+    raw_additional = container.get("additional_sha256")
+    additional = tuple(
+        item
+        for item in (raw_additional if isinstance(raw_additional, list) else [])[:64]
+        if isinstance(item, str) and re.fullmatch(r"[0-9a-f]{64}", item)
+    )
+    raw_messages = value.get("messages")
+    messages = [
+        item[:500]
+        for item in (raw_messages if isinstance(raw_messages, list) else [])[-20:]
+        if isinstance(item, str)
+    ]
+    job = Job(
+        id=job_id,
+        created_at=created_at,
+        source=source,
+        correlation_id=_manifest_str(value.get("correlation_id")),
+        finished_at=_manifest_str(value.get("finished_at")),
+        status=_manifest_str(value.get("status")) or "protocol_failed",
+        ticket_length=_manifest_int(ticket.get("length")),
+        ticket_sha256=_manifest_str(ticket.get("sha256")),
+        decoder_id=_manifest_str(decoder.get("id")),
+        decoder_version=_manifest_str(decoder.get("version")),
+        command=_manifest_str(value.get("command")),
+        request_host=_manifest_str(value.get("request_host")),
+        response_length=_manifest_int(response.get("length")),
+        response_sha256=_manifest_str(response.get("sha256")),
+        artifact_path=_restored_output_path(artifact.get("path"), output_dir),
+        artifact_sha256=_manifest_str(artifact.get("sha256")),
+        artifact_kind=_manifest_str(artifact.get("kind")),
+        rendered_pdf_path=_restored_output_path(rendered.get("path"), output_dir),
+        rendered_pdf_sha256=_manifest_str(rendered.get("sha256")),
+        rendered_page_count=_manifest_int(rendered.get("page_count")),
+        rendered_object_count=_manifest_int(rendered.get("object_count")),
+        rendered_replay_verified=_manifest_bool(
+            rendered.get("deterministic_replay_verified")
+        ),
+        rendered_fonts=tuple(fonts),
+        bundle_primary_length=_manifest_int(container.get("primary_length")),
+        bundle_primary_sha256=_manifest_str(container.get("primary_sha256")),
+        bundle_additional_sha256=additional,
+        document_number_status=(
+            _manifest_str(document_number.get("status")) or "not_requested"
+        ),
+        document_number_length=_manifest_int(document_number.get("length")),
+        document_number_response_status=_manifest_int(
+            document_number.get("response_status")
+        ),
+        document_number_response_length=_manifest_int(
+            document_number.get("response_length")
+        ),
+        document_number_response_shape=_manifest_str(
+            document_number.get("response_shape")
+        ),
+        completion_attempted=_manifest_bool(
+            document_number.get("completion_attempted")
+        ),
+        completion_notified=_manifest_bool(
+            document_number.get("completion_notified")
+        ),
+        completion_status=(
+            _manifest_str(document_number.get("completion_status"))
+            or "not_requested"
+        ),
+        completion_response_status=_manifest_int(
+            document_number.get("completion_response_status")
+        ),
+        verification=_manifest_str(value.get("verification")) or "not_performed",
+        print_attempted=_manifest_bool(print_state.get("attempted")),
+        printed=_manifest_bool(print_state.get("printed")),
+        print_status=_manifest_str(print_state.get("status")) or "not_requested",
+        reason_code=_manifest_str(value.get("reason_code")),
+        duplicate_of_job_id=_manifest_str(value.get("duplicate_of_job_id")),
+        messages=messages,
+    )
+    set_job_reason(job, job.reason_code)
+    return job
 
 
 class AgentState:
@@ -501,52 +708,366 @@ class AgentState:
             self.official_assets: OfficialAssets | None = load_official_assets(root)
         except ReportXProfileError:
             self.official_assets = None
+        try:
+            mapped_font_hashes = {
+                TrueTypeFont(path).sha256
+                for path in set(self.font_map.values())
+            }
+        except (OSError, TypeError, ValueError):
+            mapped_font_hashes = set()
+        self.font_hashes_verified = (
+            mapped_font_hashes == set(BUNDLED_FONT_SHA256.values())
+        )
         self.lock = threading.RLock()
         self.jobs: dict[str, Job] = {}
+        self.job_events: dict[str, threading.Event] = {}
         self.events: list[str] = []
         self.pending_jobs = 0
         self.active_tickets: dict[str, str] = {}
+        self.response_claims: dict[str, str] = {}
         self.submission_times: deque[float] = deque()
         self.protocol_arm_deadline = 0.0
+        self.protocol_arm_id: str | None = None
+        self.worker_futures: dict[
+            str, concurrent.futures.Future[None]
+        ] = {}
+        self._load_prior_jobs()
         self.executor = concurrent.futures.ThreadPoolExecutor(
             max_workers=2,
             thread_name_prefix="reportx-worker",
         )
+
+    @staticmethod
+    def _job_holds_response_claim(job: Job) -> bool:
+        return bool(
+            job.document_number_status
+            not in {
+                "not_requested",
+                "explicit_opt_in_required",
+                "preflight_rejected",
+            }
+            and not job.completion_notified
+        )
+
+    def _completed_job_is_recent(self, job: Job) -> bool:
+        if not job_is_settled(job):
+            return False
+        if job.status == "server_pdf_saved_unverified":
+            raw_path = job.artifact_path
+            expected_digest = job.artifact_sha256
+        elif job.status == "server_report_rendered_pdf_unverified":
+            raw_path = job.rendered_pdf_path
+            expected_digest = job.rendered_pdf_sha256
+        else:
+            return False
+        if not raw_path or not expected_digest:
+            return False
+        try:
+            path = Path(raw_path).resolve(strict=True)
+            path.relative_to(self.out_dir.resolve(strict=True))
+            info = path.lstat()
+            if (
+                not stat.S_ISREG(info.st_mode)
+                or info.st_size > MAX_RESPONSE_BODY
+            ):
+                return False
+            body = path.read_bytes()
+        except (OSError, RuntimeError, ValueError):
+            return False
+        if sha256_bytes(body) != expected_digest or not is_pdf_container(body):
+            return False
+        stamp = job.finished_at or job.created_at
+        try:
+            age = (
+                datetime.now(timezone.utc)
+                - datetime.fromisoformat(stamp)
+            ).total_seconds()
+        except (TypeError, ValueError):
+            return False
+        return 0 <= age <= SEMANTIC_DUPLICATE_TTL_SECONDS
+
+    def _load_prior_jobs(self) -> None:
+        """Reload bounded manifests and settle work interrupted by a restart."""
+
+        try:
+            manifests = sorted(
+                self.jobs_dir.glob("*.json"),
+                key=lambda path: path.name,
+            )[-MAX_JOB_MANIFESTS:]
+        except OSError:
+            return
+        for path in manifests:
+            try:
+                if not stat.S_ISREG(path.lstat().st_mode):
+                    continue
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+                continue
+            job = restore_job_manifest(payload, self.out_dir)
+            if job is None or path.stem != job.id:
+                continue
+            if job.document_number_status == "request_started_unknown":
+                job.status = "document_number_reservation_unknown"
+                job.document_number_status = "unknown_after_agent_restart"
+                set_job_reason(job, "document_number_reservation_unknown")
+                job.note("agent restarted during document-number reservation")
+            elif job.completion_status == "request_started_unknown":
+                job.completion_status = "unknown_after_agent_restart"
+                set_job_reason(job, "completion_notification_unknown")
+                job.note("agent restarted during print-completion notification")
+            elif job.status not in TERMINAL_STATES:
+                job.status = "protocol_failed"
+                set_job_reason(job, "agent_restarted_during_job")
+                job.note("agent restarted before the worker settled")
+            self.jobs[job.id] = job
+            event = self.job_events.setdefault(job.id, threading.Event())
+            if job_is_settled(job):
+                event.set()
+            if (
+                job.response_sha256
+                and self._job_holds_response_claim(job)
+            ):
+                self.response_claims.setdefault(job.response_sha256, job.id)
+            # Persist only the explicit interrupted-state transition; otherwise
+            # loaded manifests remain byte-for-byte historical state.
+            if job.reason_code in {
+                "agent_restarted_during_job",
+                "document_number_reservation_unknown",
+                "completion_notification_unknown",
+            } and payload.get("reason_code") != job.reason_code:
+                self.save_job(job)
+
+    def claim_server_response(self, job: Job) -> tuple[bool, str | None]:
+        """Claim one semantic server document before any mutable reservation."""
+
+        digest = job.response_sha256
+        if not digest or not re.fullmatch(r"[0-9a-f]{64}", digest):
+            return False, None
+        with self.lock:
+            existing_id = self.response_claims.get(digest)
+            if existing_id and existing_id != job.id:
+                return False, existing_id
+            semantic_guard = self.reservations_dir / f"response-{digest}.json"
+            if semantic_guard.exists():
+                try:
+                    guarded = json.loads(
+                        semantic_guard.read_text(encoding="utf-8")
+                    )
+                    guard_value = _manifest_dict(guarded)
+                    guarded_id = _manifest_str(guard_value.get("job_id"))
+                    guard_status = _manifest_str(guard_value.get("status"))
+                    updated_at = _manifest_str(guard_value.get("updated_at"))
+                except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+                    return False, None
+                expired_completed_guard = False
+                if guard_status == "completion_notified" and updated_at:
+                    try:
+                        guard_age = (
+                            datetime.now(timezone.utc)
+                            - datetime.fromisoformat(updated_at)
+                        ).total_seconds()
+                        expired_completed_guard = (
+                            guard_age > SEMANTIC_DUPLICATE_TTL_SECONDS
+                        )
+                    except (TypeError, ValueError):
+                        expired_completed_guard = False
+                if (
+                    expired_completed_guard
+                    or guard_status == "prepared_not_requested"
+                ):
+                    try:
+                        semantic_guard.unlink()
+                    except FileNotFoundError:
+                        pass
+                    except OSError:
+                        return False, guarded_id
+                else:
+                    return False, guarded_id
+            for existing in reversed(tuple(self.jobs.values())):
+                if (
+                    existing.id != job.id
+                    and existing.response_sha256 == digest
+                    and self._completed_job_is_recent(existing)
+                ):
+                    return False, existing.id
+            self.response_claims[digest] = job.id
+        return True, None
+
+    def reuse_completed_response(self, job: Job, existing_id: str | None) -> bool:
+        """Point a coalesced job at an identical durable recent PDF."""
+
+        if not existing_id:
+            return False
+        with self.lock:
+            existing = self.jobs.get(existing_id)
+            if existing is None or not self._completed_job_is_recent(existing):
+                return False
+            job.artifact_path = existing.artifact_path
+            job.artifact_sha256 = existing.artifact_sha256
+            job.artifact_kind = existing.artifact_kind
+            job.rendered_pdf_path = existing.rendered_pdf_path
+            job.rendered_pdf_sha256 = existing.rendered_pdf_sha256
+            job.rendered_page_count = existing.rendered_page_count
+            job.rendered_object_count = existing.rendered_object_count
+            job.rendered_replay_verified = existing.rendered_replay_verified
+            job.rendered_fonts = existing.rendered_fonts
+            job.document_number_status = existing.document_number_status
+            job.document_number_length = existing.document_number_length
+            job.completion_attempted = existing.completion_attempted
+            job.completion_notified = existing.completion_notified
+            job.completion_status = existing.completion_status
+            job.completion_response_status = (
+                existing.completion_response_status
+            )
+            return True
+
+    def observe_future(
+        self,
+        job: Job,
+        future: concurrent.futures.Future[None],
+    ) -> None:
+        with self.lock:
+            self.worker_futures[job.id] = future
+
+        def worker_done(done: concurrent.futures.Future[None]) -> None:
+            try:
+                done.result()
+            except concurrent.futures.CancelledError:
+                if not job_is_settled(job):
+                    _finish_failure(
+                        job,
+                        self,
+                        "protocol_failed",
+                        "worker_cancelled",
+                    )
+            except Exception:
+                if not job_is_settled(job):
+                    _finish_failure(
+                        job,
+                        self,
+                        "protocol_failed",
+                        "unexpected_worker_error",
+                    )
+            finally:
+                with self.lock:
+                    self.worker_futures.pop(job.id, None)
+
+        future.add_done_callback(worker_done)
+
+    def wait_for_job(self, job_id: str, timeout: float) -> Job | None:
+        with self.lock:
+            job = self.jobs.get(job_id)
+            event = self.job_events.get(job_id)
+        if job is None:
+            return None
+        if event is not None and not job_is_settled(job):
+            event.wait(max(0.0, min(timeout, 30.0)))
+        with self.lock:
+            return self.jobs.get(job_id)
+
+    def readiness(self) -> dict[str, bool]:
+        assets_ready = self.official_assets is not None
+        fonts_ready = self.font_hashes_verified
+        return {
+            "official_runtime_assets_verified": assets_ready,
+            "bundled_font_hashes_verified": fonts_ready,
+            "live_issue_ready": bool(
+                self.allow_fetch
+                and self.allow_document_reservation
+                and self.allow_completion_notification
+                and assets_ready
+                and fonts_ready
+            ),
+        }
 
     def begin_document_reservation(self, job: Job) -> bool:
         """Persist a no-retry reservation guard before the mutating GET."""
 
         if not job.ticket_sha256:
             return False
+        semantic_path: Path | None = None
+        if job.response_sha256:
+            semantic_path = (
+                self.reservations_dir
+                / f"response-{job.response_sha256}.json"
+            )
         path = self.reservations_dir / f"{job.ticket_sha256}.json"
-        payload = json.dumps(
+        prepared_payload = json.dumps(
             {
                 "schema": "yonsei-reportx-reservation-guard/v1",
                 "job_id": job.id,
                 "ticket_sha256": job.ticket_sha256,
-                "status": "started_unknown_until_response",
-                "started_at": utc_now(),
+                "response_sha256": job.response_sha256,
+                "status": "prepared_not_requested",
+                "prepared_at": utc_now(),
             },
             sort_keys=True,
             indent=2,
         ).encode("utf-8")
-        try:
-            fd = os.open(
-                path,
-                os.O_WRONLY | os.O_CREAT | os.O_EXCL,
-                0o600,
+        created: list[Path] = []
+        # Acquire the ticket guard first. If the semantic guard is already
+        # owned, remove only this unsubmitted prepared guard: URLCheck has not
+        # been called yet, so there is no ambiguous mutation to preserve.
+        guard_paths = (path, semantic_path) if semantic_path is not None else (path,)
+        with self.lock:
+            for guard_path in guard_paths:
+                assert guard_path is not None
+                try:
+                    existing_guard = json.loads(
+                        guard_path.read_text(encoding="utf-8")
+                    )
+                    existing_status = _manifest_str(
+                        _manifest_dict(existing_guard).get("status")
+                    )
+                except FileNotFoundError:
+                    continue
+                except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+                    continue
+                if existing_status == "prepared_not_requested":
+                    try:
+                        guard_path.unlink()
+                    except FileNotFoundError:
+                        pass
+            for guard_path in guard_paths:
+                assert guard_path is not None
+                try:
+                    fd = os.open(
+                        guard_path,
+                        os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+                        0o600,
+                    )
+                except FileExistsError:
+                    for prepared_path in reversed(created):
+                        try:
+                            prepared_path.unlink()
+                        except FileNotFoundError:
+                            pass
+                    return False
+                try:
+                    with os.fdopen(fd, "wb") as handle:
+                        handle.write(prepared_payload)
+                        handle.flush()
+                        os.fsync(handle.fileno())
+                except Exception:
+                    # A prepared guard may already be durable. It explicitly
+                    # records that URLCheck was not called and is recoverable.
+                    raise
+                created.append(guard_path)
+
+            started_payload = json.dumps(
+                {
+                    "schema": "yonsei-reportx-reservation-guard/v1",
+                    "job_id": job.id,
+                    "ticket_sha256": job.ticket_sha256,
+                    "response_sha256": job.response_sha256,
+                    "status": "started_unknown_until_response",
+                    "started_at": utc_now(),
+                },
+                sort_keys=True,
+                indent=2,
             )
-        except FileExistsError:
-            return False
-        try:
-            with os.fdopen(fd, "wb") as handle:
-                handle.write(payload)
-                handle.flush()
-                os.fsync(handle.fileno())
-        except Exception:
-            # The guard may already be durable.  Keep it fail-closed rather
-            # than deleting it and permitting an ambiguous second request.
-            raise
+            for guard_path in created:
+                secure_write_text(guard_path, started_payload)
         return True
 
     def finish_document_reservation(self, job: Job, status: str) -> None:
@@ -560,6 +1081,7 @@ class AgentState:
                     "schema": "yonsei-reportx-reservation-guard/v1",
                     "job_id": job.id,
                     "ticket_sha256": job.ticket_sha256,
+                    "response_sha256": job.response_sha256,
                     "status": status,
                     "updated_at": utc_now(),
                 },
@@ -567,6 +1089,26 @@ class AgentState:
                 indent=2,
             ),
         )
+        if job.response_sha256:
+            response_path = (
+                self.reservations_dir
+                / f"response-{job.response_sha256}.json"
+            )
+            secure_write_text(
+                response_path,
+                json.dumps(
+                    {
+                        "schema": "yonsei-reportx-reservation-guard/v1",
+                        "job_id": job.id,
+                        "ticket_sha256": job.ticket_sha256,
+                        "response_sha256": job.response_sha256,
+                        "status": status,
+                        "updated_at": utc_now(),
+                    },
+                    sort_keys=True,
+                    indent=2,
+                ),
+            )
 
     def log(self, message: str) -> None:
         line = f"{utc_now()} {message}"
@@ -580,10 +1122,17 @@ class AgentState:
             self.jobs_dir / f"{job.id}.json",
             json.dumps(job.manifest(), ensure_ascii=False, indent=2),
         )
+        with self.lock:
+            event = self.job_events.setdefault(job.id, threading.Event())
+            if job_is_settled(job):
+                event.set()
+            else:
+                event.clear()
 
     def add_job(self, job: Job) -> None:
         with self.lock:
             self.jobs[job.id] = job
+            self.job_events.setdefault(job.id, threading.Event())
             if len(self.jobs) > 200:
                 for old_id in list(self.jobs)[:50]:
                     self.jobs.pop(old_id, None)
@@ -650,12 +1199,21 @@ class AgentState:
 
     def finish_job(self, job: Job) -> None:
         with self.lock:
+            if job.finished_at is None:
+                job.finished_at = utc_now()
             self.pending_jobs = max(0, self.pending_jobs - 1)
             if (
                 job.ticket_sha256
                 and self.active_tickets.get(job.ticket_sha256) == job.id
             ):
                 self.active_tickets.pop(job.ticket_sha256, None)
+            if (
+                job.response_sha256
+                and self.response_claims.get(job.response_sha256) == job.id
+                and not self._job_holds_response_claim(job)
+            ):
+                self.response_claims.pop(job.response_sha256, None)
+        self.save_job(job)
 
     def write_artifact(self, path: Path, data: bytes) -> bool:
         with self.lock:
@@ -664,24 +1222,29 @@ class AgentState:
             secure_write_bytes(path, data)
         return True
 
-    def arm_protocol_once(self) -> int:
+    def arm_protocol_once(self) -> tuple[int, str]:
         """Authorize one originless official iframe handoff for a short window."""
 
+        arm_id = secrets.token_hex(12)
         with self.lock:
             self.protocol_arm_deadline = (
                 time.monotonic() + PROTOCOL_ARM_TTL_SECONDS
             )
-        return PROTOCOL_ARM_TTL_SECONDS
+            self.protocol_arm_id = arm_id
+        return PROTOCOL_ARM_TTL_SECONDS, arm_id
 
-    def consume_protocol_arm(self) -> bool:
+    def consume_protocol_arm(self) -> str | None:
         with self.lock:
             armed = time.monotonic() <= self.protocol_arm_deadline
+            arm_id = self.protocol_arm_id if armed else None
             self.protocol_arm_deadline = 0.0
-            return armed
+            self.protocol_arm_id = None
+            return arm_id
 
     def clear_protocol_arm(self) -> None:
         with self.lock:
             self.protocol_arm_deadline = 0.0
+            self.protocol_arm_id = None
 
     def close(self) -> None:
         self.executor.shutdown(wait=False, cancel_futures=True)
@@ -785,7 +1348,8 @@ def local_ipv4_for(host: str) -> str:
 
 def _finish_failure(job: Job, state: AgentState, status: str, code: str) -> None:
     job.status = status
-    job.note(code)
+    set_job_reason(job, code)
+    job.note(job.reason_code or "protocol_failed")
     job.param = None
     state.save_job(job)
     state.log(f"job {job.id} -> {status} code={code}")
@@ -820,8 +1384,8 @@ def process_job(job: Job, state: AgentState) -> None:
     try:
         assert job.param is not None
         ticket = TicketEnvelope.parse(job.param)
-    except (AssertionError, TypeError, ValueError) as error:
-        _finish_failure(job, state, "decode_failed", type(error).__name__)
+    except (AssertionError, TypeError, ValueError):
+        _finish_failure(job, state, "decode_failed", "decode_failed")
         return
 
     job.ticket_length = ticket.raw_length
@@ -832,10 +1396,15 @@ def process_job(job: Job, state: AgentState) -> None:
     )
     opened = BundledDecoderRegistry().open(ticket, context)
     if isinstance(opened, Unsupported):
-        _finish_failure(job, state, "unsupported_protocol", opened.reason)
+        _finish_failure(
+            job,
+            state,
+            "unsupported_protocol",
+            "unsupported_protocol",
+        )
         return
     if isinstance(opened, Failed):
-        _finish_failure(job, state, "decode_failed", opened.code)
+        _finish_failure(job, state, "decode_failed", "decode_failed")
         return
 
     job.decoder_id = str(getattr(opened, "decoder_id", "bundled"))
@@ -853,10 +1422,10 @@ def process_job(job: Job, state: AgentState) -> None:
     )
     action = broker.start()
     if isinstance(action, Failed):
-        _finish_failure(job, state, "protocol_failed", action.code)
+        _finish_failure(job, state, "protocol_failed", "protocol_failed")
         return
     if not isinstance(action, RequestAction):
-        _finish_failure(job, state, "protocol_failed", "request_not_produced")
+        _finish_failure(job, state, "protocol_failed", "protocol_failed")
         return
 
     job.request_host = (urllib.parse.urlsplit(action.url).hostname or "").lower()
@@ -876,18 +1445,39 @@ def process_job(job: Job, state: AgentState) -> None:
     transport_opener = build_transport_opener(http.cookiejar.CookieJar())
     try:
         response = perform_request(action, opener=transport_opener)
-    except (OSError, TimeoutError, urllib.error.URLError, ValueError) as error:
-        _finish_failure(job, state, "transport_failed", type(error).__name__)
+    except (OSError, TimeoutError, urllib.error.URLError, ValueError):
+        _finish_failure(job, state, "transport_failed", "transport_failed")
         return
     job.response_length = len(response.body)
     job.response_sha256 = response.body_sha256
     result = broker.receive(response)
     if not isinstance(result, AcceptServerResponse) or broker.accepted_artifact is None:
-        code = result.code if isinstance(result, Failed) else "response_not_accepted"
-        _finish_failure(job, state, "protocol_failed", code)
+        _finish_failure(job, state, "protocol_failed", "protocol_failed")
         return
 
     artifact = broker.accepted_artifact
+    claimed, existing_id = state.claim_server_response(job)
+    if not claimed:
+        job.duplicate_of_job_id = existing_id
+        reused = state.reuse_completed_response(job, existing_id)
+        if reused:
+            job.status = "server_document_reused_unverified"
+            set_job_reason(job, None)
+        else:
+            job.status = "duplicate_server_document"
+            set_job_reason(job, "duplicate_server_document")
+        job.note(
+            "identical server document coalesced to a recent durable PDF"
+            if reused
+            else "identical server document is already active or reserved"
+        )
+        job.param = None
+        state.save_job(job)
+        state.log(
+            f"job {job.id} -> {job.status}"
+            + (f" existing={existing_id}" if existing_id else "")
+        )
+        return
     rendered_pdf: bytes | None = None
     reserved_document_number: str | None = None
     if is_pdf_container(artifact.body):
@@ -915,12 +1505,15 @@ def process_job(job: Job, state: AgentState) -> None:
             )
             if parsed is None:
                 job.status = "server_report_decoded_unrendered"
+                set_job_reason(job, "runtime_profile_rejected")
                 job.note("decoded ReportX document lacks parsed ticket context")
             elif runtime_profile_required is None:
                 job.status = "server_report_decoded_unrendered"
+                set_job_reason(job, "fp3_structure_rejected")
                 job.note("decoded ReportX FP3 failed structural inspection")
             elif state.require_original_fonts and not state.font_map:
                 job.status = "server_report_fonts_required"
+                set_job_reason(job, "original_fonts_required")
                 job.note(
                     "official Yonsei title/body fonts are required before "
                     "rendering; no document number was reserved"
@@ -939,11 +1532,13 @@ def process_job(job: Job, state: AgentState) -> None:
                         )
                 except (TypeError, FP3RenderError) as error:
                     job.status = "server_report_decoded_unrendered"
+                    set_job_reason(job, "fp3_render_rejected")
                     job.note(
                         "decoded ReportX outer container; FP3 renderer "
                         f"rejected it ({type(error).__name__})"
                     )
                 else:
+                    set_job_reason(job, None)
                     rendered_pdf = rendered.pdf
                     job.artifact_kind = "server_report_response"
                     job.status = "server_report_rendered_pdf_unverified"
@@ -961,6 +1556,7 @@ def process_job(job: Job, state: AgentState) -> None:
                     )
             elif state.official_assets is None:
                 job.status = "server_report_official_assets_required"
+                set_job_reason(job, "official_assets_required")
                 job.note(
                     "prepare the exact-hash official ReportX runtime assets "
                     "before rendering"
@@ -969,6 +1565,7 @@ def process_job(job: Job, state: AgentState) -> None:
                 param_5 = parsed.get("Param_5")
                 if param_5 not in {None, "", "0", "1"}:
                     job.status = "server_report_decoded_unrendered"
+                    set_job_reason(job, "unsupported_logo_policy")
                     job.note("unsupported ReportX Param_5 logo policy")
                     bindings = None
                     needs_document_number = False
@@ -986,6 +1583,7 @@ def process_job(job: Job, state: AgentState) -> None:
                         bindings = None
                         needs_document_number = False
                         job.status = "server_report_decoded_unrendered"
+                        set_job_reason(job, "runtime_profile_rejected")
                         job.note(
                             "ReportX runtime profile rejected the document "
                             f"({type(error).__name__})"
@@ -997,6 +1595,10 @@ def process_job(job: Job, state: AgentState) -> None:
                     if not state.allow_document_reservation:
                         job.status = "server_report_document_number_required"
                         job.document_number_status = "explicit_opt_in_required"
+                        set_job_reason(
+                            job,
+                            "document_number_reservation_required",
+                        )
                         job.note(
                             "document serial requires one mutating URLCheck "
                             "reservation; no request was made"
@@ -1005,12 +1607,27 @@ def process_job(job: Job, state: AgentState) -> None:
                         # Validate every local placeholder and official asset
                         # before crossing the one-shot reservation boundary.
                         try:
-                            build_runtime_bindings(
+                            preflight_bindings = build_runtime_bindings(
                                 bundle.primary,
                                 state.official_assets,
                                 ("0000000000000000",),
                                 hide_logo=param_5 == "1",
                             )
+                            preflight_rendered = _render_fp3_pdf_replayed(
+                                bundle.primary,
+                                bundle.additional,
+                                font_map=state.font_map or None,
+                                runtime_pictures=preflight_bindings.pictures,
+                                runtime_text=preflight_bindings.text,
+                                official_empty_pictures=(
+                                    preflight_bindings.official_empty_pictures
+                                ),
+                            )
+                            if state.require_original_fonts:
+                                validate_rendered_font_set(
+                                    preflight_rendered.font_files,
+                                    state.font_map,
+                                )
                             reservation_action = build_document_number_action(
                                 parsed
                             )
@@ -1024,6 +1641,17 @@ def process_job(job: Job, state: AgentState) -> None:
                                     ),
                                     printer_model="YonseiSkills PDF",
                                 )
+                        except FP3RenderError as error:
+                            job.status = "server_report_decoded_unrendered"
+                            job.document_number_status = "preflight_rejected"
+                            set_job_reason(
+                                job,
+                                "document_number_preflight_render_rejected",
+                            )
+                            job.note(
+                                "full deterministic render preflight rejected "
+                                f"the job ({type(error).__name__})"
+                            )
                         except (
                             TypeError,
                             ReportXProfileError,
@@ -1031,6 +1659,10 @@ def process_job(job: Job, state: AgentState) -> None:
                         ) as error:
                             job.status = "server_report_decoded_unrendered"
                             job.document_number_status = "preflight_rejected"
+                            set_job_reason(
+                                job,
+                                "document_number_preflight_rejected",
+                            )
                             job.note(
                                 "document-number preflight rejected the job "
                                 f"({type(error).__name__})"
@@ -1042,6 +1674,10 @@ def process_job(job: Job, state: AgentState) -> None:
                                 )
                                 job.document_number_status = (
                                     "blocked_by_existing_no_retry_guard"
+                                )
+                                set_job_reason(
+                                    job,
+                                    "document_number_already_reserved",
                                 )
                                 job.note(
                                     "reservation guard already exists; "
@@ -1116,6 +1752,10 @@ def process_job(job: Job, state: AgentState) -> None:
                                     job.document_number_status = (
                                         "unknown_after_request"
                                     )
+                                    set_job_reason(
+                                        job,
+                                        "document_number_reservation_unknown",
+                                    )
                                     state.finish_document_reservation(
                                         job,
                                         "unknown_after_request",
@@ -1127,6 +1767,7 @@ def process_job(job: Job, state: AgentState) -> None:
                                     )
                                 else:
                                     job.document_number_status = "reserved"
+                                    set_job_reason(job, None)
                                     reserved_document_number = document_number
                                     job.document_number_length = len(
                                         document_number
@@ -1149,6 +1790,10 @@ def process_job(job: Job, state: AgentState) -> None:
                                         bindings = None
                                         job.status = (
                                             "server_report_decoded_unrendered"
+                                        )
+                                        set_job_reason(
+                                            job,
+                                            "post_reservation_materialization_failed",
                                         )
                                         job.note(
                                             "reserved document number but "
@@ -1175,11 +1820,13 @@ def process_job(job: Job, state: AgentState) -> None:
                             )
                     except (TypeError, FP3RenderError) as error:
                         job.status = "server_report_decoded_unrendered"
+                        set_job_reason(job, "fp3_render_rejected")
                         job.note(
                             "decoded ReportX outer container; FP3 renderer "
                             f"rejected it ({type(error).__name__})"
                         )
                     else:
+                        set_job_reason(job, None)
                         rendered_pdf = rendered.pdf
                         job.artifact_kind = "server_report_response"
                         job.status = "server_report_rendered_pdf_unverified"
@@ -1265,6 +1912,7 @@ def process_job(job: Job, state: AgentState) -> None:
                 ValueError,
             ) as error:
                 job.completion_status = "unknown_after_request"
+                set_job_reason(job, "completion_notification_unknown")
                 job.note(
                     "print completion may have reached the server; retry refused "
                     f"({type(error).__name__})"
@@ -1278,6 +1926,7 @@ def process_job(job: Job, state: AgentState) -> None:
                 if 200 <= completion_response.status < 300:
                     job.completion_notified = True
                     job.completion_status = "notified"
+                    set_job_reason(job, None)
                     job.note(
                         "official print completion endpoint acknowledged the "
                         "durably saved PDF"
@@ -1288,6 +1937,7 @@ def process_job(job: Job, state: AgentState) -> None:
                     )
                 else:
                     job.completion_status = "non_success_response"
+                    set_job_reason(job, "completion_notification_failed")
                     job.note(
                         "print completion returned a non-success status; "
                         "retry refused"
@@ -1310,6 +1960,13 @@ def process_job(job: Job, state: AgentState) -> None:
 def _process_job_guarded(job: Job, state: AgentState) -> None:
     try:
         process_job(job, state)
+    except Exception:
+        _finish_failure(
+            job,
+            state,
+            "protocol_failed",
+            "unexpected_worker_error",
+        )
     finally:
         state.finish_job(job)
 
@@ -1319,10 +1976,17 @@ def schedule_job(job: Job, state: AgentState) -> tuple[str, str | None]:
     if admission != "accepted":
         return admission, existing_id
     try:
-        state.executor.submit(_process_job_guarded, job, state)
+        future = state.executor.submit(_process_job_guarded, job, state)
     except RuntimeError:
+        _finish_failure(
+            job,
+            state,
+            "protocol_failed",
+            "worker_unavailable",
+        )
         state.finish_job(job)
         return "worker_unavailable", None
+    state.observe_future(job, future)
     return "accepted", None
 
 
@@ -1464,19 +2128,24 @@ def _protocol_origin_ok(handler: BaseHTTPRequestHandler) -> bool:
 def _protocol_submission_authorized(
     handler: BaseHTTPRequestHandler,
     state: AgentState,
-) -> bool:
+) -> tuple[bool, str | None]:
     """Authorize exact-origin requests or one explicitly armed originless handoff."""
+
+    if state.allow_fetch:
+        if not state.readiness()["live_issue_ready"]:
+            return False, None
+        arm_id = state.consume_protocol_arm()
+        return arm_id is not None, arm_id
 
     origin = handler.headers.get("Origin")
     if origin:
         if origin not in ALLOWED_PROTOCOL_ORIGINS:
-            return False
-        state.clear_protocol_arm()
-        return True
+            return False, None
+        return True, state.consume_protocol_arm()
     if _token_ok(state, _token(handler)):
-        state.clear_protocol_arm()
-        return True
-    return state.consume_protocol_arm()
+        return True, state.consume_protocol_arm()
+    arm_id = state.consume_protocol_arm()
+    return arm_id is not None, arm_id
 
 
 class LoopbackHTTPServer(ThreadingHTTPServer):
@@ -1547,6 +2216,7 @@ class ReportXHandler(BaseHTTPRequestHandler):
             return
         parsed = urllib.parse.urlsplit(self.path)
         path = parsed.path.rstrip("/") or "/"
+        query = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
 
         if path in {"/SSO_ETC", "/sso_etc"}:
             if not _protocol_origin_ok(self):
@@ -1559,7 +2229,6 @@ class ReportXHandler(BaseHTTPRequestHandler):
             if not _protocol_origin_ok(self):
                 self._send(403, html_message("ORIGIN DENIED"))
                 return
-            query = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
             param = (query.get("PARAM") or query.get("param") or [""])[0]
             # application/x-www-form-urlencoded turns '+' into a space; the
             # official service explicitly restores it before launching ReportX.
@@ -1572,7 +2241,11 @@ class ReportXHandler(BaseHTTPRequestHandler):
             except (TypeError, ValueError):
                 self._send(400, html_message("INVALID PARAM"), protocol=True)
                 return
-            if not _protocol_submission_authorized(self, STATE):
+            authorized, correlation_id = _protocol_submission_authorized(
+                self,
+                STATE,
+            )
+            if not authorized:
                 self._send(401, html_message("HANDOFF NOT ARMED"), protocol=True)
                 return
             job = Job(
@@ -1580,6 +2253,7 @@ class ReportXHandler(BaseHTTPRequestHandler):
                 utc_now(),
                 "sso",
                 param=param,
+                correlation_id=correlation_id,
                 ticket_length=envelope.raw_length,
                 ticket_sha256=envelope.raw_sha256,
             )
@@ -1606,7 +2280,34 @@ class ReportXHandler(BaseHTTPRequestHandler):
             self._send(410, html_message("CAPTURE MODE REMOVED"))
             return
 
-        if path in {"/health", "/status", "/jobs"}:
+        if path.startswith("/jobs/"):
+            if not self._control_authorized():
+                self._json(401, {"ok": False, "error": "unauthorized"})
+                return
+            job_id = path.removeprefix("/jobs/")
+            if not re.fullmatch(r"[A-Za-z0-9_.-]{1,80}", job_id):
+                self._json(400, {"ok": False, "error": "invalid_job_id"})
+                return
+            raw_wait = (query.get("wait") or ["0"])[0]
+            try:
+                wait_seconds = max(0.0, min(float(raw_wait), 30.0))
+            except ValueError:
+                self._json(400, {"ok": False, "error": "invalid_wait"})
+                return
+            job = STATE.wait_for_job(job_id, wait_seconds)
+            if job is None:
+                self._json(404, {"ok": False, "error": "job_not_found"})
+                return
+            with STATE.lock:
+                public = public_job_view(job)
+                terminal = job_is_settled(job)
+            self._json(
+                200,
+                {"ok": True, "terminal": terminal, "job": public},
+            )
+            return
+
+        if path in {"/health", "/status", "/jobs", "/printers"}:
             if not self._control_authorized():
                 self._json(401, {"ok": False, "error": "unauthorized"})
                 return
@@ -1617,11 +2318,31 @@ class ReportXHandler(BaseHTTPRequestHandler):
                         "ok": True,
                         "agent": "reportx-local",
                         "protocol": "cleanroom-v1",
+                        "readiness": STATE.readiness(),
                     },
+                )
+                return
+            if path == "/printers":
+                self._json(
+                    200,
+                    {"ok": True, "printers": list_cups_printers()},
                 )
                 return
             with STATE.lock:
                 jobs = [public_job_view(job) for job in list(STATE.jobs.values())[-50:]]
+            correlation_id = (query.get("correlation_id") or [""])[0]
+            if correlation_id:
+                if not re.fullmatch(r"[0-9a-f]{24}", correlation_id):
+                    self._json(
+                        400,
+                        {"ok": False, "error": "invalid_correlation_id"},
+                    )
+                    return
+                jobs = [
+                    job
+                    for job in jobs
+                    if job.get("correlation_id") == correlation_id
+                ]
             self._json(
                 200,
                 {
@@ -1641,7 +2362,7 @@ class ReportXHandler(BaseHTTPRequestHandler):
                     ),
                     "output_dir": STATE.out_dir.name,
                     "jobs": jobs,
-                    "printers": list_cups_printers() if path == "/status" else [],
+                    "readiness": STATE.readiness(),
                 },
             )
             return
@@ -1677,7 +2398,18 @@ class ReportXHandler(BaseHTTPRequestHandler):
             if not self._control_authorized():
                 self._json(401, {"ok": False, "error": "unauthorized"})
                 return
-            ttl = STATE.arm_protocol_once()
+            readiness = STATE.readiness()
+            if STATE.allow_fetch and not readiness["live_issue_ready"]:
+                self._json(
+                    409,
+                    {
+                        "ok": False,
+                        "error": "live_issue_not_ready",
+                        "readiness": readiness,
+                    },
+                )
+                return
+            ttl, arm_id = STATE.arm_protocol_once()
             self._json(
                 200,
                 {
@@ -1685,6 +2417,7 @@ class ReportXHandler(BaseHTTPRequestHandler):
                     "armed": True,
                     "one_shot": True,
                     "ttl_seconds": ttl,
+                    "arm_id": arm_id,
                 },
             )
             return

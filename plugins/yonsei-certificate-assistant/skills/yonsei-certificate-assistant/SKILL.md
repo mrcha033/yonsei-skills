@@ -77,37 +77,53 @@ retried.
 
 ## Run
 
-Network remains off unless explicitly enabled.
+For issuance, prewarm as soon as the skill is invoked. This emits the official
+Portal URL for Codex Computer Use and prepares the cold path while the student
+answers the single intake batch and completes visible login:
 
 ```bash
-# First use: download the exact official installer, verify it, and extract
-# only the two runtime logo BMPs. Requires innoextract.
-python3 "$SKILL_DIR/scripts/icert_print.py" prepare-assets
-
-# Decode only; no remote request
-python3 "$SKILL_DIR/scripts/icert_print.py" agent
-
-# Full PDF path. The second flag explicitly permits one URLCheck reservation.
-# The command automatically uses the bundled redistribution-authorized
-# 연세제목/연세본문 TTF files.
-python3 "$SKILL_DIR/scripts/icert_print.py" agent \
-  --allow-fetch --reserve-document-number --notify-print-completion
+python3 "$SKILL_DIR/scripts/icert_print.py" start
 ```
 
-If either bundled file is missing or its pinned hash differs, stop before a
+The CLI never launches or manipulates a browser. Use Codex Computer Use in the
+student's current browser for the emitted official URL, login, visible
+selection, and one final click. Do not use Orca, AppleScript, JXA, coordinate
+automation, or a separate Chrome profile.
+
+Capture missing choices and issuance authorization in the initial login pause.
+A fully specified prompt that explicitly commands issuance already provides
+that authorization. Validate the complete review internally and never ask for
+a second reply. Then run the single continuing command. It reuses the prewarmed
+agent, arms once, emits a
+machine-readable Computer Use handoff, correlates the job by the exact
+`arm_id`, waits for that job only, verifies the saved digest, and exports to a
+new destination without overwriting different bytes:
+
+```bash
+python3 "$SKILL_DIR/scripts/icert_print.py" issue \
+  --request "<complete-request-json>" \
+  --output "<new-pdf-destination>" \
+  --confirm
+```
+
+`purpose` is optional. A transcript request must settle rank inclusion,
+conversion inclusion, and the observed 4.5 conversion scale when selected.
+Login state is determined from the visible page through Computer Use, not by
+asking the student to describe cookies or credentials. There is no second
+confirmation and no separate doctor/open/arm/wait/status/copy sequence.
+
+The one-minute objective is the confirmed, visibly logged-in hot path with
+cached assets. First-use exact-hash download and extraction happen during the
+initial intake/login pause and must complete before any document number is
+reserved. `issue` performs no cold download and uses one overall command-start
+deadline capped at 55 seconds, preserving export margin. This is an
+implementation budget until a representative live issuance is measured.
+
+If either bundled font is missing or its pinned hash differs, stop before a
 live request. `--title-font` and `--body-font` remain development overrides but
-must match the released authorized hashes.
-
-In another terminal:
-
-```bash
-python3 "$SKILL_DIR/scripts/icert_print.py" open
-# In the browser: authenticate and choose the certificate.
-python3 "$SKILL_DIR/scripts/icert_print.py" arm
-# Within 120 seconds, click 프린터 출력. The arm is one-shot.
-python3 "$SKILL_DIR/scripts/icert_print.py" wait-job
-python3 "$SKILL_DIR/scripts/icert_print.py" status
-```
+must match the released authorized hashes. The lower-level `agent`, `arm`,
+`wait-job JOB_ID`, and `status` commands remain diagnosis tools, not the normal
+issuance flow.
 
 The cross-platform compatibility path needs no DevTools bridge, cookie export,
 VM, or extra Windows machine. For a PDF on Windows, use this local path; use
@@ -130,6 +146,7 @@ Private state is under:
 | `server_report_decoded_unrendered` | Outer container decoded, but profile or renderer rejected unsupported semantics |
 | `server_report_rendered_pdf_unverified` | Runtime placeholders were materialized and a compatibility PDF was rendered; inspect `document_number.completion_notified` separately |
 | `server_pdf_saved_unverified` | Exact server response is a complete PDF container; official document verification was not performed |
+| `server_document_reused_unverified` | This exact arm correlated to a recent identical durable PDF; require its path, digest, and prior completion semantics before acceptance |
 | `decode_failed` | Ticket failed a strict framing, cipher, URL, command, or host check |
 | `transport_failed` | Allowlisted request did not complete |
 | `protocol_failed` | Response failed status, redirect, size, identity, or broker checks |
@@ -157,9 +174,9 @@ this command.
 ## Security invariants
 
 - Bind loopback only; validate Host and Origin before creating a job.
-- Accept an exact icert Origin directly. Require a token-authorized, one-shot,
-  120-second `arm` for the official iframe handoff when the browser omits Origin
-  on the HTTPS-to-loopback navigation.
+- A live issuance agent (`--allow-fetch`) requires a token-authorized, one-shot,
+  120-second `arm` for every `/SSO` submission, including an exact icert Origin.
+  Decode-only diagnosis may accept the exact Origin without a live arm.
 - `/SSO` requires a non-empty, valid `dzreportx:` envelope.
 - `/GETCRYPTARIA` is unsupported; the official local service has no usable
   decrypt endpoint.

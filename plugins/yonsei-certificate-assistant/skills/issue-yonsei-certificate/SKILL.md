@@ -13,85 +13,107 @@ rejects ordinary PDF virtual printers. Use native ReportX on Windows only when
 the student explicitly requests a named physical printer. Read
 `references/cross-platform.md` before acting.
 
-## Preferred command path
+## One-pause workflow
 
-Call `yonsei_student` with `intent: "documents"` and put document type,
-language, copies, and output format in `request`. Review `primary_result`, then
-repeat with `action: "issue"` and `confirmed: true`. A PDF request uses the
-bundled local PDF printer and authorized fonts on all three desktop platforms.
+Start the cold setup immediately, before asking questions. Keep the command
+running while the student answers and, if necessary, signs in:
 
-## Workflow
+```bash
+python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" start
+```
 
-1. Collect certificate type, language, copies, and purpose. Default to a PDF
-   virtual-print result; ask for a named physical printer only when the student
-   explicitly wants paper. Run:
+`start` emits one `yonsei-certificate-start/v1` handoff with the official Portal
+URL, validates or prepares the pinned official assets, and starts the fully
+enabled local agent under `~/.cache/yonsei-certificate-assistant`. It does not
+launch, focus, resize, or cover a browser window. Use **Codex Computer Use** to
+reuse the student's current browser, navigate to the emitted URL, and inspect
+the visible page. Do not use Orca, AppleScript, JXA, coordinate clicks, a new
+CLI-launched browser, or a separate profile.
 
-   ```bash
-   python3 "$SKILL_DIR/scripts/prepare_certificate_issue.py" --input "<temporary-json>"
-   ```
+Ask one batch containing every missing user choice and the issuance
+authorization:
 
-2. Stop unless the result is `ready`. Follow the returned `issuance_path`.
-3. On Windows, macOS, or Linux, run the environment check, reuse the student's
-   persistent browser profile, and open the official internet-certificate page:
+- certificate type: enrollment, transcript, graduation,
+  expected graduation, leave, or completion
+- language: Korean or English
+- copies: the compatibility issuance supports exactly one
+- output: PDF, or a named physical printer
+- transcript only: rank included or excluded; conversion included or excluded;
+  when included, the currently verified portal scale is 4.5
+- purpose only if the student wants it recorded; it is optional and does not
+  control issuance
+- unless the fully specified original prompt already commands issuance,
+  authorize one document-number reservation, requested PDF export, and any
+  named physical print
 
-   ```bash
-   python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" doctor
-   python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" open
-   ```
+At the same initial pause, leave the official login screen visible and ask the
+student to finish login there if needed. Never ask for a password or OTP in
+chat. Runtime login state comes from the visible current browser, not from the
+student filling another request field.
 
-4. Prepare pinned official runtime assets on every supported platform. On
-   Windows, the helper first reuses a verified installed `REPORTX.exe`; if it
-   is absent, install the official component once and rerun the check. Use the
-   bundled, redistribution-authorized `연세제목.TTF` and
-   `연세본문.TTF` files automatically. Validate their pinned hashes before any
-   live request; do not ask the student to install fonts.
+Build the complete request once:
 
-   ```bash
-   python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" doctor
-   python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" prepare-assets
-   ```
+```json
+{
+  "certificate_type": "transcript",
+  "language": "en",
+  "copies": 1,
+  "output": "pdf",
+  "include_rank": false,
+  "include_conversion": true,
+  "conversion_scale": "4.5",
+  "login_state": "connected"
+}
+```
 
-5. Start the local PDF virtual-printer compatibility agent in a continuing
-   terminal session:
+Run `prepare_certificate_issue.py` after that single reply. Its `review` is an
+internal validation artifact, not another question. The `login_state` value is
+set only after Computer Use sees authenticated official content. If
+`missing_user_fields` is unexpectedly nonempty, the initial batch was
+incomplete; collect every listed field together before issuance. A fully
+specified original prompt that explicitly commands issuance is itself the
+authorization. Otherwise the authorization captured in the initial batch
+covers the free-print issuance, one document-number reservation, requested PDF
+export, and explicitly named physical print. Never ask the student to approve
+the generated review again.
 
-   ```bash
-   python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" \
-     agent --allow-fetch --reserve-document-number --notify-print-completion
-   ```
+With that initial authorization there are no routine questions or separate
+doctor, open, arm, status, copy, or wait commands. Run one continuing command:
 
-6. Reuse the student's persistent Yonsei browser profile and open the official
-   internet-certificate page. If login is required, leave that exact page open,
-   ask the student once to sign in there, and resume in the same profile. Never
-   request the password in chat or inspect cookies, local storage, or saved
-   passwords.
-7. Select the exact certificate, language, copies, and purpose. Before clicking
-   **프린터 출력**, confirm the certificate type, copies, free-print path, and
-   that one verification number will be reserved.
-8. Arm one originless handoff:
+```bash
+python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" \
+  issue --request "<request-json>" \
+  --output "<new-user-facing-pdf-path>" \
+  --confirm
+```
 
-   ```bash
-   python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" arm
-   ```
+Read the emitted `yonsei-certificate-computer-use-handoff/v1` and perform only
+those visible browser actions with Codex Computer Use. Match the certificate,
+language, copies, rank, and conversion fields exactly. Reuse an exact existing
+request row where possible. Click **프린터 출력** at most once. The same command
+has already armed the agent and tracks only the job whose `correlation_id`
+equals that exact `arm_id`; pre-click IDs are only an additional ambiguity
+check. It verifies the private PDF digest and exports it without overwriting
+different destination bytes.
 
-9. Click **프린터 출력** once within 120 seconds. Do not retry an uncertain
-   document-number reservation.
-10. Wait for the terminal result:
+The one-minute target is measured from the confirmed, visibly logged-in,
+cached-assets hot path to a verified export. First-use asset download and
+extraction are cold setup and run during the initial intake/login pause; never
+cross the document-number reservation boundary before they finish.
+`issue` never performs a cold download. Its single overall budget begins at
+command start and is capped at 55 seconds, leaving the remainder of the minute
+for digest-verified export. This is a design budget, not a claim of live timing
+until a representative issuance is measured.
 
-   ```bash
-   python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" wait-job
-   python3 "$SKILL_DIR/../yonsei-certificate-assistant/scripts/icert_print.py" status
-   ```
-
-11. Require `server_report_rendered_pdf_unverified` or
-    `server_pdf_saved_unverified`, inspect the PDF page count and visible
-    certificate identity fields, verify that the result lists the selected
-    `YonseiB`/`YonseiL` font hashes when those faces occur in the FP3, and
-    require `completion_notified: true` before calling the official print
-    transaction complete. Then provide the local file.
-12. For physical printing on macOS/Linux, recheck the PDF digest, name the
-    action-time confirmation, and run the existing `print-job ... --confirm`
-    command once. On Windows, an explicitly requested named physical printer
-    may instead use the official native ReportX print path.
+Require `server_report_rendered_pdf_unverified`,
+`server_pdf_saved_unverified`, or a digest-backed
+`server_document_reused_unverified`; inspect the PDF page count and visible
+certificate identity fields, verify that the result lists the selected
+`YonseiB`/`YonseiL` font hashes when those faces occur in the FP3, and require
+`completion_notified: true` before calling the official print
+transaction complete. The result remains a compatibility PDF with
+institutional verification not performed. On Windows, an explicitly requested
+named physical printer continues to use the official native ReportX path.
 
 ## Boundaries
 

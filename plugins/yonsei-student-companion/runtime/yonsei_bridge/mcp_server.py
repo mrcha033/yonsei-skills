@@ -30,8 +30,9 @@ TOOLS = [
             "Use this single student-friendly tool for Yonsei daily tasks, academic applications, "
             "official course-handbook search and mileage, graduation, shuttle, spaces, dorms, "
             "documents, LearnUs, and attendance. "
-            "Ask only for missing student information. For a write, show primary_result and call again "
-            "with the returned selection_id and confirmed=true after the student confirms."
+            "Ask for every applicable document option together before opening the official route. "
+            "For a document issue, request login only at the initial boundary and then make one "
+            "reviewed call with confirmed=true; never ask again mid-flow."
         ),
         "inputSchema": {
             "type": "object",
@@ -117,8 +118,24 @@ TOOLS = [
                                 "teaching"
                             ]
                         },
-                        "language": {"type": "string"},
-                        "copies": {"type": "integer"},
+                        "language": {
+                            "type": "string",
+                            "enum": ["ko", "en", "korean", "english", "국문", "영문"]
+                        },
+                        "copies": {"type": "integer", "minimum": 1, "maximum": 1},
+                        "include_rank": {
+                            "type": "boolean",
+                            "description": "Whether a transcript must include the official rank notation."
+                        },
+                        "gpa_conversion": {
+                            "type": "boolean",
+                            "description": "Whether a transcript must include the official GPA conversion notation."
+                        },
+                        "gpa_scale": {
+                            "type": "string",
+                            "enum": ["4.5"],
+                            "description": "Required when gpa_conversion is true."
+                        },
                         "output_format": {"type": "string", "enum": ["pdf", "print"]}
                     },
                     "additionalProperties": False,

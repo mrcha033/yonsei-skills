@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "yonsei-student-companion",
   "displayName": "오늘의 연세·포털 연결",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "한 번 로그인한 전용 관리 브라우저를 이어 쓰고 포털·Underwood·LearnUs·출결과 생활관·장학금·교환학생 업무를 자연어로 처리합니다.",
   "author": {
     "name": "mrcha033",

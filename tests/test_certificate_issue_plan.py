@@ -27,6 +27,7 @@ class CertificateIssuePlanTests(unittest.TestCase):
                 "copies": 1,
                 "purpose": "제출",
                 "desired_result": "reviewed_pdf",
+                "login_state": "connected",
             }
         )
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -51,6 +52,7 @@ class CertificateIssuePlanTests(unittest.TestCase):
                 "purpose": "제출",
                 "desired_result": "physical_print",
                 "printer": "Campus Printer",
+                "login_state": "connected",
             },
             platform="windows",
         )
@@ -70,6 +72,7 @@ class CertificateIssuePlanTests(unittest.TestCase):
                 "copies": 1,
                 "purpose": "개인 보관",
                 "desired_result": "reviewed_pdf",
+                "login_state": "connected",
             },
             platform="windows",
         )
@@ -87,10 +90,68 @@ class CertificateIssuePlanTests(unittest.TestCase):
                 "certificate_type": "재학증명서",
                 "purpose": "제출",
                 "student_name": "수정값",
+                "login_state": "connected",
             }
         )
         self.assertEqual(result.returncode, 2)
         self.assertEqual(json.loads(result.stdout)["error"]["code"], "certificate-content-not-accepted")
+
+    def test_transcript_collects_all_options_and_purpose_is_optional(self):
+        result = self.run_script(
+            {
+                "certificate_type": "transcript",
+                "language": "en",
+                "copies": 1,
+                "output": "pdf",
+                "include_rank": False,
+                "include_conversion": True,
+                "conversion_scale": "4.5",
+                "login_state": "connected",
+            }
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["schema"], "yonsei-certificate-issue-plan/v2")
+        self.assertTrue(output["ready"])
+        self.assertIsNone(output["purpose"])
+        self.assertEqual(output["review"]["certificate_label"], "성적증명서")
+        self.assertFalse(output["review"]["include_rank"])
+        self.assertEqual(output["review"]["conversion_scale"], "4.5")
+        self.assertEqual(output["missing_user_fields"], [])
+
+    def test_transcript_reports_missing_choices_in_one_batch(self):
+        result = self.run_script(
+            {
+                "certificate_type": "성적증명서",
+                "language": "en",
+                "login_state": "unknown",
+            }
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertFalse(output["ready"])
+        self.assertEqual(
+            output["missing_user_fields"],
+            ["include_rank", "include_conversion"],
+        )
+        self.assertEqual(output["runtime_checks"]["login_state"], "unknown")
+
+    def test_rejects_unobserved_conversion_scale_before_browser_work(self):
+        result = self.run_script(
+            {
+                "certificate_type": "transcript",
+                "language": "en",
+                "include_rank": False,
+                "include_conversion": True,
+                "conversion_scale": "4.3",
+                "login_state": "connected",
+            }
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(
+            json.loads(result.stdout)["error"]["code"],
+            "unsupported-conversion-scale",
+        )
 
 
 if __name__ == "__main__":

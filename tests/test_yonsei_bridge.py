@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -94,6 +95,9 @@ class YonseiBridgeTests(unittest.TestCase):
         self.assertNotIn("row_terms", request_properties)
         self.assertNotIn("fields", request_properties)
         self.assertIn("enrollment", request_properties["document_type"]["enum"])
+        self.assertIn("include_rank", request_properties)
+        self.assertIn("gpa_conversion", request_properties)
+        self.assertEqual(request_properties["gpa_scale"]["enum"], ["4.5"])
 
     def test_document_print_action_defaults_to_physical_output(self):
         bridge = mock.Mock()
@@ -105,16 +109,24 @@ class YonseiBridgeTests(unittest.TestCase):
         result = StudentRouter(bridge).run(
             intent="documents",
             action="print",
-            request={"document_type": "enrollment"},
+            request={
+                "document_type": "enrollment",
+                "language": "en",
+                "copies": 1,
+                "output_format": "print",
+            },
             confirmed=True,
         )
         bridge.documents.assert_called_once_with(
             document_type="enrollment",
             action="issue",
             output_format="print",
-            language=None,
-            copies=None,
+            language="en",
+            copies=1,
             purpose=None,
+            include_rank=None,
+            gpa_conversion=None,
+            gpa_scale=None,
             confirmed=True,
         )
         self.assertEqual("print", result["primary_result"]["output_format"])
@@ -137,7 +149,12 @@ class YonseiBridgeTests(unittest.TestCase):
         result = StudentRouter(bridge).run(
             intent="documents",
             action="issue",
-            request={"document_type": "enrollment"},
+            request={
+                "document_type": "enrollment",
+                "language": "en",
+                "copies": 1,
+                "output_format": "pdf",
+            },
             confirmed=True,
         )
         self.assertEqual("completed", result["status"])
@@ -288,6 +305,243 @@ class YonseiBridgeTests(unittest.TestCase):
         self.assertIn("setter.call(input, '')", expressions[0])
         self.assertNotIn("setter.call(input, '0')", expressions[0])
         self.assertIn("every(input => input.value === '')", expressions[1])
+
+    def test_transcript_intake_passes_english_45_without_rank_once(self):
+        bridge = mock.Mock()
+        bridge.documents.return_value = {
+            "state": "completed",
+            "document_type": "transcript",
+            "official_result_verified": True,
+        }
+        StudentRouter(bridge).run(
+            intent="documents",
+            action="issue",
+            request={
+                "document_type": "transcript",
+                "language": "en",
+                "copies": 1,
+                "output_format": "pdf",
+                "include_rank": False,
+                "gpa_conversion": True,
+                "gpa_scale": "4.5",
+            },
+            confirmed=True,
+        )
+        bridge.documents.assert_called_once_with(
+            document_type="transcript",
+            action="issue",
+            output_format="pdf",
+            language="en",
+            copies=1,
+            purpose=None,
+            include_rank=False,
+            gpa_conversion=True,
+            gpa_scale="4.5",
+            confirmed=True,
+        )
+
+    def test_transcript_intake_reports_all_known_missing_options_before_browser(self):
+        bridge = mock.Mock()
+        with self.assertRaisesRegex(
+            BridgeError,
+            "missing:language,copies,output_format,include_rank,gpa_conversion",
+        ):
+            StudentRouter(bridge).run(
+                intent="documents",
+                action="issue",
+                request={"document_type": "transcript"},
+                confirmed=True,
+            )
+        bridge.documents.assert_not_called()
+
+    def test_transcript_options_are_scoped_to_the_owned_language_row(self):
+        class FakeConnection:
+            def __init__(self):
+                self.commands = []
+
+            def command(self, method, parameters):
+                self.commands.append((method, parameters))
+                return {}
+
+        page = BrowserPage.__new__(BrowserPage)
+        page.connection = FakeConnection()
+        expressions = []
+        page._evaluate_until_true = lambda expression: expressions.append(expression) or True
+        self.assertTrue(
+            page.configure_certificate_request(
+                document_label="성적증명서",
+                language_label="영문",
+                copies=1,
+                include_rank=False,
+                gpa_conversion=True,
+                gpa_scale="4.5",
+            )
+        )
+        self.assertEqual(
+            page.connection.commands,
+            [("Input.insertText", {"text": "1"})],
+        )
+        combined = "\n".join(expressions)
+        self.assertIn("owner?.rowSpan", combined)
+        self.assertIn("const boxes = [...row.querySelectorAll", combined)
+        self.assertIn("석차표기", combined)
+        self.assertIn("4.5 환산 표기 추가", combined)
+        self.assertIn("const includeRank = false", combined)
+        self.assertIn("const includeConversion = true", combined)
+
+    def test_exact_semantic_basket_row_is_reused_without_new_request(self):
+        class FakePage:
+            def __init__(self):
+                self.selected = []
+                self.href_clicks = []
+
+            def snapshot(self):
+                return page_snapshot(text="증명서 보관함")
+
+            def select_radio(self, *_arguments, **_keywords):
+                return False
+
+            def certificate_basket_rows(self, **_arguments):
+                return [{"portal_id": "opaque", "_portal_key": "ephemeral"}]
+
+            def select_certificate_basket_row(self, **arguments):
+                self.selected.append(arguments)
+                return True
+
+            def click_href_fragment(self, fragment):
+                self.href_clicks.append(fragment)
+                return True
+
+        page = FakePage()
+        with mock.patch.object(
+            YonseiBridge,
+            "_known_certificate_row",
+            return_value="opaque",
+        ), mock.patch.object(YonseiBridge, "_remember_certificate_row"):
+            result = YonseiBridge._select_certificate_for_free_print(
+                page,
+                document_type="transcript",
+                document_label="성적증명서",
+                language_label="영문",
+                copies=1,
+                include_rank=False,
+                gpa_conversion=True,
+                gpa_scale="4.5",
+            )
+        self.assertEqual(result["source"], "existing_exact_basket")
+        self.assertEqual(len(page.selected), 1)
+        self.assertEqual(page.href_clicks, [])
+        self.assertNotIn("portal_id", result)
+        self.assertNotIn("ephemeral", str(result))
+
+    def test_option_mismatch_never_creates_duplicate_basket_request(self):
+        class FakePage:
+            def __init__(self):
+                self.href_clicks = []
+
+            def snapshot(self):
+                return page_snapshot(text="증명서 보관함")
+
+            def select_radio(self, *_arguments, **_keywords):
+                return False
+
+            def certificate_basket_rows(self, **_arguments):
+                return [{"portal_id": "old", "_portal_key": "private"}]
+
+            def click_href_fragment(self, fragment):
+                self.href_clicks.append(fragment)
+                return True
+
+        page = FakePage()
+        with mock.patch.object(
+            YonseiBridge,
+            "_known_certificate_row",
+            return_value=None,
+        ), mock.patch.object(
+            YonseiBridge,
+            "_portal_id_has_other_semantics",
+            return_value=True,
+        ):
+            with self.assertRaisesRegex(
+                BridgeError,
+                "option_mismatch_do_not_duplicate",
+            ):
+                YonseiBridge._select_certificate_for_free_print(
+                    page,
+                    document_type="transcript",
+                    document_label="성적증명서",
+                    language_label="영문",
+                    copies=1,
+                    include_rank=False,
+                    gpa_conversion=True,
+                    gpa_scale="4.5",
+                )
+        self.assertEqual(page.href_clicks, [])
+
+    def test_reportx_waiter_pins_the_single_correlated_job_id(self):
+        arm_id = "a" * 24
+        calls = []
+
+        def request(path, **_arguments):
+            calls.append(path)
+            if path.startswith("/jobs?correlation_id="):
+                return {
+                    "jobs": [
+                        {
+                            "id": "ours",
+                            "correlation_id": arm_id,
+                            "status": "requesting",
+                        },
+                        {
+                            "id": "unrelated",
+                            "correlation_id": "b" * 24,
+                            "status": "requesting",
+                        },
+                    ]
+                }
+            self.assertEqual(path.split("?", 1)[0], "/jobs/ours")
+            return {
+                "ok": True,
+                "terminal": True,
+                "job": {
+                    "id": "ours",
+                    "correlation_id": arm_id,
+                    "status": "server_report_rendered_pdf_unverified",
+                },
+            }
+
+        with mock.patch.object(
+            YonseiBridge,
+            "_reportx_request",
+            side_effect=request,
+        ), mock.patch.object(
+            YonseiBridge,
+            "_verify_reportx_result",
+            return_value={"verified": True, "job_id": "ours"},
+        ):
+            result = YonseiBridge._wait_reportx_result(arm_id, timeout=1)
+        self.assertTrue(result["verified"])
+        self.assertTrue(any(path.startswith("/jobs/ours?") for path in calls))
+        self.assertFalse(any(path.startswith("/jobs/unrelated") for path in calls))
+
+    def test_reportx_status_ignores_stale_pid_without_signalling_process(self):
+        with tempfile.TemporaryDirectory() as directory:
+            cache = Path(directory)
+            pid_file = cache / "bridge-agent.pid"
+            pid_file.write_text("424242", encoding="utf-8")
+            with mock.patch(
+                "yonsei_bridge.bridge.certificate_cache",
+                return_value=cache,
+            ), mock.patch.object(
+                YonseiBridge,
+                "_reportx_request",
+                side_effect=BridgeError("unauthenticated"),
+            ), mock.patch("yonsei_bridge.bridge.os.kill") as signal_process:
+                status = YonseiBridge._reportx_process_status()
+            self.assertFalse(status["running"])
+            self.assertFalse(status["health_verified"])
+            self.assertFalse(pid_file.exists())
+            signal_process.assert_not_called()
 
     def test_candidates_get_opaque_selection_ids(self):
         bridge = YonseiBridge.__new__(YonseiBridge)

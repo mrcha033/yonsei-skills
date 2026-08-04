@@ -177,6 +177,33 @@ def _reportx_profile_fp3() -> bytes:
 """.encode("utf-8")
 
 
+def _multipage_runtime_picture_fp3(page_count: int = 2) -> bytes:
+    preview = "".join(
+        f'<page{page}><logo{page} ImageIndex="0"/></page{page}>'
+        for page in range(page_count)
+    )
+    source = "".join(
+        f"""
+    <TfrxReportPage Name="Page{page}" PaperWidth="210" PaperHeight="297">
+      <TfrxPictureView Name="__LOGO1__" Left="10" Top="10"
+        Width="20" Height="10" PrintOnly="True"/>
+    </TfrxReportPage>"""
+        for page in range(page_count)
+    )
+    dictionary = "".join(
+        f'<logo{page} name="Page{page}.__LOGO1__"/>'
+        for page in range(page_count)
+    )
+    return f"""\
+<preparedreport>
+  <previewpages>{preview}</previewpages>
+  <sourcepages>{source}
+  </sourcepages>
+  <dictionary>{dictionary}</dictionary>
+</preparedreport>
+""".encode("utf-8")
+
+
 def _png_chunk(kind: bytes, payload: bytes) -> bytes:
     return (
         len(payload).to_bytes(4, "big")
@@ -368,6 +395,57 @@ class FP3PDFTests(unittest.TestCase):
         self.assertEqual(5, len(re.findall(rb"/Im[0-9]+ Do", content)))
         self.assertIn(b"-0.225 Tc", content)
         self.assertNotIn(b"do not paint", content)
+
+    def test_page_specific_runtime_targets_accept_identical_repeats(self) -> None:
+        source = _multipage_runtime_picture_fp3()
+        logo = _bmp8()
+        rendered = render_fp3_pdf(
+            source,
+            runtime_pictures={
+                (0, 0, "__LOGO1__"): logo,
+                (1, 0, "__LOGO1__"): logo,
+            },
+        )
+        self.assertEqual(2, rendered.page_count)
+        self.assertEqual(1, rendered.image_count)
+
+    def test_page_specific_runtime_targets_preserve_divergent_values(self) -> None:
+        source = _multipage_runtime_picture_fp3()
+        first = _bmp8()
+        second = first[:-4] + b"\x01\x00\x00\x00"
+        rendered = render_fp3_pdf(
+            source,
+            runtime_pictures={
+                (0, 0, "__LOGO1__"): first,
+                (1, 0, "__LOGO1__"): second,
+            },
+        )
+        self.assertEqual(2, rendered.page_count)
+        self.assertEqual(2, rendered.image_count)
+
+    def test_page_specific_runtime_targets_reject_unexpected_extra_object(
+        self,
+    ) -> None:
+        source = _multipage_runtime_picture_fp3(page_count=3)
+        logo = _bmp8()
+        with self.assertRaisesRegex(
+            FP3RenderError,
+            "multiplicity does not match",
+        ):
+            render_fp3_pdf(
+                source,
+                runtime_pictures={
+                    (0, 0, "__LOGO1__"): logo,
+                    (1, 0, "__LOGO1__"): logo,
+                },
+            )
+
+    def test_legacy_named_runtime_binding_still_rejects_repeats(self) -> None:
+        with self.assertRaisesRegex(FP3RenderError, "not one-to-one"):
+            render_fp3_pdf(
+                _multipage_runtime_picture_fp3(),
+                runtime_pictures={"__LOGO1__": _bmp8()},
+            )
 
     def test_reportx_ansi_font_and_tag_attributes_are_normalized(self) -> None:
         mixed = MINIMAL_FP3.replace(

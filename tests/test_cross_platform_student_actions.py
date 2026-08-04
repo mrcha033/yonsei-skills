@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -62,6 +63,7 @@ class CrossPlatformStudentActionTests(unittest.TestCase):
                 "purpose": "제출",
                 "desired_result": "physical_print",
                 "printer": "Campus Printer",
+                "login_state": "connected",
             },
             system="windows",
         )
@@ -79,6 +81,9 @@ class CrossPlatformStudentActionTests(unittest.TestCase):
                     {
                         "certificate_type": "성적증명서",
                         "purpose": "제출",
+                        "include_rank": False,
+                        "include_conversion": False,
+                        "login_state": "connected",
                     },
                     system=system,
                 )
@@ -100,6 +105,16 @@ class CrossPlatformStudentActionTests(unittest.TestCase):
         )
         self.assertEqual("start-local-agent", result["id"])
         self.assertIn("Linux", result["summary"])
+
+    def test_certificate_pdf_diagnostic_skips_slow_printer_enumeration(self) -> None:
+        with mock.patch.object(
+            DIAGNOSE,
+            "list_printers",
+            side_effect=AssertionError("printer discovery must be opt-in"),
+        ):
+            result = DIAGNOSE.diagnose()
+        self.assertFalse(result["printers"]["checked"])
+        self.assertEqual([], result["printers"]["all"])
 
 
 if __name__ == "__main__":

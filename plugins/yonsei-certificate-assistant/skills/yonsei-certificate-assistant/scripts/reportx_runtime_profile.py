@@ -38,7 +38,7 @@ FP3_RENDERER_DIR = (
 if str(FP3_RENDERER_DIR) not in sys.path:
     sys.path.insert(0, str(FP3_RENDERER_DIR))
 
-from fp3_pdf import FP3Model, parse_fp3
+from fp3_pdf import DrawObject, FP3Model, parse_fp3
 
 
 OFFICIAL_INSTALLER_URL = (
@@ -99,11 +99,14 @@ class OfficialAssets:
     portrait: bytes
 
 
+RuntimeObjectTarget = tuple[int, int, str]
+
+
 @dataclass(frozen=True)
 class RuntimeBindings:
-    pictures: dict[str, bytes]
-    text: dict[str, str]
-    official_empty_pictures: frozenset[str]
+    pictures: dict[RuntimeObjectTarget, bytes]
+    text: dict[RuntimeObjectTarget, str]
+    official_empty_pictures: frozenset[RuntimeObjectTarget]
     profile_id: str = "yonsei-reportx-print-v1"
 
 
@@ -357,6 +360,38 @@ def _asset_dir(root: Path) -> Path:
     return root / ASSET_DIRNAME
 
 
+def _expected_asset_manifest() -> dict[str, object]:
+    return {
+        "schema": ASSET_SCHEMA,
+        "source_url": OFFICIAL_INSTALLER_URL,
+        "installer_sha256": OFFICIAL_INSTALLER_SHA256,
+        "reportx_sha256": OFFICIAL_REPORTX_SHA256,
+        "assets": {
+            name: {
+                "sha256": contract["sha256"],
+                "width": contract["width"],
+                "height": contract["height"],
+            }
+            for name, contract in _ASSET_LAYOUT.items()
+        },
+    }
+
+
+def _validate_asset_manifest(root: Path) -> None:
+    raw = _read_regular(
+        _asset_dir(root) / "source.json",
+        maximum=64 * 1024,
+    )
+    try:
+        manifest = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ReportXProfileError(
+            "official asset manifest is invalid"
+        ) from error
+    if manifest != _expected_asset_manifest():
+        raise ReportXProfileError("official asset manifest does not match")
+
+
 def load_official_assets(root: Path) -> OfficialAssets:
     """Load and revalidate previously extracted private-cache assets."""
 
@@ -399,6 +434,18 @@ def prepare_official_assets(
         raise ReportXProfileError(
             "choose either installer_path or reportx_exe_path"
         )
+    if installer_path is None and reportx_exe_path is None:
+        try:
+            _validate_asset_manifest(root)
+            assets = load_official_assets(root)
+        except ReportXProfileError:
+            pass
+        else:
+            directory = _asset_dir(root)
+            _private_chmod(directory, 0o700)
+            for name in ("ImgOnebon.bmp", "ImgOnebon1.bmp", "source.json"):
+                _private_chmod(directory / name, 0o600)
+            return assets
     reportx_exe: bytes | None = None
     if reportx_exe_path is not None:
         reportx_exe = _read_regular(
@@ -439,20 +486,7 @@ def prepare_official_assets(
     _private_chmod(directory, 0o700)
     _atomic_private_write(directory / "ImgOnebon.bmp", assets.landscape)
     _atomic_private_write(directory / "ImgOnebon1.bmp", assets.portrait)
-    manifest = {
-        "schema": ASSET_SCHEMA,
-        "source_url": OFFICIAL_INSTALLER_URL,
-        "installer_sha256": OFFICIAL_INSTALLER_SHA256,
-        "reportx_sha256": OFFICIAL_REPORTX_SHA256,
-        "assets": {
-            name: {
-                "sha256": contract["sha256"],
-                "width": contract["width"],
-                "height": contract["height"],
-            }
-            for name, contract in _ASSET_LAYOUT.items()
-        },
-    }
+    manifest = _expected_asset_manifest()
     _atomic_private_write(
         directory / "source.json",
         json.dumps(manifest, sort_keys=True, indent=2).encode("utf-8"),
@@ -462,8 +496,8 @@ def prepare_official_assets(
 
 def _special_objects(model: FP3Model):  # noqa: ANN202
     for page_number, page in enumerate(model.pages):
-        for item in page.objects:
-            yield page_number, page, item
+        for object_number, item in enumerate(page.objects):
+            yield page_number, object_number, page, item
 
 
 def has_runtime_placeholders(fp3: bytes) -> bool:
@@ -472,7 +506,7 @@ def has_runtime_placeholders(fp3: bytes) -> bool:
     model = parse_fp3(fp3)
     return any(
         pattern.fullmatch(item.attrs.get("Name", ""))
-        for _, _, item in _special_objects(model)
+        for _, _, _, item in _special_objects(model)
         for pattern in (_LOGO_NAME, _SERIAL_NAME, _SEAL_NAME)
     )
 
@@ -487,11 +521,12 @@ def build_runtime_bindings(
     """Resolve runtime logo, serial, and proven-empty seal placeholders."""
 
     model = parse_fp3(fp3)
-    logo_items = []
-    serial_items = []
-    empty_seals: set[str] = set()
-    for page_number, page, item in _special_objects(model):
+    logo_items: list[tuple[RuntimeObjectTarget, DrawObject]] = []
+    serial_items: list[tuple[RuntimeObjectTarget, DrawObject]] = []
+    empty_seals: set[RuntimeObjectTarget] = set()
+    for page_number, object_number, page, item in _special_objects(model):
         name = item.attrs.get("Name", "")
+        target = (page_number, object_number, name)
         if _LOGO_NAME.fullmatch(name):
             if (
                 item.class_name != "TfrxPictureView"
@@ -502,7 +537,7 @@ def build_runtime_bindings(
                 or item.height <= 0
             ):
                 raise ReportXProfileError("runtime logo placeholder is invalid")
-            logo_items.append(item)
+            logo_items.append((target, item))
         elif _SERIAL_NAME.fullmatch(name):
             if (
                 item.class_name
@@ -512,7 +547,7 @@ def build_runtime_bindings(
                 or len(_PLACEHOLDER_NUMBER.findall(item.text)) != 1
             ):
                 raise ReportXProfileError("runtime serial placeholder is invalid")
-            serial_items.append(item)
+            serial_items.append((target, item))
         elif _SEAL_NAME.fullmatch(name):
             same_page_mark = [
                 candidate
@@ -533,7 +568,7 @@ def build_runtime_bindings(
                 raise ReportXProfileError(
                     "empty seal placeholder lacks its source fingerprint"
                 )
-            empty_seals.add(name)
+            empty_seals.add(target)
 
     if not logo_items:
         raise ReportXProfileError("prepared report has no runtime logo placeholder")
@@ -552,18 +587,18 @@ def build_runtime_bindings(
         {}
         if hide_logo
         else {
-            item.attrs["Name"]: (
+            target: (
                 assets.landscape if item.width > item.height else assets.portrait
             )
-            for item in logo_items
+            for target, item in logo_items
         }
     )
-    text: dict[str, str] = {}
+    text: dict[RuntimeObjectTarget, str] = {}
     if document_numbers:
         value = document_numbers[0]
         formatted = "-".join(value[offset : offset + 4] for offset in range(0, 16, 4))
-        for item in serial_items:
-            text[item.attrs["Name"]] = _PLACEHOLDER_NUMBER.sub(
+        for target, item in serial_items:
+            text[target] = _PLACEHOLDER_NUMBER.sub(
                 formatted,
                 item.text,
                 count=1,
@@ -574,7 +609,7 @@ def build_runtime_bindings(
         official_empty_pictures=frozenset(
             empty_seals
             | (
-                {item.attrs["Name"] for item in logo_items}
+                {target for target, _ in logo_items}
                 if hide_logo
                 else set()
             )

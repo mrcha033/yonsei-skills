@@ -99,8 +99,9 @@ and a live user-authorized issuance:
 - bands, memo, view, line, shape, checkbox, and picture objects;
 - one-based FastReport picture-cache references and the ReportX
   `__2DBARCODE__` additional-component binding;
-- exact, one-to-one named runtime picture/text bindings supplied by a
-  caller-side profile resolver;
+- exact single-name or page/object-specific runtime picture/text bindings
+  supplied by a caller-side profile resolver, with complete multiplicity
+  checks for names repeated across prepared pages;
 - strict mixed UTF-8/CP949 normalization only for ReportX `Font.Name` and
   `TagStr`;
 - JPEG, non-interlaced 8-bit PNG, BI_RGB 8/24/32-bit BMP, indexed BMP
